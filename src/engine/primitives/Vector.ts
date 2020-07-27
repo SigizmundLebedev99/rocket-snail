@@ -43,9 +43,18 @@ export class Vector{
         return new Vector(this.x/length, this.y/this.Length);
     }
 
+    GetRotatedUnit(angle){
+        angle -= this.Angle;
+        return new Vector(Math.cos(angle), Math.sin(angle));
+    }
+
     Rotate(angle){
         angle -= this.Angle;
-        let unit = new Vector(Math.cos(angle), Math.sin(angle));
+        let unit : Vector;
+        if(this.y < 0)
+            unit = new Vector(Math.cos(angle), Math.sin(angle));
+        else
+            unit = new Vector(-Math.cos(angle), -Math.sin(angle));
         return unit.Product(this.Length);
     }
 

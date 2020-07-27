@@ -1,5 +1,4 @@
-export class Map{
-    
+export class Rectangle{
 
     constructor(){
 

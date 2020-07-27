@@ -1,4 +1,4 @@
-export class Circle{
+export class Ellips{
     x:number;
     y:number;
     radius:number;

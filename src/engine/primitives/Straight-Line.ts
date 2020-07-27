@@ -30,7 +30,7 @@ export class StraightLine{
     private _p : Point;
 
     constructor(p1 : Point, p2: Point){
-        let A = p1.y-p2.y,  B = p2.x-p1.x,  C = -A*p1.x - B*p1.y;
+        let A = p1.y-p2.y, B = p2.x-p1.x, C = -A*p1.x - B*p1.y;
         this._A = A;
         this._B = B;
         this._C = C;
@@ -57,6 +57,15 @@ export class StraightLine{
             let detY = A1 * C2 - A2 * C1
             return new Point(detX/d,detY/d);
         }
+    }
+
+    HalfPlane(p:Point){
+        let result = this._A*p.x + this._B*p.y + this._C;
+        if(result > 0)
+            return 1;
+        if(result < 0)
+            return -1;
+        return 0;
     }
 
     DefineY(x:number){

@@ -1,4 +1,4 @@
-import {Point} from '../primitives/Point'
+import {Point} from './Point'
 
 export class Polygon{
 
