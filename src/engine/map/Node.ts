@@ -3,23 +3,22 @@ import { NodeStyle } from "./NodeStyle";
 import { Camera } from "./Camera";
 import { BaseState } from "../BaseState";
 
-export class Node<T> extends BaseState {
+export class Node extends BaseState {
     isMouseIn : boolean = false;
 
     readonly Components : Component[] = [];
     readonly Style : NodeStyle = new NodeStyle();
 
-    DependentNodes : Node<unknown>[] = [];
+    DependentNodes : Node[] = [];
 
-    Content : T | null = null;
-
-    private camera : Camera | null = null;
+    protected camera : Camera | null = null;
     get Camera(){
-        return this.camera;
+        return Camera.FromState(this);
     }
 
-    AddChild(element: Node<unknown>){
+    AddChild(element: Node){
         element.camera = Camera.FromState(this);
+        this.CopyTo(element);
         this.DependentNodes.push(element);
         return element;
     }
@@ -29,7 +28,7 @@ export class Node<T> extends BaseState {
         this.Components.push(component);
     }
 
-    private onUpdate(){
+    OnUpdate(){
         this.Components.forEach(c=>c.OnUpdate());
     }
 }

@@ -4,11 +4,11 @@ import { Node } from "../map/Node";
 import { Point } from "../primitives/Point";
 import { LEFT_TOP, LEFT_BOTTOM, RIGH_TOP, RIGHT_BOTTOM, CONTEXT, SCREEN_HEIGTH, SCREEN_WIDTH } from "../Consts";
 
-export class DrawLineCom<TNode extends Node<unknown>> extends Component{
+export class DrawLineCom<TNode extends Node> extends Component{
     node: TNode;
-    map: (n:TNode) => StraightLine | null;
+    map: (n:TNode) => StraightLine;
 
-    constructor(node: TNode, map: (n:TNode) => StraightLine | null){
+    constructor(node: TNode, map: (n:TNode) => StraightLine){
         super();
         this.node = node;
         this.map = map;
@@ -16,8 +16,8 @@ export class DrawLineCom<TNode extends Node<unknown>> extends Component{
 
     OnUpdate(): void {
         let camera = this.node.Camera;
-        let line;
-        if((line = this.map(this.node)) == null || camera == null)
+        let line = this.map(this.node);
+        if(camera == null)
             return;
 
         let screenLineP = camera.Convert(line.Point);

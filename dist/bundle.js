@@ -552,7 +552,7 @@ exports.BaseState = BaseState;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RIGHT_BOTTOM = exports.RIGH_TOP = exports.LEFT_BOTTOM = exports.LEFT_TOP = exports.SCREEN_HEIGTH = exports.SCREEN_WIDTH = void 0;
+exports.CONTEXT = exports.RIGHT_BOTTOM = exports.RIGH_TOP = exports.LEFT_BOTTOM = exports.LEFT_TOP = exports.SCREEN_HEIGTH = exports.SCREEN_WIDTH = void 0;
 const Point_1 = __webpack_require__(/*! ./primitives/Point */ "./src/engine/primitives/Point.ts");
 exports.SCREEN_WIDTH = document.body.clientWidth;
 exports.SCREEN_HEIGTH = window.screen.availHeight - 30;
@@ -560,6 +560,145 @@ exports.LEFT_TOP = new Point_1.Point(0, 0);
 exports.LEFT_BOTTOM = new Point_1.Point(0, exports.SCREEN_HEIGTH);
 exports.RIGH_TOP = new Point_1.Point(exports.SCREEN_WIDTH, 0);
 exports.RIGHT_BOTTOM = new Point_1.Point(exports.SCREEN_WIDTH, exports.SCREEN_HEIGTH);
+let canvas = document.getElementById('canvas');
+canvas.width = exports.SCREEN_WIDTH;
+canvas.height = exports.SCREEN_HEIGTH;
+exports.CONTEXT = canvas.getContext('2d');
+
+
+/***/ }),
+
+/***/ "./src/engine/general-components/DrawLineCom.ts":
+/*!******************************************************!*\
+  !*** ./src/engine/general-components/DrawLineCom.ts ***!
+  \******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DrawLineCom = void 0;
+const Component_1 = __webpack_require__(/*! ../map/Component */ "./src/engine/map/Component.ts");
+const Straight_Line_1 = __webpack_require__(/*! ../primitives/Straight-Line */ "./src/engine/primitives/Straight-Line.ts");
+const Consts_1 = __webpack_require__(/*! ../Consts */ "./src/engine/Consts.ts");
+class DrawLineCom extends Component_1.Component {
+    constructor(node, map) {
+        super();
+        this.node = node;
+        this.map = map;
+    }
+    OnUpdate() {
+        let camera = this.node.Camera;
+        let line;
+        if ((line = this.map(this.node)) == null || camera == null)
+            return;
+        let screenLineP = camera.Convert(line.Point);
+        let screenLineV = line.DirectionVector.GetRotatedUnit(camera.rotation);
+        let screenLine = Straight_Line_1.StraightLine.FromPointAndVector(screenLineP, screenLineV);
+        let hpg = (p) => screenLine.HalfPlane(p) == 1;
+        let hpl = (p) => screenLine.HalfPlane(p) == -1;
+        if ((hpg(Consts_1.LEFT_TOP) && hpg(Consts_1.LEFT_BOTTOM) && hpg(Consts_1.RIGH_TOP) && hpg(Consts_1.RIGHT_BOTTOM))
+            || (hpl(Consts_1.LEFT_TOP) && hpl(Consts_1.LEFT_BOTTOM) && hpl(Consts_1.RIGH_TOP) && hpl(Consts_1.RIGHT_BOTTOM)))
+            return;
+        Consts_1.CONTEXT.beginPath();
+        if (screenLine.DirectionVector.x == 0) {
+            Consts_1.CONTEXT.moveTo(Math.abs(screenLine.C), 0);
+            Consts_1.CONTEXT.lineTo(Math.abs(screenLine.C), Consts_1.SCREEN_HEIGTH);
+            Consts_1.CONTEXT.stroke();
+        }
+        if (screenLine.DirectionVector.y == 0) {
+            Consts_1.CONTEXT.moveTo(0, Math.abs(screenLine.C));
+            Consts_1.CONTEXT.lineTo(Consts_1.SCREEN_WIDTH, Math.abs(screenLine.C));
+            Consts_1.CONTEXT.stroke();
+        }
+        let startX = 0, startY = screenLine.DefineY(startX);
+        let endX = Consts_1.SCREEN_WIDTH, endY = screenLine.DefineY(endX);
+        Consts_1.CONTEXT.moveTo(startX, startY);
+        Consts_1.CONTEXT.lineTo(endX, endY);
+        Consts_1.CONTEXT.stroke();
+    }
+}
+exports.DrawLineCom = DrawLineCom;
+
+
+/***/ }),
+
+/***/ "./src/engine/general-components/DrawPointCom.ts":
+/*!*******************************************************!*\
+  !*** ./src/engine/general-components/DrawPointCom.ts ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DrawPointCom = void 0;
+const Component_1 = __webpack_require__(/*! ../map/Component */ "./src/engine/map/Component.ts");
+const Point_1 = __webpack_require__(/*! ../primitives/Point */ "./src/engine/primitives/Point.ts");
+const Consts_1 = __webpack_require__(/*! ../Consts */ "./src/engine/Consts.ts");
+class DrawPointCom extends Component_1.Component {
+    constructor(node, map) {
+        super();
+        this.node = node;
+        this.map = map;
+    }
+    OnUpdate() {
+        let camera = this.node.Camera;
+        let pointLike;
+        if (camera == null || (pointLike = this.map(this.node)) == null)
+            return;
+        let style = this.node.Style;
+        let p = Point_1.Point.From(pointLike);
+        p = camera.Convert(p);
+        let radius = style.position == "relative" ? style.pointRadius * camera.RelationX : style.pointRadius;
+        Consts_1.CONTEXT.beginPath();
+        Consts_1.CONTEXT.arc(p.x, p.y, radius, 0, 2 * Math.PI, true);
+        Consts_1.CONTEXT.stroke();
+    }
+}
+exports.DrawPointCom = DrawPointCom;
+
+
+/***/ }),
+
+/***/ "./src/engine/general-nodes/Grid.ts":
+/*!******************************************!*\
+  !*** ./src/engine/general-nodes/Grid.ts ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Grid = void 0;
+const Node_1 = __webpack_require__(/*! ../map/Node */ "./src/engine/map/Node.ts");
+const Point_1 = __webpack_require__(/*! ../primitives/Point */ "./src/engine/primitives/Point.ts");
+const Straight_Line_1 = __webpack_require__(/*! ../primitives/Straight-Line */ "./src/engine/primitives/Straight-Line.ts");
+const DrawLineCom_1 = __webpack_require__(/*! ../general-components/DrawLineCom */ "./src/engine/general-components/DrawLineCom.ts");
+const DrawPointCom_1 = __webpack_require__(/*! ../general-components/DrawPointCom */ "./src/engine/general-components/DrawPointCom.ts");
+class Grid extends Node_1.Node {
+    constructor(camera) {
+        super();
+        let ox = new Straight_Line_1.StraightLine(new Point_1.Point(0, 0), new Point_1.Point(1, 0));
+        let oy = new Straight_Line_1.StraightLine(new Point_1.Point(0, 0), new Point_1.Point(0, 1));
+        this.AddComponent(new DrawLineCom_1.DrawLineCom(this, o => ox));
+        this.AddComponent(new DrawLineCom_1.DrawLineCom(this, o => oy));
+        for (var i = 1; i < camera.scale.x; i++) {
+            this.AddComponent(new DrawPointCom_1.DrawPointCom(this, o => new Point_1.Point(i, i)));
+            this.AddComponent(new DrawPointCom_1.DrawPointCom(this, o => new Point_1.Point(-i, i)));
+            this.AddComponent(new DrawPointCom_1.DrawPointCom(this, o => new Point_1.Point(i, -i)));
+            this.AddComponent(new DrawPointCom_1.DrawPointCom(this, o => new Point_1.Point(-i, -i)));
+            this.AddComponent(new DrawLineCom_1.DrawLineCom(this, o => new Straight_Line_1.StraightLine(new Point_1.Point(i, 0), new Point_1.Point(i, 1))));
+            this.AddComponent(new DrawLineCom_1.DrawLineCom(this, o => new Straight_Line_1.StraightLine(new Point_1.Point(-i, 0), new Point_1.Point(-i, 1))));
+            this.AddComponent(new DrawLineCom_1.DrawLineCom(this, o => new Straight_Line_1.StraightLine(new Point_1.Point(0, i), new Point_1.Point(1, i))));
+            this.AddComponent(new DrawLineCom_1.DrawLineCom(this, o => new Straight_Line_1.StraightLine(new Point_1.Point(0, -i), new Point_1.Point(1, -i))));
+        }
+    }
+}
+exports.Grid = Grid;
 
 
 /***/ }),
@@ -582,12 +721,15 @@ const BaseState_1 = __webpack_require__(/*! ../BaseState */ "./src/engine/BaseSt
 class Camera extends BaseState_1.BaseState {
     constructor() {
         super();
+        this.RelationX = 100;
+        this.RelationY = 100;
     }
     static FromState(state) {
         let camera = new Camera();
         camera.transition = state.transition;
         camera.rotation = state.rotation;
         camera.scale = state.scale;
+        return camera;
     }
     get RelationX() {
         return Consts_1.SCREEN_WIDTH / this.scale.x;
@@ -629,6 +771,125 @@ class Camera extends BaseState_1.BaseState {
     }
 }
 exports.Camera = Camera;
+
+
+/***/ }),
+
+/***/ "./src/engine/map/Component.ts":
+/*!*************************************!*\
+  !*** ./src/engine/map/Component.ts ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Component = void 0;
+class Component {
+    OnStart() {
+    }
+}
+exports.Component = Component;
+
+
+/***/ }),
+
+/***/ "./src/engine/map/Node.ts":
+/*!********************************!*\
+  !*** ./src/engine/map/Node.ts ***!
+  \********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Node = void 0;
+const NodeStyle_1 = __webpack_require__(/*! ./NodeStyle */ "./src/engine/map/NodeStyle.ts");
+const Camera_1 = __webpack_require__(/*! ./Camera */ "./src/engine/map/Camera.ts");
+const BaseState_1 = __webpack_require__(/*! ../BaseState */ "./src/engine/BaseState.ts");
+class Node extends BaseState_1.BaseState {
+    constructor() {
+        super(...arguments);
+        this.isMouseIn = false;
+        this.Components = [];
+        this.Style = new NodeStyle_1.NodeStyle();
+        this.DependentNodes = [];
+        this.Content = null;
+        this.camera = null;
+    }
+    get Camera() {
+        return this.camera;
+    }
+    AddChild(element) {
+        element.camera = Camera_1.Camera.FromState(this);
+        this.DependentNodes.push(element);
+        return element;
+    }
+    AddComponent(component) {
+        component.OnStart();
+        this.Components.push(component);
+    }
+    OnUpdate() {
+        this.Components.forEach(c => c.OnUpdate());
+    }
+}
+exports.Node = Node;
+
+
+/***/ }),
+
+/***/ "./src/engine/map/NodeStyle.ts":
+/*!*************************************!*\
+  !*** ./src/engine/map/NodeStyle.ts ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.NodeStyle = void 0;
+class NodeStyle {
+    constructor() {
+        this.strokeStyle = 'black';
+        this.fillStyle = 'black';
+        this.position = "relative";
+        this.pointRadius = 5;
+    }
+}
+exports.NodeStyle = NodeStyle;
+
+
+/***/ }),
+
+/***/ "./src/engine/map/View.ts":
+/*!********************************!*\
+  !*** ./src/engine/map/View.ts ***!
+  \********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.View = void 0;
+const Camera_1 = __webpack_require__(/*! ./Camera */ "./src/engine/map/Camera.ts");
+class View {
+    constructor() {
+        this.Nodes = [];
+        this.MainCamera = new Camera_1.Camera();
+        this.MainCamera.RelationX = 45;
+        this.MainCamera.RelationY = 45;
+    }
+    Run() {
+        setInterval(() => {
+            this.Nodes.forEach(n => n.OnUpdate());
+        }, 5);
+    }
+}
+exports.View = View;
 
 
 /***/ }),
@@ -1014,41 +1275,72 @@ const Artist_1 = __webpack_require__(/*! ./engine/view/Artist */ "./src/engine/v
 const Consts_1 = __webpack_require__(/*! ./engine/Consts */ "./src/engine/Consts.ts");
 const Vector_1 = __webpack_require__(/*! ./engine/primitives/Vector */ "./src/engine/primitives/Vector.ts");
 const Section_1 = __webpack_require__(/*! ./engine/primitives/Section */ "./src/engine/primitives/Section.ts");
-let canvas = document.getElementById('canvas');
-let camera = new Camera_1.Camera();
-canvas.addEventListener('click', (event) => {
-    let p1 = camera.ConvertToCamera(new Point_1.Point(event.x, event.y));
-    let p2 = camera.Convert(p1);
-    console.log(`mouse : x:${event.x} y:${event.y}, camera: x:${p1.x} y:${p1.y}, back: x:${p2.x} y:${p2.y}`);
-});
-canvas.width = Consts_1.SCREEN_WIDTH;
-canvas.height = Consts_1.SCREEN_HEIGTH;
-let context = canvas.getContext('2d');
-let artist = new Artist_1.Artist(context, camera);
-let transition = 0;
-setInterval(() => {
-    transition += 0.01;
-    camera.transition = new Vector_1.Vector(100 * Math.sin(transition), -100 * Math.cos(transition));
-    artist.Clear();
-    context.strokeStyle = "red";
-    artist.DrawLine(new Straight_Line_1.StraightLine(new Point_1.Point(0, 0), new Point_1.Point(1, 0)));
-    artist.DrawLine(new Straight_Line_1.StraightLine(new Point_1.Point(0, 0), new Point_1.Point(0, 1)));
-    artist.DrawSection(new Section_1.Section(new Point_1.Point(2, 0), new Point_1.Point(0, 2)));
-    artist.DrawSection(new Section_1.Section(new Point_1.Point(-2, 0), new Point_1.Point(0, 2)));
-    artist.DrawSection(new Section_1.Section(new Point_1.Point(-2, 0), new Point_1.Point(0, -2)));
-    artist.DrawSection(new Section_1.Section(new Point_1.Point(2, 0), new Point_1.Point(0, -2)));
-    context.strokeStyle = 'black';
-    for (var i = 1; i < camera.RelationX - 5; i++) {
-        artist.DrawPoint(new Point_1.Point(i, i));
-        artist.DrawPoint(new Point_1.Point(-i, i));
-        artist.DrawPoint(new Point_1.Point(i, -i));
-        artist.DrawPoint(new Point_1.Point(-i, -i));
-        artist.DrawLine(new Straight_Line_1.StraightLine(new Point_1.Point(i, 0), new Point_1.Point(i, 1)));
-        artist.DrawLine(new Straight_Line_1.StraightLine(new Point_1.Point(-i, 0), new Point_1.Point(-i, 1)));
-        artist.DrawLine(new Straight_Line_1.StraightLine(new Point_1.Point(0, i), new Point_1.Point(1, i)));
-        artist.DrawLine(new Straight_Line_1.StraightLine(new Point_1.Point(0, -i), new Point_1.Point(1, -i)));
-    }
-}, 10);
+const Main_1 = __webpack_require__(/*! ./logic/Main */ "./src/logic/Main.ts");
+Main_1.Main();
+function Demo() {
+    let canvas = document.getElementById('canvas');
+    let camera = new Camera_1.Camera();
+    camera.RelationX = 45;
+    camera.RelationY = 45;
+    canvas.addEventListener('click', (event) => {
+        let p1 = camera.ConvertToCamera(new Point_1.Point(event.x, event.y));
+        let p2 = camera.Convert(p1);
+        console.log(`mouse : x:${event.x} y:${event.y}, camera: x:${p1.x} y:${p1.y}, back: x:${p2.x} y:${p2.y}`);
+    });
+    canvas.width = Consts_1.SCREEN_WIDTH;
+    canvas.height = Consts_1.SCREEN_HEIGTH;
+    let context = canvas.getContext('2d');
+    let artist = new Artist_1.Artist(context, camera);
+    let transition = 0;
+    setInterval(() => {
+        transition += 0.01;
+        camera.transition = new Vector_1.Vector(100 * Math.sin(transition), -100 * Math.cos(transition));
+        camera.rotation += 0.001;
+        artist.Clear();
+        context.strokeStyle = "red";
+        artist.DrawLine(new Straight_Line_1.StraightLine(new Point_1.Point(0, 0), new Point_1.Point(1, 0)));
+        artist.DrawLine(new Straight_Line_1.StraightLine(new Point_1.Point(0, 0), new Point_1.Point(0, 1)));
+        artist.DrawSection(new Section_1.Section(new Point_1.Point(2, 0), new Point_1.Point(0, 2)));
+        artist.DrawSection(new Section_1.Section(new Point_1.Point(-2, 0), new Point_1.Point(0, 2)));
+        artist.DrawSection(new Section_1.Section(new Point_1.Point(-2, 0), new Point_1.Point(0, -2)));
+        artist.DrawSection(new Section_1.Section(new Point_1.Point(2, 0), new Point_1.Point(0, -2)));
+        context.strokeStyle = 'black';
+        for (var i = 1; i < camera.scale.x; i++) {
+            artist.DrawPoint(new Point_1.Point(i, i));
+            artist.DrawPoint(new Point_1.Point(-i, i));
+            artist.DrawPoint(new Point_1.Point(i, -i));
+            artist.DrawPoint(new Point_1.Point(-i, -i));
+            artist.DrawLine(new Straight_Line_1.StraightLine(new Point_1.Point(i, 0), new Point_1.Point(i, 1)));
+            artist.DrawLine(new Straight_Line_1.StraightLine(new Point_1.Point(-i, 0), new Point_1.Point(-i, 1)));
+            artist.DrawLine(new Straight_Line_1.StraightLine(new Point_1.Point(0, i), new Point_1.Point(1, i)));
+            artist.DrawLine(new Straight_Line_1.StraightLine(new Point_1.Point(0, -i), new Point_1.Point(1, -i)));
+        }
+    }, 10);
+}
+
+
+/***/ }),
+
+/***/ "./src/logic/Main.ts":
+/*!***************************!*\
+  !*** ./src/logic/Main.ts ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Main = void 0;
+const Grid_1 = __webpack_require__(/*! ../engine/general-nodes/Grid */ "./src/engine/general-nodes/Grid.ts");
+const View_1 = __webpack_require__(/*! ../engine/map/View */ "./src/engine/map/View.ts");
+function Main() {
+    let view = new View_1.View();
+    let grid = new Grid_1.Grid(view.MainCamera);
+    view.Nodes.push(grid);
+    view.Run();
+}
+exports.Main = Main;
 
 
 /***/ })
