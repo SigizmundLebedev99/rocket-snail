@@ -17,8 +17,6 @@ export class DrawPointCom<TNode extends Node> extends Component{
     OnUpdate(): void {
         let camera = this.node.Camera;
         let pointLike = this.map(this.node);
-        if(camera == null)
-            return;
 
         let style = this.node.Style;
         
@@ -26,9 +24,13 @@ export class DrawPointCom<TNode extends Node> extends Component{
         p = camera.Convert(p);
         
         let radius = style.pointRadius;
-            
+        CONTEXT.save();
+        CONTEXT.strokeStyle = style.strokeStyle;
+        CONTEXT.fillStyle = style.pointColor;
         CONTEXT.beginPath();
         CONTEXT.arc(p.x, p.y, radius, 0, 2*Math.PI,true);
         CONTEXT.stroke();
+        CONTEXT.fill();
+        CONTEXT.restore();
     }
 }

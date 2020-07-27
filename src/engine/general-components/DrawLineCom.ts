@@ -17,8 +17,6 @@ export class DrawLineCom<TNode extends Node> extends Component{
     OnUpdate(): void {
         let camera = this.node.Camera;
         let line = this.map(this.node);
-        if(camera == null)
-            return;
 
         let screenLineP = camera.Convert(line.Point);
         let screenLineV = line.DirectionVector.GetRotatedUnit(camera.rotation);

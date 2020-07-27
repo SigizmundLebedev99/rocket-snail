@@ -12,9 +12,7 @@ export class Camera extends BaseState{
 
     static FromState(state: BaseState){
         let camera = new Camera();
-        camera.transition = state.transition;
-        camera.rotation = state.rotation;
-        camera.scale = state.scale;
+        camera.From(state);
         return camera;
     }
 
@@ -24,7 +22,7 @@ export class Camera extends BaseState{
 
     Reset(){
         this.transition = new Vector(0,0);
-        this.rotation = 0;
+        this.SetRotation(0);
         this.scale=new Vector(45,45);
     }
 
@@ -46,7 +44,10 @@ export class Camera extends BaseState{
         if(this.rotation != 0 && scaled.Length != 0){
             scaled = scaled.Rotate(-this.rotation);
         }
-        let moved = scaled.Add(this.transition);
+
+        let transition = new Vector(this.transition.x * this.scale.x, this.transition.y * this.scale.y)
+
+        let moved = scaled.Add(transition);
         return new Point(moved.x + SCREEN_WIDTH/2, -(moved.y - SCREEN_HEIGTH/2));
     }
 }

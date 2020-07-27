@@ -1,7 +1,6 @@
 export abstract class Component{
 
-    OnStart() : void{
-    }
+    OnStart() : void{}
 
     abstract OnUpdate() : void;
 }

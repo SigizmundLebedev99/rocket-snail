@@ -15,6 +15,12 @@ export class View extends Node{
         CONTEXT.clearRect(0,0,SCREEN_WIDTH, SCREEN_HEIGTH);        
     }
 
+    TreeTraversal(node : Node){
+        node.DependentNodes.forEach(n=>{
+            
+        })
+    }
+
     Run(){
         setInterval(() => {
             this.Clear();

@@ -2,9 +2,7 @@ import { Camera } from "../map/Camera";
 import { Point } from "../primitives/Point";
 import { StraightLine } from "../primitives/Straight-Line";
 import { Section } from "../primitives/Section";
-import { Vector } from "../primitives/Vector";
 import { SCREEN_WIDTH, SCREEN_HEIGTH, LEFT_TOP, LEFT_BOTTOM, RIGH_TOP, RIGHT_BOTTOM } from "../Consts";
-import { Label } from "../primitives/Label";
 
 export class Artist{
     context: CanvasRenderingContext2D;
@@ -67,10 +65,5 @@ export class Artist{
         this.context.moveTo(p1.x, p1.y);
         this.context.lineTo(p2.x, p2.y);
         this.context.stroke();
-    }
-
-    DrawLabel(str : Label){
-        let p = str.absolute?str.position:this.camera.Convert(str.position);
-        this.context.strokeText(str.text,p.x, p.y);
     }
 }

@@ -18,15 +18,15 @@ export class Grid extends Node{
         this.scale = new Vector(45,45);
 
         for(let i = 1; i < SCREEN_WIDTH/this.scale.x; i ++){
-            this.AddComponent(new DrawPointCom(this, o => new Point(i,i)));
-            this.AddComponent(new DrawPointCom(this, o => new Point(-i,i)));
-            this.AddComponent(new DrawPointCom(this, o => new Point(i,-i)));
-            this.AddComponent(new DrawPointCom(this, o => new Point(-i,-i)));
-
             this.AddComponent(new DrawLineCom(this, o => new StraightLine(new Point(i,0), new Point(i,1))));
             this.AddComponent(new DrawLineCom(this, o => new StraightLine(new Point(-i,0), new Point(-i,1))));
             this.AddComponent(new DrawLineCom(this, o => new StraightLine(new Point(0,i), new Point(1,i))));
             this.AddComponent(new DrawLineCom(this, o => new StraightLine(new Point(0,-i), new Point(1,-i))));
+
+            this.AddComponent(new DrawPointCom(this, o => new Point(i,i)));
+            this.AddComponent(new DrawPointCom(this, o => new Point(-i,i)));
+            this.AddComponent(new DrawPointCom(this, o => new Point(i,-i)));
+            this.AddComponent(new DrawPointCom(this, o => new Point(-i,-i)));
         }
     }
 }

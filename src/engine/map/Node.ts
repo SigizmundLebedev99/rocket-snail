@@ -11,14 +11,12 @@ export class Node extends BaseState {
 
     DependentNodes : Node[] = [];
 
-    protected camera : Camera | null = null;
     get Camera(){
         return Camera.FromState(this);
     }
 
     AddChild(element: Node){
-        element.camera = Camera.FromState(this);
-        this.CopyTo(element);
+        element.From(this);
         this.DependentNodes.push(element);
         return element;
     }
