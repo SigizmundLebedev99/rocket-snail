@@ -2,7 +2,7 @@ import { Node } from "./Node";
 import { CONTEXT, SCREEN_WIDTH, SCREEN_HEIGTH } from "../Consts";
 
 export class View{
-    static readonly DependentNodes : Node[] = [];
+    static DependentNodes : Node[] = [];
     
     private static tree : Node;
 
@@ -13,7 +13,9 @@ export class View{
     }
 
     static Resort(){
-        this.DependentNodes.sort((a,b) => a.Priority - b.Priority);
+        let nodes = [...this.DependentNodes];
+        nodes.sort((a,b) => a.Priority - b.Priority);
+        this.DependentNodes = nodes;
     }
 
     static Clear(){

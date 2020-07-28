@@ -3,12 +3,12 @@ import { Node } from "../map/Node";
 import { CONTEXT } from "../Consts";
 import { Section } from "../primitives/Section";
 
-export class DrawPointCom<TNode extends Node> extends Component{
+export class DrawSectionCom extends Component{
 
-    node : TNode;
-    map: (o: TNode) => Section;
+    node : Node;
+    map: (o: Node) => Section;
 
-    constructor(node : TNode, map: (o: TNode) => Section){
+    constructor(node : Node, map: (o: Node) => Section){
         super();
         this.node = node;
         this.map = map;

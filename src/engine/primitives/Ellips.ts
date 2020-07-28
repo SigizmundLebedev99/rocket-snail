@@ -1,11 +1,13 @@
 export class Ellips{
     x:number;
     y:number;
-    radius:number;
+    width:number;
+    height:number;
 
-    constructor(x:number, y:number, radius:number){
+    constructor(x:number, y:number, w:number, h:number){
         this.x = x;
         this.y = y;
-        this.radius = radius;
+        this.height = h;
+        this.width = w;
     }
 }

@@ -34,8 +34,8 @@ export class Node extends BaseState {
     }
 
     AddComponent(component : Component){
-        component.OnStart();
         this.Components.push(component);
+        component.OnStart();
     }
 
     OnUpdate(){

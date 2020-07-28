@@ -8,10 +8,13 @@ export class SatelliteTransition extends Component{
     increment:number;
     changed : boolean = true;
     amplitude : number = 4
-    constructor(node : Node, speed : number, amplitude? : number){
+    constructor(node : Node, speed? : number, amplitude? : number){
         super();
         this.node = node;
-        this.increment = speed;
+        if(speed)
+            this.increment = speed;
+        else
+            this.increment = 0.005;
         if(amplitude)
             this.amplitude = amplitude;
     }
@@ -23,15 +26,15 @@ export class SatelliteTransition extends Component{
 
     OnUpdate(): void {
         this.transition += this.increment;
-        let tr = 5 * Math.sin(this.transition);
+        let tr = this.amplitude * Math.sin(this.transition);
         this.node.transition = new Vector(tr, -Math.cos(this.transition));
-        if(tr > 4.5){
+        if(tr > this.amplitude - 0.1){
             if(!this.changed){
                 this.node.Priority = -this.node.Priority;
                 this.changed = true;
             }
         }     
-        if(tr < -4.5){
+        if(tr <  - this.amplitude + 0.1){
             if(this.changed){
                 this.node.Priority = -this.node.Priority;
                 this.changed = false;
