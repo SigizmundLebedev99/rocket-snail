@@ -2,6 +2,7 @@ import { Component } from "./Component";
 import { NodeStyle } from "./NodeStyle";
 import { Camera } from "./Camera";
 import { BaseState } from "../BaseState";
+import { View } from "./View";
 
 export class Node extends BaseState {
     isMouseIn : boolean = false;
@@ -18,6 +19,7 @@ export class Node extends BaseState {
     AddChild(element: Node){
         element.From(this);
         this.DependentNodes.push(element);
+        View.AddChild(element);
         return element;
     }
 

@@ -1,30 +1,28 @@
 import { Node } from "./Node";
-import { Camera } from "./Camera";
 import { CONTEXT, SCREEN_WIDTH, SCREEN_HEIGTH } from "../Consts";
 
-export class View extends Node{
-    readonly Nodes : Node[] = [];
-    MainCamera : Camera;
+export class View{
+    private static _singleton : View = new View();
 
-    constructor(){
-        super();
-        this.MainCamera = new Camera();
+    static get Instanse(){
+        return this._singleton;
     }
 
-    Clear(){
+    static readonly DependentNodes : Node[] = [];
+
+    static AddChild(element: Node){
+        this.DependentNodes.push(element);
+        return element;
+    }
+
+    static Clear(){
         CONTEXT.clearRect(0,0,SCREEN_WIDTH, SCREEN_HEIGTH);        
     }
 
-    TreeTraversal(node : Node){
-        node.DependentNodes.forEach(n=>{
-            
-        })
-    }
-
-    Run(){
+    static Run(){
         setInterval(() => {
             this.Clear();
-            this.Nodes.forEach(n => n.OnUpdate());
+            this.DependentNodes.forEach(n => n.OnUpdate());
         }, 5);
     }
 }

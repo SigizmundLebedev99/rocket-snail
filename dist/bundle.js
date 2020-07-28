@@ -530,11 +530,66 @@ module.exports = content.locals || {};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BaseState = void 0;
 const Vector_1 = __webpack_require__(/*! ./primitives/Vector */ "./src/engine/primitives/Vector.ts");
+const Consts_1 = __webpack_require__(/*! ./Consts */ "./src/engine/Consts.ts");
 class BaseState {
     constructor() {
-        this.transition = new Vector_1.Vector(0, 0);
-        this.rotation = 0;
-        this.scale = new Vector_1.Vector(1, 1);
+        this._transition = new Vector_1.Vector(0, 0);
+        this._rotation = 0;
+        this._scale = new Vector_1.Vector(Consts_1.SCALE, Consts_1.SCALE);
+        this._base = null;
+    }
+    get transition() {
+        if (this._base == null)
+            return this._transition;
+        else
+            return this._transition.Add(this._base.transition);
+    }
+    get rotation() {
+        if (this._base == null)
+            return this._rotation;
+        else
+            return this._rotation + this._base.rotation;
+    }
+    get scale() {
+        let obj = {
+            acc: this._scale, count: 1
+        };
+        this.RecAvg(obj);
+        return obj.acc.Product(1 / obj.count);
+    }
+    set transition(v) {
+        this._transition = v;
+    }
+    set scale(v) {
+        this._scale = v;
+    }
+    Reset() {
+        this._transition = new Vector_1.Vector(0, 0);
+        this._rotation = 0;
+        this._scale = new Vector_1.Vector(Consts_1.SCALE, Consts_1.SCALE);
+        this._base = null;
+    }
+    From(state) {
+        this._base = state;
+    }
+    Copy(state) {
+        this._base = state._base;
+        this._rotation = state._rotation;
+        this._scale = state._scale;
+        this._transition = state._transition;
+    }
+    RecAvg(obj) {
+        if (this._base == null)
+            return;
+        obj.acc = obj.acc.Add(this._base.scale);
+        obj.count += 1;
+        this._base.RecAvg(obj);
+    }
+    SetRotation(angle) {
+        this._rotation = angle;
+    }
+    Rotate(angle) {
+        this._rotation += angle;
     }
 }
 exports.BaseState = BaseState;
@@ -552,17 +607,23 @@ exports.BaseState = BaseState;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CONTEXT = exports.RIGHT_BOTTOM = exports.RIGH_TOP = exports.LEFT_BOTTOM = exports.LEFT_TOP = exports.SCREEN_HEIGTH = exports.SCREEN_WIDTH = void 0;
+exports.CONTEXT = exports.CANVAS = exports.SCALE = exports.RIGHT_BOTTOM = exports.RIGH_TOP = exports.LEFT_BOTTOM = exports.LEFT_TOP = exports.SCREEN_HEIGTH = exports.SCREEN_WIDTH = void 0;
 const Point_1 = __webpack_require__(/*! ./primitives/Point */ "./src/engine/primitives/Point.ts");
+///
+/// Temporary solution
+///
 exports.SCREEN_WIDTH = document.body.clientWidth;
-exports.SCREEN_HEIGTH = window.screen.availHeight - 30;
+exports.SCREEN_HEIGTH = screen.availHeight;
 exports.LEFT_TOP = new Point_1.Point(0, 0);
 exports.LEFT_BOTTOM = new Point_1.Point(0, exports.SCREEN_HEIGTH);
 exports.RIGH_TOP = new Point_1.Point(exports.SCREEN_WIDTH, 0);
 exports.RIGHT_BOTTOM = new Point_1.Point(exports.SCREEN_WIDTH, exports.SCREEN_HEIGTH);
+// count of cells in scren width;
+exports.SCALE = 45;
 let canvas = document.getElementById('canvas');
 canvas.width = exports.SCREEN_WIDTH;
 canvas.height = exports.SCREEN_HEIGTH;
+exports.CANVAS = canvas;
 exports.CONTEXT = canvas.getContext('2d');
 
 
@@ -590,9 +651,7 @@ class DrawLineCom extends Component_1.Component {
     }
     OnUpdate() {
         let camera = this.node.Camera;
-        let line;
-        if ((line = this.map(this.node)) == null || camera == null)
-            return;
+        let line = this.map(this.node);
         let screenLineP = camera.Convert(line.Point);
         let screenLineV = line.DirectionVector.GetRotatedUnit(camera.rotation);
         let screenLine = Straight_Line_1.StraightLine.FromPointAndVector(screenLineP, screenLineV);
@@ -646,16 +705,19 @@ class DrawPointCom extends Component_1.Component {
     }
     OnUpdate() {
         let camera = this.node.Camera;
-        let pointLike;
-        if (camera == null || (pointLike = this.map(this.node)) == null)
-            return;
+        let pointLike = this.map(this.node);
         let style = this.node.Style;
         let p = Point_1.Point.From(pointLike);
         p = camera.Convert(p);
-        let radius = style.position == "relative" ? style.pointRadius * camera.RelationX : style.pointRadius;
+        let radius = style.pointRadius;
+        Consts_1.CONTEXT.save();
+        Consts_1.CONTEXT.strokeStyle = style.strokeStyle;
+        Consts_1.CONTEXT.fillStyle = style.pointColor;
         Consts_1.CONTEXT.beginPath();
         Consts_1.CONTEXT.arc(p.x, p.y, radius, 0, 2 * Math.PI, true);
         Consts_1.CONTEXT.stroke();
+        Consts_1.CONTEXT.fill();
+        Consts_1.CONTEXT.restore();
     }
 }
 exports.DrawPointCom = DrawPointCom;
@@ -663,10 +725,10 @@ exports.DrawPointCom = DrawPointCom;
 
 /***/ }),
 
-/***/ "./src/engine/general-nodes/Grid.ts":
-/*!******************************************!*\
-  !*** ./src/engine/general-nodes/Grid.ts ***!
-  \******************************************/
+/***/ "./src/engine/general-nodes/grid/Grid.ts":
+/*!***********************************************!*\
+  !*** ./src/engine/general-nodes/grid/Grid.ts ***!
+  \***********************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -674,31 +736,87 @@ exports.DrawPointCom = DrawPointCom;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Grid = void 0;
-const Node_1 = __webpack_require__(/*! ../map/Node */ "./src/engine/map/Node.ts");
-const Point_1 = __webpack_require__(/*! ../primitives/Point */ "./src/engine/primitives/Point.ts");
-const Straight_Line_1 = __webpack_require__(/*! ../primitives/Straight-Line */ "./src/engine/primitives/Straight-Line.ts");
-const DrawLineCom_1 = __webpack_require__(/*! ../general-components/DrawLineCom */ "./src/engine/general-components/DrawLineCom.ts");
-const DrawPointCom_1 = __webpack_require__(/*! ../general-components/DrawPointCom */ "./src/engine/general-components/DrawPointCom.ts");
+const Node_1 = __webpack_require__(/*! ../../map/Node */ "./src/engine/map/Node.ts");
+const Point_1 = __webpack_require__(/*! ../../primitives/Point */ "./src/engine/primitives/Point.ts");
+const Straight_Line_1 = __webpack_require__(/*! ../../primitives/Straight-Line */ "./src/engine/primitives/Straight-Line.ts");
+const DrawLineCom_1 = __webpack_require__(/*! ../../general-components/DrawLineCom */ "./src/engine/general-components/DrawLineCom.ts");
+const Consts_1 = __webpack_require__(/*! ../../Consts */ "./src/engine/Consts.ts");
+const Vector_1 = __webpack_require__(/*! ../../primitives/Vector */ "./src/engine/primitives/Vector.ts");
+const XAxis_1 = __webpack_require__(/*! ./XAxis */ "./src/engine/general-nodes/grid/XAxis.ts");
+const YAxis_1 = __webpack_require__(/*! ./YAxis */ "./src/engine/general-nodes/grid/YAxis.ts");
 class Grid extends Node_1.Node {
-    constructor(camera) {
+    constructor() {
         super();
-        let ox = new Straight_Line_1.StraightLine(new Point_1.Point(0, 0), new Point_1.Point(1, 0));
-        let oy = new Straight_Line_1.StraightLine(new Point_1.Point(0, 0), new Point_1.Point(0, 1));
-        this.AddComponent(new DrawLineCom_1.DrawLineCom(this, o => ox));
-        this.AddComponent(new DrawLineCom_1.DrawLineCom(this, o => oy));
-        for (var i = 1; i < camera.scale.x; i++) {
-            this.AddComponent(new DrawPointCom_1.DrawPointCom(this, o => new Point_1.Point(i, i)));
-            this.AddComponent(new DrawPointCom_1.DrawPointCom(this, o => new Point_1.Point(-i, i)));
-            this.AddComponent(new DrawPointCom_1.DrawPointCom(this, o => new Point_1.Point(i, -i)));
-            this.AddComponent(new DrawPointCom_1.DrawPointCom(this, o => new Point_1.Point(-i, -i)));
+        this.AddChild(new XAxis_1.XAxis());
+        this.AddChild(new YAxis_1.YAxis());
+        this.scale = new Vector_1.Vector(45, 45);
+        for (let i = 1; i < Consts_1.SCREEN_WIDTH / this.scale.x; i++) {
             this.AddComponent(new DrawLineCom_1.DrawLineCom(this, o => new Straight_Line_1.StraightLine(new Point_1.Point(i, 0), new Point_1.Point(i, 1))));
             this.AddComponent(new DrawLineCom_1.DrawLineCom(this, o => new Straight_Line_1.StraightLine(new Point_1.Point(-i, 0), new Point_1.Point(-i, 1))));
             this.AddComponent(new DrawLineCom_1.DrawLineCom(this, o => new Straight_Line_1.StraightLine(new Point_1.Point(0, i), new Point_1.Point(1, i))));
             this.AddComponent(new DrawLineCom_1.DrawLineCom(this, o => new Straight_Line_1.StraightLine(new Point_1.Point(0, -i), new Point_1.Point(1, -i))));
+            //this.AddComponent(new DrawPointCom(this, o => new Point(i,i)));
+            //this.AddComponent(new DrawPointCom(this, o => new Point(-i,i)));
+            //this.AddComponent(new DrawPointCom(this, o => new Point(i,-i)));
+            //this.AddComponent(new DrawPointCom(this, o => new Point(-i,-i)));
         }
     }
 }
 exports.Grid = Grid;
+
+
+/***/ }),
+
+/***/ "./src/engine/general-nodes/grid/XAxis.ts":
+/*!************************************************!*\
+  !*** ./src/engine/general-nodes/grid/XAxis.ts ***!
+  \************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.XAxis = void 0;
+const Node_1 = __webpack_require__(/*! ../../map/Node */ "./src/engine/map/Node.ts");
+const DrawLineCom_1 = __webpack_require__(/*! ../../general-components/DrawLineCom */ "./src/engine/general-components/DrawLineCom.ts");
+const Straight_Line_1 = __webpack_require__(/*! ../../primitives/Straight-Line */ "./src/engine/primitives/Straight-Line.ts");
+const Point_1 = __webpack_require__(/*! ../../primitives/Point */ "./src/engine/primitives/Point.ts");
+class XAxis extends Node_1.Node {
+    constructor() {
+        super();
+        this.Style.strokeStyle = "red";
+        this.AddComponent(new DrawLineCom_1.DrawLineCom(this, o => new Straight_Line_1.StraightLine(new Point_1.Point(0, 0), new Point_1.Point(1, 0))));
+    }
+}
+exports.XAxis = XAxis;
+
+
+/***/ }),
+
+/***/ "./src/engine/general-nodes/grid/YAxis.ts":
+/*!************************************************!*\
+  !*** ./src/engine/general-nodes/grid/YAxis.ts ***!
+  \************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.YAxis = void 0;
+const Node_1 = __webpack_require__(/*! ../../map/Node */ "./src/engine/map/Node.ts");
+const DrawLineCom_1 = __webpack_require__(/*! ../../general-components/DrawLineCom */ "./src/engine/general-components/DrawLineCom.ts");
+const Straight_Line_1 = __webpack_require__(/*! ../../primitives/Straight-Line */ "./src/engine/primitives/Straight-Line.ts");
+const Point_1 = __webpack_require__(/*! ../../primitives/Point */ "./src/engine/primitives/Point.ts");
+class YAxis extends Node_1.Node {
+    constructor() {
+        super();
+        this.Style.strokeStyle = "blue";
+        this.AddComponent(new DrawLineCom_1.DrawLineCom(this, o => new Straight_Line_1.StraightLine(new Point_1.Point(0, 0), new Point_1.Point(0, 1))));
+    }
+}
+exports.YAxis = YAxis;
 
 
 /***/ }),
@@ -721,53 +839,46 @@ const BaseState_1 = __webpack_require__(/*! ../BaseState */ "./src/engine/BaseSt
 class Camera extends BaseState_1.BaseState {
     constructor() {
         super();
-        this.RelationX = 100;
-        this.RelationY = 100;
     }
     static FromState(state) {
         let camera = new Camera();
-        camera.transition = state.transition;
-        camera.rotation = state.rotation;
-        camera.scale = state.scale;
+        camera.Copy(state);
         return camera;
-    }
-    get RelationX() {
-        return Consts_1.SCREEN_WIDTH / this.scale.x;
-    }
-    get RelationY() {
-        return Consts_1.SCREEN_HEIGTH / this.scale.y;
-    }
-    set RelationX(v) {
-        this.scale = new Vector_1.Vector(Consts_1.SCREEN_WIDTH / v, this.scale.y);
-    }
-    set RelationY(v) {
-        this.scale = new Vector_1.Vector(this.scale.x, Consts_1.SCREEN_HEIGTH / v);
     }
     MoveBy(vector) {
         this.transition = this.transition.Add(vector);
     }
     Reset() {
         this.transition = new Vector_1.Vector(0, 0);
-        this.rotation = 0;
-        this.scale = new Vector_1.Vector(100, 100);
-        this.RelationY = this.RelationX;
+        this.SetRotation(0);
+        this.scale = new Vector_1.Vector(45, 45);
     }
     ConvertToCamera(screen) {
         let movedPoint = new Point_1.Point(screen.x - Consts_1.SCREEN_WIDTH / 2, -(screen.y - Consts_1.SCREEN_HEIGTH / 2));
         movedPoint = movedPoint.GetMoved(this.transition.Product(-1));
-        let inMeters = new Vector_1.Vector(movedPoint.x / this.RelationX, movedPoint.y / this.RelationY);
+        let inMeters = new Vector_1.Vector(movedPoint.x / this.scale.x, movedPoint.y / this.scale.y);
         if (this.rotation != 0) {
             inMeters = inMeters.Rotate(this.rotation);
         }
         return Point_1.Point.From(inMeters);
     }
     Convert(point) {
-        let scaled = new Vector_1.Vector(point.x * this.RelationX, point.y * this.RelationY);
-        if (this.rotation != 0 && scaled.Length != 0) {
-            scaled = scaled.Rotate(-this.rotation);
+        let p = Vector_1.Vector.FromPoint(point);
+        if (this._base != null) {
+            p = p.Add(this._transition);
+            p = p.Rotate(-this._rotation);
+            p = p.Add(this._base.transition);
+            p = p.Rotate(-this._base.rotation);
         }
-        let moved = scaled.Add(this.transition);
-        return new Point_1.Point(moved.x + Consts_1.SCREEN_WIDTH / 2, -(moved.y - Consts_1.SCREEN_HEIGTH / 2));
+        else if (this.rotation != 0 && p.Length != 0) {
+            p = p.Rotate(-this.rotation);
+            p = p.Add(this.transition);
+        }
+        else {
+            p = p.Add(this.transition);
+        }
+        let scaled = new Vector_1.Vector(p.x * this.scale.x, p.y * this.scale.y);
+        return new Point_1.Point(scaled.x + Consts_1.SCREEN_WIDTH / 2, -(scaled.y - Consts_1.SCREEN_HEIGTH / 2));
     }
 }
 exports.Camera = Camera;
@@ -787,8 +898,7 @@ exports.Camera = Camera;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Component = void 0;
 class Component {
-    OnStart() {
-    }
+    OnStart() { }
 }
 exports.Component = Component;
 
@@ -809,6 +919,7 @@ exports.Node = void 0;
 const NodeStyle_1 = __webpack_require__(/*! ./NodeStyle */ "./src/engine/map/NodeStyle.ts");
 const Camera_1 = __webpack_require__(/*! ./Camera */ "./src/engine/map/Camera.ts");
 const BaseState_1 = __webpack_require__(/*! ../BaseState */ "./src/engine/BaseState.ts");
+const View_1 = __webpack_require__(/*! ./View */ "./src/engine/map/View.ts");
 class Node extends BaseState_1.BaseState {
     constructor() {
         super(...arguments);
@@ -816,15 +927,14 @@ class Node extends BaseState_1.BaseState {
         this.Components = [];
         this.Style = new NodeStyle_1.NodeStyle();
         this.DependentNodes = [];
-        this.Content = null;
-        this.camera = null;
     }
     get Camera() {
-        return this.camera;
+        return Camera_1.Camera.FromState(this);
     }
     AddChild(element) {
-        element.camera = Camera_1.Camera.FromState(this);
+        element.From(this);
         this.DependentNodes.push(element);
+        View_1.View.Instanse.AddChild(element);
         return element;
     }
     AddComponent(component) {
@@ -857,6 +967,7 @@ class NodeStyle {
         this.fillStyle = 'black';
         this.position = "relative";
         this.pointRadius = 5;
+        this.pointColor = "red";
     }
 }
 exports.NodeStyle = NodeStyle;
@@ -875,17 +986,25 @@ exports.NodeStyle = NodeStyle;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.View = void 0;
-const Camera_1 = __webpack_require__(/*! ./Camera */ "./src/engine/map/Camera.ts");
+const Consts_1 = __webpack_require__(/*! ../Consts */ "./src/engine/Consts.ts");
 class View {
     constructor() {
-        this.Nodes = [];
-        this.MainCamera = new Camera_1.Camera();
-        this.MainCamera.RelationX = 45;
-        this.MainCamera.RelationY = 45;
+        this.DependentNodes = [];
+    }
+    static get Instanse() {
+        return this._singleton;
+    }
+    AddChild(element) {
+        this.DependentNodes.push(element);
+        return element;
+    }
+    Clear() {
+        Consts_1.CONTEXT.clearRect(0, 0, Consts_1.SCREEN_WIDTH, Consts_1.SCREEN_HEIGTH);
     }
     Run() {
         setInterval(() => {
-            this.Nodes.forEach(n => n.OnUpdate());
+            this.Clear();
+            this.DependentNodes.forEach(n => n.OnUpdate());
         }, 5);
     }
 }
@@ -923,53 +1042,6 @@ class Point {
     }
 }
 exports.Point = Point;
-
-
-/***/ }),
-
-/***/ "./src/engine/primitives/Section.ts":
-/*!******************************************!*\
-  !*** ./src/engine/primitives/Section.ts ***!
-  \******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Section = void 0;
-const Straight_Line_1 = __webpack_require__(/*! ./Straight-Line */ "./src/engine/primitives/Straight-Line.ts");
-const math_1 = __webpack_require__(/*! ../../helpers/math */ "./src/helpers/math.ts");
-class Section {
-    constructor(p1, p2) {
-        this._p1 = p1;
-        this._p2 = p2;
-    }
-    get Point1() {
-        return this._p1;
-    }
-    get Point2() {
-        return this._p2;
-    }
-    get Length() {
-        return Math.sqrt((this._p2.x - this._p1.x) ^ 2 + (this._p2.y - this._p1.y));
-    }
-    Intersection(anower) {
-        let a = this._p1, b = this._p2, c = anower._p1, d = anower._p2;
-        let line1 = new Straight_Line_1.StraightLine(a, b);
-        let line2 = new Straight_Line_1.StraightLine(c, d);
-        let point = line1.Intersection(line2);
-        if (point == null)
-            return null;
-        let isBelong = math_1.Fns.Between(a.x, b.x, point.x) && math_1.Fns.Between(a.y, b.y, point.y)
-            && math_1.Fns.Between(c.x, d.x, point.x) && math_1.Fns.Between(c.y, d.y, point.y);
-        if (isBelong)
-            return point;
-        else
-            return null;
-    }
-}
-exports.Section = Section;
 
 
 /***/ }),
@@ -1095,6 +1167,8 @@ class Vector {
         return new Vector(Math.cos(angle), Math.sin(angle));
     }
     Rotate(angle) {
+        if (this.x == 0 && this.y == 0)
+            return this;
         angle -= this.Angle;
         let unit;
         if (this.y < 0)
@@ -1115,148 +1189,6 @@ exports.Vector = Vector;
 
 /***/ }),
 
-/***/ "./src/engine/view/Artist.ts":
-/*!***********************************!*\
-  !*** ./src/engine/view/Artist.ts ***!
-  \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Artist = void 0;
-const Straight_Line_1 = __webpack_require__(/*! ../primitives/Straight-Line */ "./src/engine/primitives/Straight-Line.ts");
-const Consts_1 = __webpack_require__(/*! ../Consts */ "./src/engine/Consts.ts");
-class Artist {
-    constructor(context, camera) {
-        this.camera = camera;
-        this.context = context;
-    }
-    Clear() {
-        this.context.clearRect(0, 0, Consts_1.SCREEN_WIDTH, Consts_1.SCREEN_HEIGTH);
-    }
-    DrawPoint(point) {
-        let p = this.camera.Convert(point);
-        this.context.beginPath();
-        this.context.arc(p.x, p.y, 5, 0, 2 * Math.PI, true);
-        this.context.stroke();
-    }
-    DrawLine(line) {
-        let screenLineP = this.camera.Convert(line.Point);
-        let screenLineV = line.DirectionVector.GetRotatedUnit(this.camera.rotation);
-        let screenLine = Straight_Line_1.StraightLine.FromPointAndVector(screenLineP, screenLineV);
-        let hpg = (p) => screenLine.HalfPlane(p) == 1;
-        let hpl = (p) => screenLine.HalfPlane(p) == -1;
-        if ((hpg(Consts_1.LEFT_TOP) && hpg(Consts_1.LEFT_BOTTOM) && hpg(Consts_1.RIGH_TOP) && hpg(Consts_1.RIGHT_BOTTOM))
-            || (hpl(Consts_1.LEFT_TOP) && hpl(Consts_1.LEFT_BOTTOM) && hpl(Consts_1.RIGH_TOP) && hpl(Consts_1.RIGHT_BOTTOM)))
-            return;
-        this.context.beginPath();
-        if (screenLine.DirectionVector.x == 0) {
-            this.context.moveTo(Math.abs(screenLine.C), 0);
-            this.context.lineTo(Math.abs(screenLine.C), Consts_1.SCREEN_HEIGTH);
-            this.context.stroke();
-            return screenLine;
-        }
-        if (screenLine.DirectionVector.y == 0) {
-            this.context.moveTo(0, Math.abs(screenLine.C));
-            this.context.lineTo(Consts_1.SCREEN_WIDTH, Math.abs(screenLine.C));
-            this.context.stroke();
-            return screenLine;
-        }
-        let startX = 0, startY = screenLine.DefineY(startX);
-        let endX = Consts_1.SCREEN_WIDTH, endY = screenLine.DefineY(endX);
-        this.context.moveTo(startX, startY);
-        this.context.lineTo(endX, endY);
-        this.context.stroke();
-        return screenLine;
-    }
-    DrawSection(section) {
-        let p1 = this.camera.Convert(section.Point1);
-        let p2 = this.camera.Convert(section.Point2);
-        this.context.beginPath();
-        this.context.moveTo(p1.x, p1.y);
-        this.context.lineTo(p2.x, p2.y);
-        this.context.stroke();
-    }
-    DrawLabel(str) {
-        let p = str.absolute ? str.position : this.camera.Convert(str.position);
-        this.context.strokeText(str.text, p.x, p.y);
-    }
-}
-exports.Artist = Artist;
-
-
-/***/ }),
-
-/***/ "./src/helpers/math.ts":
-/*!*****************************!*\
-  !*** ./src/helpers/math.ts ***!
-  \*****************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Fns = exports.Matrix = void 0;
-class Matrix {
-    constructor(matrix) {
-        if (matrix.length <= 1 && matrix[0].length <= 1)
-            throw "Matrix must contain 2 or more elements in rows and columns";
-        this._matrix = matrix;
-        this._M = matrix.length; // rows
-        this._N = matrix[0].length; // columns
-    }
-    get IsSquare() {
-        return this._M == this._N;
-    }
-    get AsArray() {
-        return this._matrix;
-    }
-    WithoutColumn(columnIndex) {
-        let newMatrix = this._matrix.map(row => row.filter((_, i) => i != columnIndex));
-        return new Matrix(newMatrix);
-    }
-    WithoutRow(rowIndex) {
-        let newMatrix = this._matrix.filter((_, i) => i != rowIndex);
-        return new Matrix(newMatrix);
-    }
-    Determinant() {
-        if (this._cashedDeterminant)
-            return this._cashedDeterminant;
-        if (!this.IsSquare)
-            throw "Matrix must be square to find determinant";
-        let m = this._matrix;
-        if (this._M == 2)
-            return m[0][0] * m[1][1] - m[1][0] * m[0][1];
-        else {
-            let determinant = 0;
-            this._matrix[0].forEach((val, i) => {
-                let lowerDeterminant = this.WithoutRow(0).WithoutColumn(i).Determinant();
-                let result = lowerDeterminant * val * (i % 2 == 0 ? 1 : -1);
-                determinant += result;
-            });
-            this._cashedDeterminant = determinant;
-            return determinant;
-        }
-    }
-}
-exports.Matrix = Matrix;
-class Fns {
-    static Between(a, b, c) {
-        return Math.min(a, b) <= c + this.EPSILON && c <= Math.max(a, b) + this.EPSILON;
-    }
-    static Determinant(a, b, c, d) {
-        return a * b - c * d;
-    }
-}
-exports.Fns = Fns;
-Fns.EPSILON = 1E-9;
-
-
-/***/ }),
-
 /***/ "./src/index.ts":
 /*!**********************!*\
   !*** ./src/index.ts ***!
@@ -1267,56 +1199,9 @@ Fns.EPSILON = 1E-9;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const Straight_Line_1 = __webpack_require__(/*! ./engine/primitives/Straight-Line */ "./src/engine/primitives/Straight-Line.ts");
-const Point_1 = __webpack_require__(/*! ./engine/primitives/Point */ "./src/engine/primitives/Point.ts");
-const Camera_1 = __webpack_require__(/*! ./engine/map/Camera */ "./src/engine/map/Camera.ts");
 __webpack_require__(/*! ./css/style.css */ "./src/css/style.css");
-const Artist_1 = __webpack_require__(/*! ./engine/view/Artist */ "./src/engine/view/Artist.ts");
-const Consts_1 = __webpack_require__(/*! ./engine/Consts */ "./src/engine/Consts.ts");
-const Vector_1 = __webpack_require__(/*! ./engine/primitives/Vector */ "./src/engine/primitives/Vector.ts");
-const Section_1 = __webpack_require__(/*! ./engine/primitives/Section */ "./src/engine/primitives/Section.ts");
 const Main_1 = __webpack_require__(/*! ./logic/Main */ "./src/logic/Main.ts");
 Main_1.Main();
-function Demo() {
-    let canvas = document.getElementById('canvas');
-    let camera = new Camera_1.Camera();
-    camera.RelationX = 45;
-    camera.RelationY = 45;
-    canvas.addEventListener('click', (event) => {
-        let p1 = camera.ConvertToCamera(new Point_1.Point(event.x, event.y));
-        let p2 = camera.Convert(p1);
-        console.log(`mouse : x:${event.x} y:${event.y}, camera: x:${p1.x} y:${p1.y}, back: x:${p2.x} y:${p2.y}`);
-    });
-    canvas.width = Consts_1.SCREEN_WIDTH;
-    canvas.height = Consts_1.SCREEN_HEIGTH;
-    let context = canvas.getContext('2d');
-    let artist = new Artist_1.Artist(context, camera);
-    let transition = 0;
-    setInterval(() => {
-        transition += 0.01;
-        camera.transition = new Vector_1.Vector(100 * Math.sin(transition), -100 * Math.cos(transition));
-        camera.rotation += 0.001;
-        artist.Clear();
-        context.strokeStyle = "red";
-        artist.DrawLine(new Straight_Line_1.StraightLine(new Point_1.Point(0, 0), new Point_1.Point(1, 0)));
-        artist.DrawLine(new Straight_Line_1.StraightLine(new Point_1.Point(0, 0), new Point_1.Point(0, 1)));
-        artist.DrawSection(new Section_1.Section(new Point_1.Point(2, 0), new Point_1.Point(0, 2)));
-        artist.DrawSection(new Section_1.Section(new Point_1.Point(-2, 0), new Point_1.Point(0, 2)));
-        artist.DrawSection(new Section_1.Section(new Point_1.Point(-2, 0), new Point_1.Point(0, -2)));
-        artist.DrawSection(new Section_1.Section(new Point_1.Point(2, 0), new Point_1.Point(0, -2)));
-        context.strokeStyle = 'black';
-        for (var i = 1; i < camera.scale.x; i++) {
-            artist.DrawPoint(new Point_1.Point(i, i));
-            artist.DrawPoint(new Point_1.Point(-i, i));
-            artist.DrawPoint(new Point_1.Point(i, -i));
-            artist.DrawPoint(new Point_1.Point(-i, -i));
-            artist.DrawLine(new Straight_Line_1.StraightLine(new Point_1.Point(i, 0), new Point_1.Point(i, 1)));
-            artist.DrawLine(new Straight_Line_1.StraightLine(new Point_1.Point(-i, 0), new Point_1.Point(-i, 1)));
-            artist.DrawLine(new Straight_Line_1.StraightLine(new Point_1.Point(0, i), new Point_1.Point(1, i)));
-            artist.DrawLine(new Straight_Line_1.StraightLine(new Point_1.Point(0, -i), new Point_1.Point(1, -i)));
-        }
-    }, 10);
-}
 
 
 /***/ }),
@@ -1332,15 +1217,109 @@ function Demo() {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Main = void 0;
-const Grid_1 = __webpack_require__(/*! ../engine/general-nodes/Grid */ "./src/engine/general-nodes/Grid.ts");
+const Grid_1 = __webpack_require__(/*! ../engine/general-nodes/grid/Grid */ "./src/engine/general-nodes/grid/Grid.ts");
 const View_1 = __webpack_require__(/*! ../engine/map/View */ "./src/engine/map/View.ts");
+const Planet_1 = __webpack_require__(/*! ./nodes/Planet */ "./src/logic/nodes/Planet.ts");
+const Vector_1 = __webpack_require__(/*! ../engine/primitives/Vector */ "./src/engine/primitives/Vector.ts");
+const RotateCom_1 = __webpack_require__(/*! ./components/RotateCom */ "./src/logic/components/RotateCom.ts");
 function Main() {
     let view = new View_1.View();
-    let grid = new Grid_1.Grid(view.MainCamera);
-    view.Nodes.push(grid);
+    let grid = new Grid_1.Grid();
+    grid.AddComponent(new RotateCom_1.RotateCom(grid, 0.001));
+    //grid.AddComponent(new TransitionCom(grid, 0.001));
+    let planet = new Planet_1.Planet();
+    planet.transition = new Vector_1.Vector(5, 0);
+    grid.AddChild(planet);
+    view.AddChild(grid);
     view.Run();
 }
 exports.Main = Main;
+
+
+/***/ }),
+
+/***/ "./src/logic/components/RotateCom.ts":
+/*!*******************************************!*\
+  !*** ./src/logic/components/RotateCom.ts ***!
+  \*******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RotateCom = void 0;
+const Component_1 = __webpack_require__(/*! ../../engine/map/Component */ "./src/engine/map/Component.ts");
+class RotateCom extends Component_1.Component {
+    constructor(node, num) {
+        super();
+        this.node = node;
+        this.num = num;
+    }
+    OnUpdate() {
+        this.node.Rotate(this.num);
+    }
+}
+exports.RotateCom = RotateCom;
+
+
+/***/ }),
+
+/***/ "./src/logic/nodes/Planet.ts":
+/*!***********************************!*\
+  !*** ./src/logic/nodes/Planet.ts ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Planet = void 0;
+const Node_1 = __webpack_require__(/*! ../../engine/map/Node */ "./src/engine/map/Node.ts");
+const DrawPointCom_1 = __webpack_require__(/*! ../../engine/general-components/DrawPointCom */ "./src/engine/general-components/DrawPointCom.ts");
+const Point_1 = __webpack_require__(/*! ../../engine/primitives/Point */ "./src/engine/primitives/Point.ts");
+const Satellite_1 = __webpack_require__(/*! ./Satellite */ "./src/logic/nodes/Satellite.ts");
+class Planet extends Node_1.Node {
+    constructor() {
+        super();
+        this.Style.pointColor = 'red';
+        this.Style.pointRadius = 60;
+        this.AddComponent(new DrawPointCom_1.DrawPointCom(this, o => new Point_1.Point(0, 0)));
+        this.child = new Satellite_1.Satellite();
+        this.AddChild(this.child);
+    }
+}
+exports.Planet = Planet;
+
+
+/***/ }),
+
+/***/ "./src/logic/nodes/Satellite.ts":
+/*!**************************************!*\
+  !*** ./src/logic/nodes/Satellite.ts ***!
+  \**************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Satellite = void 0;
+const Node_1 = __webpack_require__(/*! ../../engine/map/Node */ "./src/engine/map/Node.ts");
+const DrawPointCom_1 = __webpack_require__(/*! ../../engine/general-components/DrawPointCom */ "./src/engine/general-components/DrawPointCom.ts");
+const Point_1 = __webpack_require__(/*! ../../engine/primitives/Point */ "./src/engine/primitives/Point.ts");
+const RotateCom_1 = __webpack_require__(/*! ../components/RotateCom */ "./src/logic/components/RotateCom.ts");
+class Satellite extends Node_1.Node {
+    constructor() {
+        super();
+        this.Style.pointColor = 'blue';
+        this.Style.pointRadius = 50;
+        this.AddComponent(new DrawPointCom_1.DrawPointCom(this, o => new Point_1.Point(0, 3)));
+        this.AddComponent(new RotateCom_1.RotateCom(this, 0.005));
+    }
+}
+exports.Satellite = Satellite;
 
 
 /***/ })

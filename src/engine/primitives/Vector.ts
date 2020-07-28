@@ -49,6 +49,8 @@ export class Vector{
     }
 
     Rotate(angle){
+        if(this.x == 0 && this.y == 0)
+            return this;
         angle -= this.Angle;
         let unit : Vector;
         if(this.y < 0)

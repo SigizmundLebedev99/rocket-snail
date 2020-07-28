@@ -17,6 +17,7 @@ export class DrawLineCom<TNode extends Node> extends Component{
     OnUpdate(): void {
         let camera = this.node.Camera;
         let line = this.map(this.node);
+        let style = this.node.Style;
 
         let screenLineP = camera.Convert(line.Point);
         let screenLineV = line.DirectionVector.GetRotatedUnit(camera.rotation);
@@ -28,17 +29,14 @@ export class DrawLineCom<TNode extends Node> extends Component{
         if((hpg(LEFT_TOP) && hpg(LEFT_BOTTOM) && hpg(RIGH_TOP) && hpg(RIGHT_BOTTOM)) 
         || (hpl(LEFT_TOP) && hpl(LEFT_BOTTOM) && hpl(RIGH_TOP) && hpl(RIGHT_BOTTOM)))
             return;
+        CONTEXT.strokeStyle = style.strokeStyle;
         CONTEXT.beginPath();
         if(screenLine.DirectionVector.x == 0){
             CONTEXT.moveTo(Math.abs(screenLine.C), 0);
             CONTEXT.lineTo(Math.abs(screenLine.C), SCREEN_HEIGTH);
             CONTEXT.stroke();
         }
-        if(screenLine.DirectionVector.y == 0){
-            CONTEXT.moveTo(0, Math.abs(screenLine.C));
-            CONTEXT.lineTo(SCREEN_WIDTH, Math.abs(screenLine.C));
-            CONTEXT.stroke();
-        }
+   
         let startX = 0,
             startY = screenLine.DefineY(startX);
         let endX = SCREEN_WIDTH,

@@ -8,7 +8,7 @@ export class Satellite extends Node{
         super();
         this.Style.pointColor = 'blue';
         this.Style.pointRadius = 50;
-        this.AddComponent(new DrawPointCom(this, o => new Point(0,0)));
+        this.AddComponent(new DrawPointCom(this, o => new Point(0,3)));
         this.AddComponent(new RotateCom(this, 0.005));
     }
 }

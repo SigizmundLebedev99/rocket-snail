@@ -2,10 +2,10 @@ import { Vector } from "./primitives/Vector";
 import { SCALE } from "./Consts";
 
 export abstract class BaseState{
-    private _transition : Vector = new Vector(0,0);
-    private _rotation : number = 0;
-    private _scale : Vector = new Vector(SCALE,SCALE);
-    private _base : BaseState | null = null;
+    protected _transition : Vector = new Vector(0,0);
+    protected _rotation : number = 0;
+    protected _scale : Vector = new Vector(SCALE,SCALE);
+    protected _base : BaseState | null = null;
 
     get transition(){
         if(this._base == null)
@@ -46,6 +46,13 @@ export abstract class BaseState{
 
     From(state: BaseState){
         this._base = state;
+    }
+
+    Copy(state: BaseState){
+        this._base = state._base;
+        this._rotation = state._rotation;
+        this._scale = state._scale;
+        this._transition = state._transition;
     }
 
     private RecAvg(obj:{acc:Vector, count:number}){

@@ -1,6 +1,5 @@
 import { Vector } from "../primitives/Vector";
 import { Point } from "../primitives/Point";
-import { Matrix } from "../../helpers/math";
 import { SCREEN_WIDTH, SCREEN_HEIGTH } from "../Consts";
 import { BaseState } from "../BaseState";
 
@@ -12,7 +11,7 @@ export class Camera extends BaseState{
 
     static FromState(state: BaseState){
         let camera = new Camera();
-        camera.From(state);
+        camera.Copy(state);
         return camera;
     }
 
@@ -39,15 +38,22 @@ export class Camera extends BaseState{
     }
 
     Convert(point: {x:number, y:number}){
-        let scaled = new Vector(point.x * this.scale.x, point.y * this.scale.y);
-        
-        if(this.rotation != 0 && scaled.Length != 0){
-            scaled = scaled.Rotate(-this.rotation);
+        let p = Vector.FromPoint(point);
+        if(this._base != null){
+            p = p.Add(this._transition);
+            p = p.Rotate(-this._rotation);
+            p = p.Add(this._base.transition);
+            p = p.Rotate(-this._base.rotation);
         }
-
-        let transition = new Vector(this.transition.x * this.scale.x, this.transition.y * this.scale.y)
-
-        let moved = scaled.Add(transition);
-        return new Point(moved.x + SCREEN_WIDTH/2, -(moved.y - SCREEN_HEIGTH/2));
+        else if(this.rotation != 0 && p.Length != 0){
+            p = p.Rotate(-this.rotation);  
+            p = p.Add(this.transition); 
+        }
+        else{
+            p = p.Add(this.transition);
+        }
+        
+        let scaled = new Vector(p.x * this.scale.x, p.y * this.scale.y);
+        return new Point(scaled.x + SCREEN_WIDTH/2, -(scaled.y - SCREEN_HEIGTH/2));
     }
 }
