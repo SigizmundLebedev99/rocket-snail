@@ -1,46 +1,45 @@
 import { Vector } from "./primitives/Vector";
-import { SCALE } from "./Consts";
 
 export abstract class BaseState{
-    protected _transition : Vector = new Vector(0,0);
-    protected _rotation : number = 0;
-    protected _scale : Vector = new Vector(SCALE,SCALE);
+    SelfTransition : Vector = new Vector(0,0);
+    SelfRotation : number = 0;
+    SelfScale : Vector = new Vector(1,1);
     protected _base : BaseState | null = null;
 
     get transition(){
         if(this._base == null)
-            return this._transition;
+            return this.SelfTransition;
         else
-            return this._transition.Add(this._base.transition);
+            return this.SelfTransition.Add(this._base.transition);
     }
 
     get rotation(){
         if(this._base == null)
-            return this._rotation;
+            return this.SelfRotation;
         else
-            return this._rotation + this._base.rotation;
+            return this.SelfRotation + this._base.rotation;
     }
 
     get scale(){
         let obj = {
-            acc : this._scale, count : 1
+            acc : this.SelfScale, count : 1
         };
         this.RecAvg(obj);
         return obj.acc.Product(1/obj.count);
     }
 
     set transition(v:Vector){
-        this._transition = v;
+        this.SelfTransition = v;
     }
 
     set scale(v:Vector){
-        this._scale = v;
+        this.SelfScale = v;
     }
 
     Reset(){
-        this._transition = new Vector(0,0);
-        this._rotation = 0;
-        this._scale = new Vector(SCALE,SCALE);
+        this.SelfTransition = new Vector(0,0);
+        this.SelfRotation = 0;
+        this.SelfScale = new Vector(1,1);
         this._base = null;
     }
 
@@ -50,9 +49,9 @@ export abstract class BaseState{
 
     Copy(state: BaseState){
         this._base = state._base;
-        this._rotation = state._rotation;
-        this._scale = state._scale;
-        this._transition = state._transition;
+        this.SelfRotation = state.SelfRotation;
+        this.SelfScale = state.SelfScale;
+        this.SelfTransition = state.SelfTransition;
     }
 
     private RecAvg(obj:{acc:Vector, count:number}){
@@ -65,10 +64,10 @@ export abstract class BaseState{
     }
 
     SetRotation(angle: number){
-        this._rotation = angle;
+        this.SelfRotation = angle;
     }
 
     Rotate(angle : number){
-        this._rotation += angle;
+        this.SelfRotation += angle;
     }
 }

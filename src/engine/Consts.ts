@@ -12,12 +12,11 @@ export const LEFT_BOTTOM = new Point(0, SCREEN_HEIGTH);
 export const RIGH_TOP = new Point(SCREEN_WIDTH, 0);
 export const RIGHT_BOTTOM = new Point(SCREEN_WIDTH, SCREEN_HEIGTH);
 
-// count of cells in scren width;
-export const SCALE = 45;
-
 let canvas = <HTMLCanvasElement>document.getElementById('canvas');
 canvas.width = SCREEN_WIDTH;
 canvas.height = SCREEN_HEIGTH;
 
 export const CANVAS = canvas;
 export const CONTEXT = <CanvasRenderingContext2D>canvas.getContext('2d');
+
+export const PIXELS_METER = 45;

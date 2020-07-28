@@ -4,14 +4,12 @@ import { Point } from "../../engine/primitives/Point";
 import { Satellite } from "./Satellite";
 
 export class Planet extends Node{
-    child : Satellite;
     constructor(){
         super();
         this.Style.pointColor = 'red';
         this.Style.pointRadius = 60;
-        this.AddComponent(new DrawPointCom(this, o => 
-            new Point(0,0)));
-        this.child = new Satellite();
-        this.AddChild(this.child);
+        this.AddComponent(new DrawPointCom(this, o => new Point(0,0)));
+        this.AddChild(new Satellite());
     }
+    
 }

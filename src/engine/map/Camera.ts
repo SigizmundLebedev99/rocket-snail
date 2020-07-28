@@ -1,6 +1,6 @@
 import { Vector } from "../primitives/Vector";
 import { Point } from "../primitives/Point";
-import { SCREEN_WIDTH, SCREEN_HEIGTH } from "../Consts";
+import { SCREEN_WIDTH, SCREEN_HEIGTH, PIXELS_METER } from "../Consts";
 import { BaseState } from "../BaseState";
 
 export class Camera extends BaseState{
@@ -22,7 +22,7 @@ export class Camera extends BaseState{
     Reset(){
         this.transition = new Vector(0,0);
         this.SetRotation(0);
-        this.scale=new Vector(45,45);
+        this.scale=new Vector(1,1);
     }
 
     ConvertToCamera(screen : Point){
@@ -40,8 +40,8 @@ export class Camera extends BaseState{
     Convert(point: {x:number, y:number}){
         let p = Vector.FromPoint(point);
         if(this._base != null){
-            p = p.Add(this._transition);
-            p = p.Rotate(-this._rotation);
+            p = p.Add(this.SelfTransition);
+            p = p.Rotate(-this.SelfRotation);
             p = p.Add(this._base.transition);
             p = p.Rotate(-this._base.rotation);
         }
@@ -54,6 +54,7 @@ export class Camera extends BaseState{
         }
         
         let scaled = new Vector(p.x * this.scale.x, p.y * this.scale.y);
+        scaled = new Vector(scaled.x * PIXELS_METER, scaled.y * PIXELS_METER)
         return new Point(scaled.x + SCREEN_WIDTH/2, -(scaled.y - SCREEN_HEIGTH/2));
     }
 }

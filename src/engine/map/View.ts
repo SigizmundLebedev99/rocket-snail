@@ -24,6 +24,6 @@ export class View{
         setInterval(() => {
             this.Clear();
             this.DependentNodes.forEach(n => n.OnUpdate());
-        }, 5);
+        }, 8);
     }
 }
