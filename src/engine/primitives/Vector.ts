@@ -1,4 +1,5 @@
 import {Point} from './Point'
+import {Complex} from '../../helpers/Complex'
 
 export class Vector{
     readonly x:number;
@@ -44,20 +45,15 @@ export class Vector{
     }
 
     GetRotatedUnit(angle){
-        angle -= this.Angle;
+        angle += this.Angle;
         return new Vector(Math.cos(angle), Math.sin(angle));
     }
 
     Rotate(angle){
-        if(this.x == 0 && this.y == 0)
-            return this;
-        angle -= this.Angle;
-        let unit : Vector;
-        if(this.y < 0)
-            unit = new Vector(Math.cos(angle), Math.sin(angle));
-        else
-            unit = new Vector(-Math.cos(angle), -Math.sin(angle));
-        return unit.Product(this.Length);
+        let v = new Vector(Math.cos(angle), Math.sin(angle));
+        let complex = new Complex(this.x, this.y);
+        let result = complex.Mul(new Complex(v.x, v.y));
+        return new Vector(result.x, result.y);
     }
 
     static FromPoints(begin:{x:number, y:number}, end:{x:number, y:number}){

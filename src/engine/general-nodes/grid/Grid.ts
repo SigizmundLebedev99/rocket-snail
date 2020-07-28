@@ -11,6 +11,7 @@ import { YAxis } from "./YAxis";
 export class Grid extends Node{
     constructor(){
         super();
+        this.Priority = -1
         this.AddChild(new XAxis());
         this.AddChild(new YAxis());
         this.scale = new Vector(45,45);

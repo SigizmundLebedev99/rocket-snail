@@ -652,6 +652,7 @@ class DrawLineCom extends Component_1.Component {
     OnUpdate() {
         let camera = this.node.Camera;
         let line = this.map(this.node);
+        let style = this.node.Style;
         let screenLineP = camera.Convert(line.Point);
         let screenLineV = line.DirectionVector.GetRotatedUnit(camera.rotation);
         let screenLine = Straight_Line_1.StraightLine.FromPointAndVector(screenLineP, screenLineV);
@@ -660,15 +661,11 @@ class DrawLineCom extends Component_1.Component {
         if ((hpg(Consts_1.LEFT_TOP) && hpg(Consts_1.LEFT_BOTTOM) && hpg(Consts_1.RIGH_TOP) && hpg(Consts_1.RIGHT_BOTTOM))
             || (hpl(Consts_1.LEFT_TOP) && hpl(Consts_1.LEFT_BOTTOM) && hpl(Consts_1.RIGH_TOP) && hpl(Consts_1.RIGHT_BOTTOM)))
             return;
+        Consts_1.CONTEXT.strokeStyle = style.strokeStyle;
         Consts_1.CONTEXT.beginPath();
         if (screenLine.DirectionVector.x == 0) {
             Consts_1.CONTEXT.moveTo(Math.abs(screenLine.C), 0);
             Consts_1.CONTEXT.lineTo(Math.abs(screenLine.C), Consts_1.SCREEN_HEIGTH);
-            Consts_1.CONTEXT.stroke();
-        }
-        if (screenLine.DirectionVector.y == 0) {
-            Consts_1.CONTEXT.moveTo(0, Math.abs(screenLine.C));
-            Consts_1.CONTEXT.lineTo(Consts_1.SCREEN_WIDTH, Math.abs(screenLine.C));
             Consts_1.CONTEXT.stroke();
         }
         let startX = 0, startY = screenLine.DefineY(startX);
@@ -923,10 +920,17 @@ const View_1 = __webpack_require__(/*! ./View */ "./src/engine/map/View.ts");
 class Node extends BaseState_1.BaseState {
     constructor() {
         super(...arguments);
-        this.isMouseIn = false;
+        this.priority = 0;
         this.Components = [];
         this.Style = new NodeStyle_1.NodeStyle();
         this.DependentNodes = [];
+    }
+    get Priority() {
+        return this.priority;
+    }
+    set Priority(v) {
+        this.priority = v;
+        View_1.View.Resort();
     }
     get Camera() {
         return Camera_1.Camera.FromState(this);
@@ -934,7 +938,7 @@ class Node extends BaseState_1.BaseState {
     AddChild(element) {
         element.From(this);
         this.DependentNodes.push(element);
-        View_1.View.Instanse.AddChild(element);
+        View_1.View.AddChild(element);
         return element;
     }
     AddComponent(component) {
@@ -988,20 +992,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.View = void 0;
 const Consts_1 = __webpack_require__(/*! ../Consts */ "./src/engine/Consts.ts");
 class View {
-    constructor() {
-        this.DependentNodes = [];
-    }
-    static get Instanse() {
-        return this._singleton;
-    }
-    AddChild(element) {
+    static AddChild(element) {
         this.DependentNodes.push(element);
+        this.Resort();
         return element;
     }
-    Clear() {
+    static Resort() {
+        this.DependentNodes.sort((a, b) => a.Priority - b.Priority);
+    }
+    static Clear() {
         Consts_1.CONTEXT.clearRect(0, 0, Consts_1.SCREEN_WIDTH, Consts_1.SCREEN_HEIGTH);
     }
-    Run() {
+    static Run() {
         setInterval(() => {
             this.Clear();
             this.DependentNodes.forEach(n => n.OnUpdate());
@@ -1009,6 +1011,7 @@ class View {
     }
 }
 exports.View = View;
+View.DependentNodes = [];
 
 
 /***/ }),
@@ -1223,15 +1226,14 @@ const Planet_1 = __webpack_require__(/*! ./nodes/Planet */ "./src/logic/nodes/Pl
 const Vector_1 = __webpack_require__(/*! ../engine/primitives/Vector */ "./src/engine/primitives/Vector.ts");
 const RotateCom_1 = __webpack_require__(/*! ./components/RotateCom */ "./src/logic/components/RotateCom.ts");
 function Main() {
-    let view = new View_1.View();
     let grid = new Grid_1.Grid();
     grid.AddComponent(new RotateCom_1.RotateCom(grid, 0.001));
     //grid.AddComponent(new TransitionCom(grid, 0.001));
     let planet = new Planet_1.Planet();
     planet.transition = new Vector_1.Vector(5, 0);
     grid.AddChild(planet);
-    view.AddChild(grid);
-    view.Run();
+    View_1.View.AddChild(grid);
+    View_1.View.Run();
 }
 exports.Main = Main;
 

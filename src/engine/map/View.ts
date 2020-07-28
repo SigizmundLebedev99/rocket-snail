@@ -2,17 +2,18 @@ import { Node } from "./Node";
 import { CONTEXT, SCREEN_WIDTH, SCREEN_HEIGTH } from "../Consts";
 
 export class View{
-    private static _singleton : View = new View();
-
-    static get Instanse(){
-        return this._singleton;
-    }
-
     static readonly DependentNodes : Node[] = [];
+    
+    private static tree : Node;
 
     static AddChild(element: Node){
         this.DependentNodes.push(element);
+        this.Resort();
         return element;
+    }
+
+    static Resort(){
+        this.DependentNodes.sort((a,b) => a.Priority - b.Priority);
     }
 
     static Clear(){
