@@ -19,12 +19,24 @@ export class DrawEllipsCom extends Component{
         let converted = camera.Convert(e);
         CONTEXT.beginPath();
         CONTEXT.save();
-        CONTEXT.translate(converted.x, converted.y);
-        CONTEXT.rotate(this.node.rotation);
-        CONTEXT.scale(1, e.height/e.width);
-        CONTEXT.arc(0, 0, e.width * camera.scale.x, 0, Math.PI*2);
-        CONTEXT.restore();
-        CONTEXT.stroke();
+         
+        let firstTime=true;
+        let dt = 2*Math.PI/30;
+        let x : number;
+        let y : number;
+        for(let t = 0; t < 2*Math.PI; t += dt) {
+            x = converted.x + e.width*Math.cos(t);
+            y = converted.y + e.height*Math.sin(t);
+            if(firstTime) {
+                firstTime = false;
+                CONTEXT.moveTo(x, y);
+            } else {
+                CONTEXT.lineTo(x, y);
+            }
+        }
         CONTEXT.closePath();
+        CONTEXT.stroke();
+        CONTEXT.restore();
+        
     }
 }
