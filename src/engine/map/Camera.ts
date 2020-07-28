@@ -46,8 +46,8 @@ export class Camera extends BaseState{
             p = p.Rotate(-this._base.rotation);
         }
         else if(this.rotation != 0 && p.Length != 0){
-            p = p.Rotate(-this.rotation);  
             p = p.Add(this.transition); 
+            p = p.Rotate(-this.rotation);  
         }
         else{
             p = p.Add(this.transition);
