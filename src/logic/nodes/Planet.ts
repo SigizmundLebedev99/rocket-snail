@@ -10,7 +10,7 @@ export class Planet extends Node{
         super();
         this.Style.pointColor = 'red';
         this.Style.pointRadius = 60;
-        this.AddComponent(new DrawEllipsCom(this, o => new Ellips(0,0,100,50)));
+        this.AddComponent(new DrawPointCom(this, o => new Point(0,0)));
         let satellite = new Satellite(-0.005);
         this.AddChild(satellite);
     }  
