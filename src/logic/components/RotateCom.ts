@@ -7,7 +7,7 @@ export class RotateCom extends Component{
     num : number;
 
     OnUpdate(): void {
-        this.node.Rotate(this.num);
+        this.node.Rotation += this.num;
     }
 
     constructor(node : Node, num : number){

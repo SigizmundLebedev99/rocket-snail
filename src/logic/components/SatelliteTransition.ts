@@ -1,44 +1,33 @@
 import { Component } from "../../engine/map/Component";
-import { Node } from "../../engine/map/Node";
 import { Vector } from "../../engine/primitives/Vector";
+import { Planet } from "../nodes/Planet";
 
 export class SatelliteTransition extends Component{
-    node : Node;
-    transition = 0;
+    node : Planet;
+    private transition = 0;
     increment:number;
-    changed : boolean = true;
-    amplitude : number = 4
-    constructor(node : Node, speed? : number, amplitude? : number){
+
+    constructor(node : Planet, speed? : number){
         super();
         this.node = node;
-        if(speed)
-            this.increment = speed;
-        else
-            this.increment = 0.005;
-        if(amplitude)
-            this.amplitude = amplitude;
-    }
-
-    OnStart(){
-        if(this.node.Priority == 0)
-            this.node.Priority = 0.5;
+        this.increment = speed??0.005;
     }
 
     OnUpdate(): void {
-        this.transition += this.increment;
-        let tr = this.amplitude * Math.sin(this.transition);
-        this.node.transition = new Vector(tr, -Math.cos(this.transition));
-        if(tr > this.amplitude - 0.1){
-            if(!this.changed){
-                this.node.Priority = -this.node.Priority;
-                this.changed = true;
-            }
-        }     
-        if(tr <  - this.amplitude + 0.1){
-            if(this.changed){
-                this.node.Priority = -this.node.Priority;
-                this.changed = false;
-            }
+        let altitude = this.node.orbitEllips;
+        let k = altitude.x * this.node.orbitYCoefficient;
+        this.transition += this.node.orbitYCoefficient * this.increment;
+        let tr = k * Math.sin(this.transition);
+        this.node.Transition = new Vector(tr, -this.node.orbitYCoefficient * altitude.y * Math.cos(this.transition));
+        let parent = this.node.ParentNode;
+        if(parent == null)
+            return
+
+        if(this.node.Transition.y < 0){
+            this.node.Priority = parent.Priority + 1;
+        }
+        else{
+            this.node.Priority = parent.Priority -1;
         }
     }
 }

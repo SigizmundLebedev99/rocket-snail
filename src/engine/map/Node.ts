@@ -5,8 +5,26 @@ import { BaseState } from "../BaseState";
 import { View } from "./View";
 
 export class Node extends BaseState {
-    
-    private priority : number = 0;
+
+    private _view : View | null = null;
+
+    get View(){
+        return this._view;
+    }
+
+    set View(v : View | null){
+        if(v == null)
+            return;
+        this.DependentNodes.forEach(node => {
+            v.AddChild(node);
+        });
+            
+        this._view = v;
+    }
+
+    Position : "relative" | "absolute" = "relative";
+
+    private priority : number = 1;
 
     get Priority(){
         return this.priority;
@@ -14,31 +32,43 @@ export class Node extends BaseState {
 
     set Priority(v : number){
         this.priority = v;
-        View.Resort();
+        if(this.View)
+            this.View.Resort();
     }
+
+    ParentNode : Node | null = null;
+    readonly DependentNodes : Node[] = [];
 
     readonly Components : Component[] = [];
     readonly Style : NodeStyle = new NodeStyle();
 
-    readonly DependentNodes : Node[] = [];
-
     get Camera(){
-        return Camera.FromState(this);
+        return new Camera(this);
     }
 
     AddChild(element: Node){
-        element.From(this);
+        element.BaseState = this;
+        element.Style.Copy(this.Style);
+        element.ParentNode = this;
         this.DependentNodes.push(element);
-        View.AddChild(element);
-        return element;
+        if(this.View)
+            this.View.AddChild(element);
+        return this;
     }
 
     AddComponent(component : Component){
         this.Components.push(component);
-        component.OnStart();
+        return this;
     }
 
     OnUpdate(){
-        this.Components.forEach(c=>c.OnUpdate());
+        this.Components.forEach(c=>{
+            if(!c.Started){
+                c.OnStart();
+                c.Started = true;
+            }
+                
+            c.OnUpdate();
+        });
     }
 }

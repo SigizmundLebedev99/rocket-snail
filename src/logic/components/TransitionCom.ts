@@ -21,6 +21,6 @@ export class TransitionCom extends Component{
 
     OnUpdate(): void {
         this.transition += this.num;
-        this.node.transition = new Vector(this.amplitudeX*Math.cos(this.transition), this.amplitudeY*Math.sin(this.transition));
+        this.node.Transition = new Vector(this.amplitudeX*Math.cos(this.transition), this.amplitudeY*Math.sin(this.transition));
     }
 }

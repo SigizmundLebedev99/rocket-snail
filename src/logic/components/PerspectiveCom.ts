@@ -1,22 +1,25 @@
 import { Component } from "../../engine/map/Component";
 import { Node } from "../../engine/map/Node";
 import { Vector } from "../../engine/primitives/Vector";
+import { Planet } from "../nodes/Planet";
 
 export class PerspectiveCom extends Component{
 
-    node : Node;
+    node : Planet;
     nearest : number;
     originalScale : Vector;
-    constructor(node:Node, nearest:number){
+
+    constructor(node:Planet, nearest:number){
         super();
         this.node = node;
-        this.originalScale = node.SelfScale;
+        this.originalScale = node.Scale;
         this.nearest = nearest;
     }
 
-
     OnUpdate(): void {
-        let relation = 1/this.node.transition.x;
-        this.node.SelfScale = this.originalScale.Product(relation);
+        let nearest = this.node.orbitEllips;
+        let relation = 3/(this.node.Transition.y + nearest.y + 3);
+        this.node.orbitYCoefficient = relation;
+        this.node.Scale = this.originalScale.Product(relation);
     }
 }

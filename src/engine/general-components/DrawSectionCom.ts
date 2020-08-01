@@ -1,10 +1,8 @@
 import { Component } from "../map/Component";
 import { Node } from "../map/Node";
-import { CONTEXT } from "../Consts";
 import { Section } from "../primitives/Section";
 
 export class DrawSectionCom extends Component{
-
     node : Node;
     map: (o: Node) => Section;
 
@@ -15,14 +13,13 @@ export class DrawSectionCom extends Component{
     }
 
     OnUpdate(): void {
-        let camera = this.node.Camera;
-        let context = CONTEXT;
+        let context = this.node.View?.Context;
+        if(!context)
+            return;
         let section = this.map(this.node);
-        let p1 = camera.Convert(section.Point1);
-        let p2 = camera.Convert(section.Point2);
         context.beginPath();
-        context.moveTo(p1.x, p1.y);
-        context.lineTo(p2.x, p2.y);
+        context.moveTo(section.Point1.x, section.Point1.y);
+        context.lineTo(section.Point2.x, section.Point2.y);
         context.stroke();
     }
 }

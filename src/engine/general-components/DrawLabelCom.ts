@@ -1,7 +1,6 @@
 import { Component } from "../map/Component";
 import { Node } from "../map/Node";
 import { Label } from "../primitives/Label";
-import { CONTEXT } from "../Consts";
 
 export class DrawLabelCom extends Component{
     node : Node;
@@ -14,8 +13,7 @@ export class DrawLabelCom extends Component{
 
     OnUpdate(): void {
         let str = this.map(this.node);
-        let camera = this.node.Camera;
-        let p = camera.Convert(str.position);
-        CONTEXT.strokeText(str.text,p.x, p.y);
+        this.node.Camera.PrepareAxis();
+        this.node.View?.Context.strokeText(str.text,str.position.x, str.position.y);
     }
 }

@@ -1,60 +1,57 @@
 import { Vector } from "../primitives/Vector";
 import { Point } from "../primitives/Point";
-import { SCREEN_WIDTH, SCREEN_HEIGTH, PIXELS_METER } from "../Consts";
 import { BaseState } from "../BaseState";
+import { Node } from "./Node";
 
-export class Camera extends BaseState{
-
-    constructor(){
-        super();
-    }
-
-    static FromState(state: BaseState){
-        let camera = new Camera();
-        camera.Copy(state);
-        return camera;
-    }
-
-    MoveBy(vector: Vector){
-        this.transition = this.transition.Add(vector);
-    }
-
-    Reset(){
-        this.transition = new Vector(0,0);
-        this.SetRotation(0);
-        this.scale=new Vector(1,1);
-    }
-
-    ConvertToCamera(screen : Point){
-        let movedPoint = new Point(screen.x - SCREEN_WIDTH/2, -(screen.y - SCREEN_HEIGTH/2));
-        movedPoint = movedPoint.GetMoved(this.transition.Product(-1));
-        let inMeters = new Vector(movedPoint.x / this.scale.x, movedPoint.y / this.scale.y);
-        
-        if(this.rotation != 0){
-            inMeters = inMeters.Rotate(this.rotation);
-        }
-        
-        return Point.From(inMeters);
+export class Camera{
+    Node : Node;
+    constructor(node : Node){
+        this.Node = node;
     }
 
     Convert(point: {x:number, y:number}){
         let p = Vector.FromPoint(point);
-        if(this._base != null){
-            p = p.Add(this.SelfTransition);
-            p = p.Rotate(-this.SelfRotation);
-            p = p.Add(this._base.transition);
-            p = p.Rotate(-this._base.rotation);
+        let view = this.Node.View;
+        if(!view)
+            return;
+
+        function TransformCamera(state:BaseState){
+            p = p.Add(state.Transition);
+            p = p.Rotate(-state.Rotation);
+            p = new Vector(p.x * state.Scale.x, p.y * state.Scale.y)
+            if(state.BaseState != null){
+                TransformCamera(state.BaseState)
+            }
         }
-        else if(this.rotation != 0 && p.Length != 0){
-            p = p.Add(this.transition); 
-            p = p.Rotate(-this.rotation);  
-        }
-        else{
-            p = p.Add(this.transition);
-        }
+
+        TransformCamera(this.Node);
         
-        let scaled = new Vector(p.x * this.scale.x, p.y * this.scale.y);
-        scaled = new Vector(scaled.x * PIXELS_METER, scaled.y * PIXELS_METER)
-        return new Point(scaled.x + SCREEN_WIDTH/2, -(scaled.y - SCREEN_HEIGTH/2));
+        p = new Vector(p.x * view.PIXELS_METER, p.y * view.PIXELS_METER);
+        return new Point(p.x + view.Width/2, -(p.y - view.Height/2));
+    }
+
+    PrepareAxis(){
+        let view = this.Node.View;
+        if(!view)
+            return;
+        let context = view.Context;
+
+        context.translate(view.Width/2, view.Height/2);
+        context.scale(view.PIXELS_METER, - view.PIXELS_METER);
+
+        function transformContext(state : BaseState){
+            if(state.BaseState == null){
+                context.scale(state.Scale.x, state.Scale.y);
+                context.translate(state.Transition.x, state.Transition.y);
+                context.rotate(state.Rotation);
+                return;
+            }
+            
+            transformContext(state.BaseState);
+            context.translate(state.Transition.x, state.Transition.y);
+            context.rotate(state.Rotation);
+            context.scale(state.Scale.x, state.Scale.y);
+        }
+        transformContext(this.Node); 
     }
 }

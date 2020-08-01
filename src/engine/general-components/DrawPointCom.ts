@@ -1,7 +1,6 @@
 import { Component } from "../map/Component";
 import { Node } from "../map/Node";
 import { Point } from "../primitives/Point";
-import { CONTEXT } from "../Consts";
 
 export class DrawPointCom<TNode extends Node> extends Component{
 
@@ -15,22 +14,27 @@ export class DrawPointCom<TNode extends Node> extends Component{
     }
 
     OnUpdate(): void {
-        let camera = this.node.Camera;
-        let pointLike = this.map(this.node);
+        let point = this.map(this.node);
+        if(this.node.Position == "absolute"){
+            let camera = this.node.Camera;
+            let p = camera.Convert(point)
+            if(p)
+                this.DrawPoint(p);
+        }
+        else{
+            this.DrawPoint(point);
+        }    
+    }
 
+    DrawPoint(p:Point){
+        let context = this.node.View?.Context;
+        if(!context)
+            return;
         let style = this.node.Style;
-        
-        let p = Point.From(pointLike);
-        p = camera.Convert(p);
-        
-        let radius = style.pointRadius;
-        CONTEXT.save();
-        CONTEXT.strokeStyle = style.strokeStyle;
-        CONTEXT.fillStyle = style.pointColor;
-        CONTEXT.beginPath();
-        CONTEXT.arc(p.x, p.y, radius, 0, 2*Math.PI,true);
-        CONTEXT.stroke();
-        CONTEXT.fill();
-        CONTEXT.restore();
+        let radius = style.pointRadius??0.3;
+        context.beginPath();
+        context.arc(p.x, p.y, radius, 0, 2*Math.PI,true);
+        context.stroke();
+        context.fill();
     }
 }
