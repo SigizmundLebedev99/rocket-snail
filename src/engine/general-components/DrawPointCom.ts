@@ -1,5 +1,5 @@
-import { Component } from "../map/Component";
-import { Node } from "../map/Node";
+import { Component } from "../core/Component";
+import { Node } from "../core/Node";
 import { Point } from "../primitives/Point";
 
 export class DrawPointCom<TNode extends Node> extends Component{

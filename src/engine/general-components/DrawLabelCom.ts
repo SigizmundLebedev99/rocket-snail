@@ -1,5 +1,5 @@
-import { Component } from "../map/Component";
-import { Node } from "../map/Node";
+import { Component } from "../core/Component";
+import { Node } from "../core/Node";
 import { Label } from "../primitives/Label";
 
 export class DrawLabelCom extends Component{

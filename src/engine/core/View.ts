@@ -1,5 +1,7 @@
 import { Node } from "./Node";
 import { Point } from "../primitives/Point";
+import { MouseState } from "./MouseState";
+import { Vector } from "../primitives/Vector";
 
 export class View{
     get Width(){
@@ -29,23 +31,39 @@ export class View{
     private intervalId;
 
     readonly PIXELS_METER = 45;
+    readonly Mouse : MouseState;
     Context : CanvasRenderingContext2D;
     DependentNodes : Node[] = [];
 
     constructor(context : CanvasRenderingContext2D){
         this.Context = context;
+        this.Mouse = new MouseState();
 
         context.canvas.addEventListener("mousedown", (e) => {
-
+            this.Mouse.State = 
+            {
+                key:"pressed", 
+                CapturePosition:new Point(e.x, e.y),
+                Which : e.which
+            }
         });
         context.canvas.addEventListener("mouseup", (e) => {
-
-        });
-        context.canvas.addEventListener("mousemove", (e) => {
-
+            this.Mouse.State = 
+            {
+                key:"none",
+                ReleasePosition: new Point(e.x, e.y)
+            }
         });
         context.canvas.addEventListener("wheel", (e) =>{
-        
+            this.Mouse.Wheel = {
+                key:"changed",
+                Delta: e.deltaY
+            }
+        });
+
+        context.canvas.addEventListener("mousemove", (e) => {
+            this.Mouse.Movement = new Vector(e.movementX, e.movementY);
+            this.Mouse.Position = new Point(e.x, e.y);
         });
     }
 
@@ -79,6 +97,7 @@ export class View{
                 node.OnUpdate()
                 this.Context.restore();
             });
+            this.Mouse.Reset();
         }, 8);
     }
 }

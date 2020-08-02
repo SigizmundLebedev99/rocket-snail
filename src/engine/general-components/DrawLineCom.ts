@@ -1,6 +1,6 @@
-import { Component } from "../map/Component";
+import { Component } from "../core/Component";
 import { StraightLine } from "../primitives/Straight-Line";
-import { Node } from "../map/Node";
+import { Node } from "../core/Node";
 import { Point } from "../primitives/Point";
 
 export class DrawLineCom<TNode extends Node> extends Component{
@@ -23,7 +23,7 @@ export class DrawLineCom<TNode extends Node> extends Component{
         let screenLineP = camera.Convert(line.Point);
         if(!screenLineP)
             return;
-        let screenLineV = line.DirectionVector.GetRotatedUnit(this.node.Rotation);
+        let screenLineV = line.DirectionVector.GetRotatedUnit(this.node.TotalRotation);
         let screenLine = StraightLine.FromPointAndVector(screenLineP, screenLineV);
 
         let hpg = (p: Point) => screenLine.HalfPlane(p) == 1;

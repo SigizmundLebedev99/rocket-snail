@@ -1,5 +1,5 @@
-import { Component } from "../map/Component";
-import { Node } from "../map/Node";
+import { Component } from "../core/Component";
+import { Node } from "../core/Node";
 import { Ellips } from "../primitives/Ellips";
 
 export class DrawEllipsCom extends Component{

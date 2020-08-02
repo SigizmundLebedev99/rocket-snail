@@ -15,16 +15,22 @@ export class Camera{
         if(!view)
             return;
 
-        function TransformCamera(state:BaseState){
-            p = p.Add(state.Transition);
-            p = p.Rotate(-state.Rotation);
-            p = new Vector(p.x * state.Scale.x, p.y * state.Scale.y)
-            if(state.BaseState != null){
-                TransformCamera(state.BaseState)
+        function transformCamera(state:BaseState){
+            if(state.BaseState == null){
+                p = p.Rotate(-state.Rotation);
+                p = p.Add(state.Transition);
+                p = new Vector(p.x / state.Scale.x, p.y / state.Scale.y)
+                return;
             }
+            
+            transformCamera(state.BaseState);
+            p = new Vector(p.x / state.Scale.x, p.y / state.Scale.y)
+            p = p.Rotate(-state.Rotation);
+            p = p.Add(state.Transition);
+                
         }
 
-        TransformCamera(this.Node);
+        transformCamera(this.Node);
         
         p = new Vector(p.x * view.PIXELS_METER, p.y * view.PIXELS_METER);
         return new Point(p.x + view.Width/2, -(p.y - view.Height/2));

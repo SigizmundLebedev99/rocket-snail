@@ -1,7 +1,8 @@
-import { Component } from "../../engine/map/Component";
-import { Node } from "../../engine/map/Node";
+import { Component } from "../../engine/core/Component";
+import { Node } from "../../engine/core/Node";
 import { Vector } from "../../engine/primitives/Vector";
 import { Planet } from "../nodes/Planet";
+import { Point } from "../../engine/primitives/Point";
 
 export class PerspectiveCom extends Component{
 
@@ -17,9 +18,14 @@ export class PerspectiveCom extends Component{
     }
 
     OnUpdate(): void {
-        let nearest = this.node.orbitEllips;
-        let relation = 3/(this.node.Transition.y + nearest.y + 3);
-        this.node.orbitYCoefficient = relation;
-        this.node.Scale = this.originalScale.Product(relation);
+        let view = this.node.View;
+        if(!view)
+            return;
+        let nearest = view.Height/2;
+        let nodeY = this.node.Camera.Convert(new Point(0,0))?.y;
+        if(!nodeY)
+            return;
+        this.node.orbitYCoefficient = nodeY/nearest;
+        this.node.Scale = this.originalScale.Product(this.node.orbitYCoefficient);
     }
 }

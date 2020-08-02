@@ -1,26 +1,23 @@
-import { Component } from "../../engine/map/Component";
-import { Node } from "../../engine/map/Node";
+import { Component } from "../../engine/core/Component";
 import { Vector } from "../../engine/primitives/Vector";
+import { Planet } from "../nodes/Planet";
 
 export class TransitionCom extends Component{
+    node : Planet;
+    private transition = 0;
+    increment:number;
 
-    node : Node;
-    transition : number = 0;
-    num : number;
-    amplitudeX : number = 5;
-    amplitudeY : number = 1;
-    constructor(node : Node, speed : number, amplitudeX? : number, amplitudeY? :number){
+    constructor(node : Planet, speed? : number){
         super();
         this.node = node;
-        this.num = speed;
-        if(amplitudeX)
-            this.amplitudeX = amplitudeX;
-        if(amplitudeY)
-            this.amplitudeY = amplitudeY;
+        this.increment = speed??0.005;
     }
 
     OnUpdate(): void {
-        this.transition += this.num;
-        this.node.Transition = new Vector(this.amplitudeX*Math.cos(this.transition), this.amplitudeY*Math.sin(this.transition));
+        let altitude = this.node.orbitEllips;
+        let kx = altitude.x * this.node.orbitYCoefficient;
+        let ky = -this.node.orbitYCoefficient * altitude.y
+        this.transition += this.node.orbitYCoefficient * this.increment;
+        this.node.Transition = new Vector(kx * Math.sin(this.transition), ky * Math.cos(this.transition));
     }
 }

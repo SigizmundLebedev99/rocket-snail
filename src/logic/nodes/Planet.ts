@@ -1,4 +1,4 @@
-import { Node } from "../../engine/map/Node";
+import { Node } from "../../engine/core/Node";
 import { DrawPointCom } from "../../engine/general-components/DrawPointCom";
 import { Point } from "../../engine/primitives/Point";
 import { Vector } from "../../engine/primitives/Vector";

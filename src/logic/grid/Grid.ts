@@ -1,4 +1,4 @@
-import { Node } from "../../engine/map/Node";
+import { Node } from "../../engine/core/Node";
 import { Point } from "../../engine/primitives/Point";
 import { StraightLine } from "../../engine/primitives/Straight-Line";
 import { DrawLineCom } from "../../engine/general-components/DrawLineCom";
@@ -6,7 +6,7 @@ import { DrawPointCom } from "../../engine/general-components/DrawPointCom";
 import { Vector } from "../../engine/primitives/Vector";
 import { XAxis } from "./XAxis";
 import { YAxis } from "./YAxis";
-import { View } from "../../engine/map/View";
+import { View } from "../../engine/core/View";
 
 export class Grid extends Node{
     constructor(view : View){
