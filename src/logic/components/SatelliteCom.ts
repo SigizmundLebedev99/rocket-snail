@@ -13,8 +13,6 @@ export class SatelliteCom extends Component{
     }
 
     OnUpdate(): void {
-        let height = this.node.Camera.Convert(new Point(0,0))?.y;
-        if(height)
-            this.node.Priority = height;
+        this.node.Priority = -this.node.TotalTransition.y;
     }
 }

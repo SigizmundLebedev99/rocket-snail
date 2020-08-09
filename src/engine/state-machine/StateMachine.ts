@@ -1,13 +1,12 @@
 export class State<T>{
     Name:T;
     Conditions:{condition:()=>boolean, goto:T}[] = [];
-    Machine : StateMachine<T>;
-    onEnterListeners : (()=>void)[] = [];
-    onLeaveListeners : (()=>void)[] = [];
+    onEnter? : ()=>void;
+    onLeave? : ()=>void;
+    onCheck? : ()=>void;
 
-    constructor(name:T, machine:StateMachine<T>){
+    constructor(name:T){
         this.Name = name;
-        this.Machine = machine;
     }
 
     AddCondition(condition:()=>boolean, goto:T){
@@ -16,12 +15,17 @@ export class State<T>{
     }
 
     OnEnter(action:()=>void){
-        this.onEnterListeners.push(action);
+        this.onEnter = action;
+        return this;
+    }
+
+    OnCheck(action:()=>void){
+        this.onCheck = action;
         return this;
     }
 
     OnLeave(action:()=>void){
-        this.onLeaveListeners.push(action);
+        this.onLeave = action;
         return this;
     }
 }
@@ -33,9 +37,10 @@ export class StateMachine<T>{
         this.currentState = initState;
     }
 
-    AddState(state: State<T>){
+    AddState(name:T){
+        let state = new State(name);
         this.states[String(state.Name)] = state;
-        return this;
+        return state;
     }
 
     CheckState(){
@@ -44,11 +49,16 @@ export class StateMachine<T>{
             let {condition, goto} = state.Conditions[c];
             if(!condition())
                 continue;
-            state.onLeaveListeners.forEach(l=>l());
+            if(state.onLeave)
+                state.onLeave();
             this.currentState = goto;
             let newState = this.states[String(this.currentState)];
-            newState.onEnterListeners.forEach(l=>l());
+            if(newState.onEnter)
+                newState.onEnter();
             return;
         }
+        
+        if(state.onCheck)
+            state.onCheck();
     }
 }

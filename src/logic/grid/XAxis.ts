@@ -7,7 +7,7 @@ import { DrawPointCom } from "../../engine/general-components/DrawPointCom";
 export class XAxis extends Node{
     constructor(){
         super();
-        this.Priority = -1;
+        this.Priority = -10000;
         this.Position = 'absolute';
         this.Style.strokeStyle = "red";
         this.Style.pointRadius = 5;

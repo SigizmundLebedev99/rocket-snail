@@ -100,4 +100,8 @@ export class View{
             this.Mouse.Reset();
         }, 8);
     }
+
+    Stop(){
+        clearInterval(this.intervalId);
+    }
 }

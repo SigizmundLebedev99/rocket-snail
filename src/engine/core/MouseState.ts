@@ -17,5 +17,6 @@ export class MouseState{
 
     Reset(){
         this.Wheel = {key:'none'};
+        this.Movement = new Vector(0,0);
     }
 }

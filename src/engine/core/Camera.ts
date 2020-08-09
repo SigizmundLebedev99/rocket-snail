@@ -2,18 +2,42 @@ import { Vector } from "../primitives/Vector";
 import { Point } from "../primitives/Point";
 import { BaseState } from "../BaseState";
 import { Node } from "./Node";
+import { View } from "./View";
 
 export class Camera{
     Node : Node;
-    constructor(node : Node){
+    private _view : View;
+    constructor(node : Node, view: View){
         this.Node = node;
+        this._view = view;
+    }
+
+    ConvertFromScreen(point: {x:number, y:number}){
+        let view = this._view;
+        let vector = Vector.FromPoint(point);
+        vector = vector.Add(new Vector(-view.Width/2, -view.Height/2));
+        vector = new Vector(vector.x / view.PIXELS_METER, vector.y / (- view.PIXELS_METER));
+
+        function transformVector(state : BaseState){
+            if(state.BaseState == null){
+                vector = new Vector(vector.x / state.Scale.x, vector.y / state.Scale.y);
+                vector = vector.Add(new Vector(-state.Transition.x, -state.Transition.y));
+                vector = vector.Rotate(-state.Rotation);
+                return;
+            }
+            
+            transformVector(state.BaseState);
+            vector = vector.Add(new Vector(-state.Transition.x, -state.Transition.y));
+            vector = vector.Rotate(-state.Rotation);
+            vector = new Vector(vector.x / state.Scale.x, vector.y / state.Scale.y);
+        }
+        transformVector(this.Node); 
+        return Point.From(vector);
     }
 
     Convert(point: {x:number, y:number}){
         let p = Vector.FromPoint(point);
-        let view = this.Node.View;
-        if(!view)
-            return;
+        let view = this._view;
 
         function transformCamera(state:BaseState){
             if(state.BaseState == null){
@@ -37,9 +61,7 @@ export class Camera{
     }
 
     PrepareAxis(){
-        let view = this.Node.View;
-        if(!view)
-            return;
+        let view = this._view;
         let context = view.Context;
 
         context.translate(view.Width/2, view.Height/2);
@@ -59,5 +81,14 @@ export class Camera{
             context.scale(state.Scale.x, state.Scale.y);
         }
         transformContext(this.Node); 
+    }
+
+    ConvertScreenVector(movement:Vector){
+        let view = this._view;
+        let node = this. Node;
+        movement = new Vector(movement.x / view.PIXELS_METER, - movement.y / view.PIXELS_METER);
+        movement = movement.Rotate(-node.TotalRotation);
+        movement = new Vector(movement.x / node.TotalScale.x, movement.y / node.TotalScale.y);
+        return movement;
     }
 }

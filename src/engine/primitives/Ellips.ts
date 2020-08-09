@@ -1,13 +1,21 @@
-export class Ellips{
+import { IPointIn } from "./IPointIn";
+import { Point } from "./Point";
+
+export class Ellips implements IPointIn{
     x:number;
     y:number;
-    width:number;
-    height:number;
+    a:number;
+    b:number;
 
-    constructor(x:number, y:number, w:number, h:number){
+    constructor(x:number, y:number, a:number, b:number){
         this.x = x;
         this.y = y;
-        this.height = h;
-        this.width = w;
+        this.a = a;
+        this.b = b;
+    }
+
+    IsPointIn(point: Point): boolean {
+        let {x,y, a,b} = this;
+        return (Math.pow(point.x - x, 2) / a*a) + (Math.pow(point.y - y, 2) / b*b) <= a;
     }
 }

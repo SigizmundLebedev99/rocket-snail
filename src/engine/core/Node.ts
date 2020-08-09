@@ -43,7 +43,10 @@ export class Node extends BaseState {
     readonly Style : NodeStyle = new NodeStyle();
 
     get Camera(){
-        return new Camera(this);
+        if(!this.View){
+            throw "Camera methods cannot be called until node not attached to view";
+        }
+        return new Camera(this,this.View);
     }
 
     AddChild(element: Node){

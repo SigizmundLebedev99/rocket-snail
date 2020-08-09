@@ -7,25 +7,30 @@ import { Point } from "../../engine/primitives/Point";
 export class PerspectiveCom extends Component{
 
     node : Planet;
-    nearest : number;
+    planeAngle : number;
     originalScale : Vector;
 
-    constructor(node:Planet, nearest:number){
+    constructor(node:Planet, planeAngle:number){
         super();
         this.node = node;
         this.originalScale = node.Scale;
-        this.nearest = nearest;
+        this.planeAngle = planeAngle;
     }
 
     OnUpdate(): void {
         let view = this.node.View;
         if(!view)
             return;
-        let nearest = view.Height/2;
-        let nodeY = this.node.Camera.Convert(new Point(0,0))?.y;
-        if(!nodeY)
-            return;
-        this.node.orbitYCoefficient = nodeY/nearest;
+        let nodeY = this.node.Transition.y;
+        if(nodeY == 0){
+            this.node.orbitYCoefficient = 1;
+        }
+        else if(nodeY >= 0){
+            this.node.orbitYCoefficient = 1 - Math.abs(nodeY)/this.planeAngle;  
+        }
+        else{
+            this.node.orbitYCoefficient = 1 + Math.abs(nodeY)/this.planeAngle;
+        }
         this.node.Scale = this.originalScale.Product(this.node.orbitYCoefficient);
     }
 }

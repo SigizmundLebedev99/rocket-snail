@@ -8,11 +8,13 @@ import { Node } from "../engine/core/Node";
 import { DrawPointCom } from "../engine/general-components/DrawPointCom";
 import { Point } from "../engine/primitives/Point";
 import { TransitionCom } from "./components/TransitionCom";
+import { DragDropCom } from "../engine/general-components/DragDropCom";
+import { Ellips } from "../engine/primitives/Ellips";
 
 export function Main(){
     let canvas = <HTMLCanvasElement>document.getElementById('canvas');
     canvas.width = document.body.clientWidth;
-    canvas.height = screen.availHeight;
+    canvas.height = document.body.clientHeight;
 
     let view = new View(<CanvasRenderingContext2D>canvas.getContext('2d'))
     let grid = new Grid(view);
@@ -30,6 +32,7 @@ export function Main(){
     grid.AddChild(
         sun
         .AddComponent(new DrawPointCom(sun, s=>new Point(0,0)))
+        .AddComponent(new DragDropCom(sun, s=>new Ellips(0,0,1.5,1.5)))
         .AddComponent(new SatelliteCom(sun))
         .AddChild(earth
             .AddComponent(new TransitionCom(earth))

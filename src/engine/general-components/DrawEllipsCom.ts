@@ -18,13 +18,13 @@ export class DrawEllipsCom extends Component{
         let context = this.node.View?.Context;
         if(!context)
             return;
-        camera.PrepareAxis();
         context.beginPath();
         context.save();
         context.translate(e.x, e.y);
-        context.scale(1, e.height/e.width);
-        context.arc(0, 0, e.width, 0, Math.PI*2);
+        context.scale(1, e.a/e.b);
+        context.arc(0, 0, e.a, 0, Math.PI*2);
         context.restore();
+        context.fill();
         context.stroke();
         context.closePath();
     }

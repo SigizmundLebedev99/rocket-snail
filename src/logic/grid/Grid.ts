@@ -11,7 +11,7 @@ import { View } from "../../engine/core/View";
 export class Grid extends Node{
     constructor(view : View){
         super();
-        this.Priority = -1;
+        this.Priority = -10000;
         this.Position = "absolute";
         this.AddChild(new XAxis());
         this.AddChild(new YAxis());
