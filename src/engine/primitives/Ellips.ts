@@ -16,6 +16,8 @@ export class Ellips implements IPointIn{
 
     IsPointIn(point: Point): boolean {
         let {x,y, a,b} = this;
-        return (Math.pow(point.x - x, 2) / a*a) + (Math.pow(point.y - y, 2) / b*b) <= a;
+        let forX = Math.pow(point.x - x, 2) / (a*a);
+        let forY = Math.pow(point.y - y, 2) / (b*b);
+        return  forX + forY <= 1;
     }
 }

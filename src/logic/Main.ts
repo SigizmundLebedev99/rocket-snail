@@ -10,6 +10,7 @@ import { Point } from "../engine/primitives/Point";
 import { TransitionCom } from "./components/TransitionCom";
 import { DragDropCom } from "../engine/general-components/DragDropCom";
 import { Ellips } from "../engine/primitives/Ellips";
+import { DrawEllipsCom } from "../engine/general-components/DrawEllipsCom";
 
 export function Main(){
     let canvas = <HTMLCanvasElement>document.getElementById('canvas');
@@ -21,6 +22,7 @@ export function Main(){
 
     let sun = new Node();
     sun.Style.pointRadius = 1.5;
+    sun.Style.lineWidth = 0.01;
     sun.Style.fillStyle = 'yellow';
     sun.Style.strokeStyle = 'yellow';
 
@@ -31,7 +33,7 @@ export function Main(){
 
     grid.AddChild(
         sun
-        .AddComponent(new DrawPointCom(sun, s=>new Point(0,0)))
+        .AddComponent(new DrawEllipsCom(sun, s=>new Ellips(0,0, 1.5, 1.5)))
         .AddComponent(new DragDropCom(sun, s=>new Ellips(0,0,1.5,1.5)))
         .AddComponent(new SatelliteCom(sun))
         .AddChild(earth

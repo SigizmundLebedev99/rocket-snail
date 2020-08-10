@@ -21,7 +21,7 @@ export class DrawEllipsCom extends Component{
         context.beginPath();
         context.save();
         context.translate(e.x, e.y);
-        context.scale(1, e.a/e.b);
+        context.scale(1, e.b/e.a);
         context.arc(0, 0, e.a, 0, Math.PI*2);
         context.restore();
         context.fill();
