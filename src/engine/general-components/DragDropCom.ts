@@ -3,49 +3,45 @@ import { Node } from "../core/Node";
 import { StateMachine, State } from "../state-machine/StateMachine";
 import { IPointIn } from "../primitives/IPointIn";
 import { Vector } from '../primitives/Vector';
+import { KeyEvent } from '../core/MouseContext';
 
-type mouseState = "drag" | "none";
+type dragState = "drag"|"none"
 
 export class DragDropCom extends Component{
-    node : Node;
-    map:(n:Node) => IPointIn;
-    sm:StateMachine<mouseState>;
-    constructor(node : Node, map:(n:Node) => IPointIn){
+    map: (() => KeyEvent | undefined);
+    node: Node;
+    sm: StateMachine<dragState>;
+    constructor(node: Node, map: (n:Node) => IPointIn){
         super();
+        this.map = node.CaptureMouse(map);
         this.node = node;
-        this.map = map;
-        this.sm = new StateMachine<mouseState>('none');
-    }
 
-    OnStart(){
-        if(this.node.View == null)
-            return;
-        let _view = this.node.View;
-        let sm = this.sm;
+        this.sm = new StateMachine<dragState>("none");
+        this.sm.AddState('none')
+        .AddCondition((state)=>{
+            let mouseState = <KeyEvent>state;
+            return mouseState.key == "down";
+        }, 'drag')
 
-        sm.AddState("none")
-        .AddCondition(()=>{
-            let state = _view.Mouse;
-            if(state.State.key == "none")
-                return false;
-            let primitive = this.map(this.node);
-            let point = this.node.Camera.ConvertFromScreen(state.State.CapturePosition);
-            return primitive.IsPointIn(point);
-        }, "drag");
-        
-        sm.AddState("drag")
-        .AddCondition(()=>{
-            let state = _view.Mouse;
-            return state.State.key == "none";
+        this.sm.AddState('drag')
+        .AddCondition((state)=>{
+            let mouseState = <KeyEvent>state;
+            return mouseState.key == "up";
         }, "none")
-        .OnCheck(()=>{
-            let state = _view.Mouse;
-            let vector = this.node.Camera.ConvertScreenVector(state.Movement);
-            this.node.Transition = this.node.Transition.Add(vector);
+        .OnCheck(state=>{
+            let mouseState = <KeyEvent>state;
+            if(mouseState.key == "move"){
+                let vector = this.node.Camera.ConvertScreenVector(mouseState.Movement);
+                this.node.Transition = this.node.Transition.Add(vector);
+            }
         })
     }
 
     OnUpdate(): void {
-        this.sm.CheckState();
+        let state = this.map();
+        if(!state)
+            return;
+        
+        this.sm.CheckState(state);
     }
 }

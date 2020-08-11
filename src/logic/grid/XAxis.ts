@@ -3,10 +3,11 @@ import { DrawLineCom } from "../../engine/general-components/DrawLineCom";
 import { StraightLine } from "../../engine/primitives/Straight-Line";
 import { Point } from "../../engine/primitives/Point";
 import { DrawPointCom } from "../../engine/general-components/DrawPointCom";
+import { View } from "../../engine/core/View";
 
 export class XAxis extends Node{
-    constructor(){
-        super();
+    constructor(view: View){
+        super(view);
         this.Priority = -10000;
         this.Position = 'absolute';
         this.Style.strokeStyle = "red";

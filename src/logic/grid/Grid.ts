@@ -10,21 +10,16 @@ import { View } from "../../engine/core/View";
 
 export class Grid extends Node{
     constructor(view : View){
-        super();
+        super(view);
         this.Priority = -10000;
         this.Position = "absolute";
-        this.AddChild(new XAxis());
-        this.AddChild(new YAxis());
+        this.AddChild(new XAxis(view));
+        this.AddChild(new YAxis(view));
         for(let i = 1; i < view.Width/view.PIXELS_METER; i ++){
             this.AddComponent(new DrawLineCom(this, o => new StraightLine(new Point(i,0), new Point(i,1))));
             this.AddComponent(new DrawLineCom(this, o => new StraightLine(new Point(-i,0), new Point(-i,1))));
             this.AddComponent(new DrawLineCom(this, o => new StraightLine(new Point(0,i), new Point(1,i))));
             this.AddComponent(new DrawLineCom(this, o => new StraightLine(new Point(0,-i), new Point(1,-i))));
-
-            //this.AddComponent(new DrawPointCom(this, o => new Point(i,i)));
-            //this.AddComponent(new DrawPointCom(this, o => new Point(-i,i)));
-            //this.AddComponent(new DrawPointCom(this, o => new Point(i,-i)));
-            //this.AddComponent(new DrawPointCom(this, o => new Point(-i,-i)));
         }
     }
 }

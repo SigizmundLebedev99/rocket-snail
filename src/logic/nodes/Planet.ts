@@ -2,6 +2,7 @@ import { Node } from "../../engine/core/Node";
 import { DrawPointCom } from "../../engine/general-components/DrawPointCom";
 import { Point } from "../../engine/primitives/Point";
 import { Vector } from "../../engine/primitives/Vector";
+import { View } from "../../engine/core/View";
 
 export class Planet extends Node{
 
@@ -9,8 +10,8 @@ export class Planet extends Node{
     orbitEllips : Vector;
     Name : string;
 
-    constructor(name : string, orbitEllips:Vector, color?:string){
-        super();
+    constructor(view: View, name : string, orbitEllips:Vector, color?:string){
+        super(view);
         this.orbitEllips = orbitEllips
         this.Name = name;
         this.Style.fillStyle = color??"red";

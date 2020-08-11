@@ -11,6 +11,7 @@ import { TransitionCom } from "./components/TransitionCom";
 import { DragDropCom } from "../engine/general-components/DragDropCom";
 import { Ellips } from "../engine/primitives/Ellips";
 import { DrawEllipsCom } from "../engine/general-components/DrawEllipsCom";
+import { Rectangle } from "../engine/primitives/Rectangle";
 
 export function Main(){
     let canvas = <HTMLCanvasElement>document.getElementById('canvas');
@@ -20,21 +21,21 @@ export function Main(){
     let view = new View(<CanvasRenderingContext2D>canvas.getContext('2d'))
     let grid = new Grid(view);
 
-    let sun = new Node();
+    let sun = new Node(view);
     sun.Style.pointRadius = 1.5;
     sun.Style.lineWidth = 0.01;
     sun.Style.fillStyle = 'yellow';
     sun.Style.strokeStyle = 'yellow';
 
-    let earth = new Planet("Earth", new Vector(8,2), 'blue');
+    let earth = new Planet(view, "Earth", new Vector(8,2), 'blue');
 
-    let moon = new Planet("Moon", new Vector(2,0.5), 'gray')
+    let moon = new Planet(view, "Moon", new Vector(2,0.5), 'gray')
     moon.Style.pointRadius = 0.3;
 
-    grid.AddChild(
-        sun
+    grid
+    .AddChild(sun
         .AddComponent(new DrawEllipsCom(sun, s=>new Ellips(0,0, 1.5, 1.5)))
-        .AddComponent(new DragDropCom(sun, s=>new Ellips(0,0,1.5,1.5)))
+        .AddComponent(new DragDropCom(sun, s=>new Ellips(0,0, 1.5, 1.5)))
         .AddComponent(new SatelliteCom(sun))
         .AddChild(earth
             .AddComponent(new TransitionCom(earth))
@@ -43,7 +44,6 @@ export function Main(){
             .AddChild(moon
                 .AddComponent(new TransitionCom(moon, -0.003))
                 .AddComponent(new SatelliteCom(moon)))));
-
     view.AddChild(grid);
     view.Run();
 }

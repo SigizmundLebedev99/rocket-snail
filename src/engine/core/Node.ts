@@ -3,23 +3,18 @@ import { NodeStyle } from "./NodeStyle";
 import { Camera } from "./Camera";
 import { BaseState } from "../BaseState";
 import { View } from "./View";
+import { IPointIn } from "../primitives/IPointIn";
 
 export class Node extends BaseState {
 
-    private _view : View | null = null;
+    private _view : View;
 
     get View(){
         return this._view;
     }
 
-    set View(v : View | null){
-        if(v == null)
-            return;
-        this.DependentNodes.forEach(node => {
-            v.AddChild(node);
-        });
-            
-        this._view = v;
+    CaptureMouse(map:(n:Node) => IPointIn){
+        return this._view.Mouse.CaptureMouse(this, map);
     }
 
     Position : "relative" | "absolute" = "relative";
@@ -32,8 +27,7 @@ export class Node extends BaseState {
 
     set Priority(v : number){
         this.priority = v;
-        if(this.View)
-            this.View.Resort();
+        this.View.Resort();
     }
 
     ParentNode : Node | null = null;
@@ -42,10 +36,13 @@ export class Node extends BaseState {
     readonly Components : Component[] = [];
     readonly Style : NodeStyle = new NodeStyle();
 
+    constructor(view: View){
+        super();
+        this._view = view;
+        view.AddChild(this);
+    }
+
     get Camera(){
-        if(!this.View){
-            throw "Camera methods cannot be called until node not attached to view";
-        }
         return new Camera(this,this.View);
     }
 
@@ -54,8 +51,6 @@ export class Node extends BaseState {
         element.Style.Copy(this.Style);
         element.ParentNode = this;
         this.DependentNodes.push(element);
-        if(this.View)
-            this.View.AddChild(element);
         return this;
     }
 

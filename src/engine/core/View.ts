@@ -1,6 +1,6 @@
 import { Node } from "./Node";
 import { Point } from "../primitives/Point";
-import { MouseState } from "./MouseState";
+import { MouseContext } from "./MouseContext";
 import { Vector } from "../primitives/Vector";
 
 export class View{
@@ -31,45 +31,47 @@ export class View{
     private intervalId;
 
     readonly PIXELS_METER = 45;
-    readonly Mouse : MouseState;
+    readonly Mouse : MouseContext;
     Context : CanvasRenderingContext2D;
     DependentNodes : Node[] = [];
 
     constructor(context : CanvasRenderingContext2D){
         this.Context = context;
-        this.Mouse = new MouseState();
+        this.Mouse = new MouseContext();
 
         context.canvas.addEventListener("mousedown", (e) => {
-            this.Mouse.State = 
-            {
-                key:"pressed", 
-                CapturePosition:new Point(e.x, e.y),
+            this.Mouse.HandleState({
+                key:"down",
+                Position: new Point(e.x, e.y),
                 Which : e.which
-            }
+            })
         });
         context.canvas.addEventListener("mouseup", (e) => {
-            this.Mouse.State = 
+            this.Mouse.HandleState(
             {
-                key:"none",
-                ReleasePosition: new Point(e.x, e.y)
-            }
+                key:"up",
+                Position: new Point(e.x, e.y)
+            });
         });
         context.canvas.addEventListener("wheel", (e) =>{
-            this.Mouse.Wheel = {
-                key:"changed",
-                Delta: e.deltaY
-            }
+            this.Mouse.HandleState({
+                key:"wheel",
+                Delta: e.deltaY,
+                Position: new Point(e.x, e.y)
+            })
         });
 
         context.canvas.addEventListener("mousemove", (e) => {
-            this.Mouse.Movement = new Vector(e.movementX, e.movementY);
-            this.Mouse.Position = new Point(e.x, e.y);
+            this.Mouse.HandleState({
+                key:"move",
+                Movement: new Vector(e.movementX, e.movementY),
+                Position: new Point(e.x, e.y)
+            })
         });
     }
 
     AddChild(element: Node){
         this.DependentNodes.push(element);
-        element.View = this;
         this.Resort();
         return element;
     }
@@ -97,7 +99,6 @@ export class View{
                 node.OnUpdate()
                 this.Context.restore();
             });
-            this.Mouse.Reset();
         }, 8);
     }
 
