@@ -99,6 +99,7 @@ export class View{
                 node.OnUpdate()
                 this.Context.restore();
             });
+            this.Mouse.Reset();
         }, 8);
     }
 

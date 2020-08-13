@@ -13,6 +13,7 @@ export class Grid extends Node{
         super(view);
         this.Priority = -10000;
         this.Position = "absolute";
+        this.Style.lineWidth = 0.1;
         this.AddChild(new XAxis(view));
         this.AddChild(new YAxis(view));
         for(let i = 1; i < view.Width/view.PIXELS_METER; i ++){

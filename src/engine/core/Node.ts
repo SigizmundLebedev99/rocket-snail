@@ -13,6 +13,10 @@ export class Node extends BaseState {
         return this._view;
     }
 
+    get Mouse(){
+        return this._view.Mouse;
+    }
+
     CaptureMouse(map:(n:Node) => IPointIn){
         return this._view.Mouse.CaptureMouse(this, map);
     }
