@@ -10,6 +10,7 @@ import { DragDropCom } from "../engine/general-components/DragDropCom";
 import { Ellips } from "../engine/primitives/Ellips";
 import { DrawEllipsCom } from "../engine/general-components/DrawEllipsCom";
 import { Rectangle } from "../engine/primitives/Rectangle";
+import { WheelScaleCom } from "../engine/general-components/WheelScaleCom";
 
 export function Main(){
     let canvas = <HTMLCanvasElement>document.getElementById('canvas');
@@ -36,6 +37,7 @@ export function Main(){
     .AddComponent(new DragDropCom(grid, gridMouse))
     .AddChild(sun
         .AddComponent(new DrawEllipsCom(sun, s=>new Ellips(0,0, 1.5, 1.5)))
+        .AddComponent(new WheelScaleCom(sun, sunMouse))
         .AddComponent(new DragDropCom(sun, sunMouse))
         .AddComponent(new SatelliteCom(sun))
         .AddChild(earth
@@ -45,6 +47,6 @@ export function Main(){
             .AddChild(moon
                 .AddComponent(new TransitionCom(moon, -0.003))
                 .AddComponent(new SatelliteCom(moon)))));
-    view.AddChild(grid);
+
     view.Run();
 }

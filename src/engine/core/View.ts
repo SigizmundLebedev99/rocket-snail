@@ -2,6 +2,7 @@ import { Node } from "./Node";
 import { Point } from "../primitives/Point";
 import { MouseContext } from "./MouseContext";
 import { Vector } from "../primitives/Vector";
+import { Grid } from "../../logic/grid/Grid";
 
 export class View{
     get Width(){
@@ -90,6 +91,7 @@ export class View{
         this.intervalId = setInterval(() => {
             this.Clear();
             this.DependentNodes.forEach(node => {
+                
                 this.Context.save();
                 node.Style.Apply(this.Context);
 
@@ -98,6 +100,7 @@ export class View{
 
                 node.OnUpdate()
                 this.Context.restore();
+                
             });
             this.Mouse.Reset();
         }, 8);

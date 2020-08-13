@@ -1,7 +1,7 @@
 import { Component } from '../core/Component'
 import { Node } from "../core/Node";
-import { StateMachine, State } from "../state-machine/StateMachine";
-import { MouseEvent, MouseState } from '../core/MouseContext';
+import { StateMachine } from "../state-machine/StateMachine";
+import { MouseState } from '../core/MouseContext';
 
 type dragState = "drag"|"none"
 

@@ -88,7 +88,6 @@ export class Camera{
         let node = this. Node;
         movement = new Vector(movement.x / view.PIXELS_METER, - movement.y / view.PIXELS_METER);
         movement = movement.Rotate(-node.TotalRotation);
-        movement = new Vector(movement.x / node.TotalScale.x, movement.y / node.TotalScale.y);
         return movement;
     }
 }
