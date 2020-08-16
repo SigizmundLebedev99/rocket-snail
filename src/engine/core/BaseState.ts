@@ -1,4 +1,4 @@
-import { Vector } from "./primitives/Vector";
+import { Vector } from "../primitives/Vector";
 
 export abstract class BaseState{
     Transition : Vector = new Vector(0,0);

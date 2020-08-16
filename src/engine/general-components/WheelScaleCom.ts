@@ -1,14 +1,14 @@
 import { Component } from "../core/Component";
 import { MouseState } from "../core/MouseContext";
 import { StateMachine } from "../state-machine/StateMachine";
-import { Node } from "../core/Node";
+import { SceneElement } from "../core/SceneElement";
 import { Vector } from "../primitives/Vector";
 
 export class WheelScaleCom extends Component{
     map: (() => MouseState);
-    node: Node;
+    node: SceneElement;
     
-    constructor(node: Node, map: () => MouseState){
+    constructor(node: SceneElement, map: () => MouseState){
         super();
         this.map = map;
         this.node = node;

@@ -1,8 +1,6 @@
 import { Component } from "../../engine/core/Component";
-import { Node } from "../../engine/core/Node";
 import { Vector } from "../../engine/primitives/Vector";
 import { Planet } from "../nodes/Planet";
-import { Point } from "../../engine/primitives/Point";
 
 export class PerspectiveCom extends Component{
 
@@ -18,7 +16,7 @@ export class PerspectiveCom extends Component{
     }
 
     OnUpdate(): void {
-        let view = this.node.View;
+        let view = this.node.Scene;
         if(!view)
             return;
         let nodeY = this.node.Transition.y;

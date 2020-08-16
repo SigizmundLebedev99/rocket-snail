@@ -1,5 +1,5 @@
 import { Component } from '../core/Component'
-import { Node } from "../core/Node";
+import { SceneElement } from "../core/SceneElement";
 import { StateMachine } from "../state-machine/StateMachine";
 import { MouseState } from '../core/MouseContext';
 
@@ -7,10 +7,10 @@ type dragState = "drag"|"none"
 
 export class DragDropCom extends Component{
     map: (() => MouseState);
-    node: Node;
+    node: SceneElement;
     sm: StateMachine<dragState>;
     
-    constructor(node: Node, map: () => MouseState){
+    constructor(node: SceneElement, map: () => MouseState){
         super();
         this.map = map;
         this.node = node;

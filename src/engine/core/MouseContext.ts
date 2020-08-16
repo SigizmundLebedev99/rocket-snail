@@ -1,7 +1,7 @@
 import { Vector } from "../primitives/Vector";
 import { Point } from "../primitives/Point";
 import { IPointIn } from "../primitives/IPointIn";
-import { Node } from "./Node";
+import { SceneElement } from "./SceneElement";
 
 export type MouseEvent = 
 | {key:"down",      Which:number,       Position: Point}
@@ -16,16 +16,14 @@ export type KeyState =
 | {key:"wheel",     Delta:number}
 | {key:"none"}
 
-let _defaultKeyEvent : MouseEvent = {key:"none", Position:new Point(0,0)};
-
 class Binding{
-    node:Node;
-    handle:(n:Node) => IPointIn;
+    node:SceneElement;
+    handle:() => IPointIn;
 
     isCaptured: boolean = false;
     isIn: boolean = false;
 
-    constructor(node:Node, handle:(n:Node) => IPointIn){
+    constructor(node:SceneElement, handle:() => IPointIn){
         this.node = node;
         this.handle = handle;
     }
@@ -45,7 +43,7 @@ export class MouseContext{
 
         for(let b in this.captureStack){
             let binding = this.captureStack[b];
-            let primitive = binding.handle(binding.node);
+            let primitive = binding.handle();
             let point = binding.node.Position == 'absolute' ? state.Position : binding.node.Camera.ConvertFromScreen(state.Position);
 
             if(primitive.IsPointIn(point)){
@@ -87,7 +85,7 @@ export class MouseContext{
         
     }
     
-    private Resort(){
+    Resort(){
         this.captureStack = [...this.captureStack].sort((a,b) => b.node.Priority - a.node.Priority);
     }
 
@@ -96,7 +94,7 @@ export class MouseContext{
         this.Movement = new Vector(0,0);
     }
 
-    CaptureMouse(node:Node, handle: (n:Node) => IPointIn) : () => MouseState{
+    CaptureMouse(node:SceneElement, handle: () => IPointIn) : () => MouseState{
         let bind = new Binding(node, handle);
         this.captureStack.push(bind);
         this.Resort();

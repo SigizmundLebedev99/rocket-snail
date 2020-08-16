@@ -1,20 +1,20 @@
 import { Component } from "../core/Component";
-import { Node } from "../core/Node";
+import { SceneElement } from "../core/SceneElement";
 import { Point } from "../primitives/Point";
 
-export class DrawPointCom<TNode extends Node> extends Component{
+export class DrawPointCom extends Component{
 
-    node : TNode;
-    map: (o: TNode) => Point;
+    node : SceneElement;
+    map: () => Point;
 
-    constructor(node : TNode, map: (o: TNode) => Point){
+    constructor(node : SceneElement, map: () => Point){
         super();
         this.node = node;
         this.map = map;
     }
 
     OnUpdate(): void {
-        let point = this.map(this.node);
+        let point = this.map();
         if(this.node.Position == "absolute"){
             let camera = this.node.Camera;
             let p = camera.Convert(point)
@@ -27,7 +27,7 @@ export class DrawPointCom<TNode extends Node> extends Component{
     }
 
     DrawPoint(p:Point){
-        let context = this.node.View?.Context;
+        let context = this.node.Scene?.Canvas;
         if(!context)
             return;
         let style = this.node.Style;

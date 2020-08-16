@@ -1,13 +1,14 @@
 import { Vector } from "../primitives/Vector";
 import { Point } from "../primitives/Point";
-import { BaseState } from "../BaseState";
-import { Node } from "./Node";
-import { View } from "./View";
+import { BaseState } from "./BaseState";
+import { SceneElement } from "./SceneElement";
+import { Scene } from "./Scene";
+import { SceneContext } from "./SceneContext";
 
 export class Camera{
-    Node : Node;
-    private _view : View;
-    constructor(node : Node, view: View){
+    Node : SceneElement;
+    private _view : SceneContext;
+    constructor(node : SceneElement, view: SceneContext){
         this.Node = node;
         this._view = view;
     }
@@ -43,12 +44,12 @@ export class Camera{
             if(state.BaseState == null){
                 p = p.Rotate(-state.Rotation);
                 p = p.Add(state.Transition);
-                p = new Vector(p.x / state.Scale.x, p.y / state.Scale.y)
+                p = new Vector(p.x * state.Scale.x, p.y * state.Scale.y)
                 return;
             }
             
             transformCamera(state.BaseState);
-            p = new Vector(p.x / state.Scale.x, p.y / state.Scale.y)
+            p = new Vector(p.x * state.Scale.x, p.y * state.Scale.y)
             p = p.Rotate(-state.Rotation);
             p = p.Add(state.Transition);
                 
@@ -62,7 +63,7 @@ export class Camera{
 
     PrepareAxis(){
         let view = this._view;
-        let context = view.Context;
+        let context = view.Canvas;
 
         context.translate(view.Width/2, view.Height/2);
         context.scale(view.PIXELS_METER, - view.PIXELS_METER);
@@ -86,7 +87,9 @@ export class Camera{
     ConvertScreenVector(movement:Vector){
         let view = this._view;
         let node = this. Node;
+        let scale = node.TotalScale;
         movement = new Vector(movement.x / view.PIXELS_METER, - movement.y / view.PIXELS_METER);
+        movement = new Vector(movement.x / scale.x,  movement.y / scale.y);
         movement = movement.Rotate(-node.TotalRotation);
         return movement;
     }

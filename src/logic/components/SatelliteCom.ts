@@ -1,13 +1,13 @@
 import { Component } from "../../engine/core/Component";
 import { Vector } from "../../engine/primitives/Vector";
 import { Planet } from "../nodes/Planet";
-import { Node } from "../../engine/core/Node";
+import { SceneElement } from "../../engine/core/SceneElement";
 import { Point } from "../../engine/primitives/Point";
 
 export class SatelliteCom extends Component{
-    node : Node;
+    node : SceneElement;
 
-    constructor(node : Node){
+    constructor(node : SceneElement){
         super();
         this.node = node;
     }

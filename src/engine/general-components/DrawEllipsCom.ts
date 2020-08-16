@@ -1,12 +1,12 @@
 import { Component } from "../core/Component";
-import { Node } from "../core/Node";
+import { SceneElement } from "../core/SceneElement";
 import { Ellips } from "../primitives/Ellips";
 
 export class DrawEllipsCom extends Component{
-    node : Node;
-    map : (n:Node) => Ellips;
+    node : SceneElement;
+    map : () => Ellips;
     
-    constructor(node : Node, map : (n: Node) => Ellips){
+    constructor(node : SceneElement, map : () => Ellips){
         super();
         this.node = node;
         this.map = map;
@@ -14,8 +14,8 @@ export class DrawEllipsCom extends Component{
 
     OnUpdate(): void {
         let camera = this.node.Camera;
-        let e = this.map(this.node);
-        let context = this.node.View?.Context;
+        let e = this.map();
+        let context = this.node.Scene?.Canvas;
         if(!context)
             return;
         context.beginPath();
