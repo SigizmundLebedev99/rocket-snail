@@ -1,6 +1,6 @@
 import { Vector } from "../primitives/Vector";
 import { Point } from "../primitives/Point";
-import { IPointIn } from "../primitives/IPointIn";
+import { IPointIn } from "../interfaces/IPointIn";
 import { SceneElement } from "./SceneElement";
 
 export type MouseEvent = 
@@ -22,22 +22,38 @@ class Binding{
 
     isCaptured: boolean = false;
     isIn: boolean = false;
-
-    constructor(node:SceneElement, handle:() => IPointIn){
+    scene: SceneBinding;
+    constructor(node:SceneElement, scene:SceneBinding, handle:() => IPointIn){
         this.node = node;
         this.handle = handle;
+        this.scene = scene;
+    }
+}
+
+class SceneBinding{
+    movement: Vector = new Vector(0,0);
+    lastState: KeyState = {key:"none"};
+
+    Reset(){
+        this.movement = new Vector(0,0);
+        this.lastState = {key:"none"};
     }
 }
 
 export class MouseContext{
     private captureStack : Binding[] = [];
+    private scenes : { [id: number]: SceneBinding; } = {};
+
     private isIn : Binding | null = null;
     private isCaptured: Binding | null = null;
 
     Position : Point = new Point(0,0);
-    LastState : KeyState = {key:'none'};
-    Movement : Vector = new Vector(0,0);
 
+    private setState(ks: KeyState){
+        for(let s in this.scenes)
+            this.scenes[s].lastState = ks;
+    }
+    
     HandleState(state: MouseEvent){
         this.Position = state.Position;
 
@@ -60,47 +76,57 @@ export class MouseContext{
 
         switch(state.key){
             case 'move':{
-                this.Movement = state.Movement;
+                for(let s in this.scenes)
+                    this.scenes[s].movement = state.Movement;
                 break;
             }
             case 'down':{
-                this.LastState = state;
+                this.setState(state);
                 this.isCaptured = this.isIn;
                 if(this.isIn != null)
                     this.isIn.isCaptured = true;
                 break;
             }   
             case 'up':{
-                this.LastState = state;
+                this.setState(state);
                 if(this.isCaptured){
                     this.isCaptured.isCaptured = false;
                     this.isCaptured = null;
                 }
                 break;
-            }  
+            }
             case 'wheel':{
-                this.LastState = state;
+                this.setState(state);
             }       
         }
-        
     }
     
     Resort(){
-        this.captureStack = [...this.captureStack].sort((a,b) => b.node.Priority - a.node.Priority);
-    }
-
-    Reset(){
-        this.LastState = {key:"none"};
-        this.Movement = new Vector(0,0);
+        let sortF = (a: Binding, b: Binding) => {
+            let scenePr = b.node.Scene.Priority - a.node.Scene.Priority;
+            if(scenePr != 0)
+                return scenePr;
+            return b.node.Priority - a.node.Priority;
+        }
+        this.captureStack = [...this.captureStack].sort(sortF);
     }
 
     CaptureMouse(node:SceneElement, handle: () => IPointIn) : () => MouseState{
-        let bind = new Binding(node, handle);
+        var scene = this.scenes[node.Scene.Priority];
+        let bind = new Binding(node, scene, handle);
         this.captureStack.push(bind);
         this.Resort();
         
         return () => {
-            return new MouseState(this.LastState, this.Position, this.Movement, bind.isCaptured, bind.isIn)
+            return new MouseState(bind.scene.lastState, this.Position, bind.scene.movement, bind.isCaptured, bind.isIn);
+        }
+    }
+
+    HandleMouseByScene(id: number){
+        let scene = new SceneBinding();
+        this.scenes[id] = scene;
+        return () => {
+            scene.Reset();
         }
     }
 }

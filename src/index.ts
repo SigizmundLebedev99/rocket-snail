@@ -1,5 +1,5 @@
 import './css/style.css';
-import { Main } from './logic/Main';
+import { Main } from './sample/Main';
 
 Main();
 

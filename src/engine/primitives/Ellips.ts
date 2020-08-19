@@ -1,4 +1,4 @@
-import { IPointIn } from "./IPointIn";
+import { IPointIn } from "../interfaces/IPointIn";
 import { Point } from "./Point";
 
 export class Ellips implements IPointIn{

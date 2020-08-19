@@ -10,6 +10,7 @@ export class SceneContext{
     private readonly _scene : Scene;
     
     private elementsOnScene : SceneElement[] = [];
+
     get ElementsOnScene(){
         return [...this.elementsOnScene];
     }
@@ -37,13 +38,17 @@ export class SceneContext{
     get RightBottom(){
         return new Point(this.Width, this.Height);
     }
-    
-    readonly PIXELS_METER = 45;
 
-    constructor(scene : Scene){
+    get Priority(){
+        return this._scene.Priority;
+    }
+    
+    PIXELS_METER = 45;
+
+    constructor(scene : Scene, mouseContext: MouseContext){
         this._scene = scene;
         this.Canvas = scene.Canvas;
-        this.Mouse = new MouseContext();
+        this.Mouse = mouseContext;
     }
 
     PriorityChanged(){

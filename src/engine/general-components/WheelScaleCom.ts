@@ -1,8 +1,6 @@
 import { Component } from "../core/Component";
 import { MouseState } from "../core/MouseContext";
-import { StateMachine } from "../state-machine/StateMachine";
 import { SceneElement } from "../core/SceneElement";
-import { Vector } from "../primitives/Vector";
 
 export class WheelScaleCom extends Component{
     map: (() => MouseState);

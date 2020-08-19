@@ -1,9 +1,8 @@
-import { IPointIn } from "./IPointIn";
+import { IPointIn } from "../interfaces/IPointIn";
 import { Point } from "./Point";
 import { Fns } from "../../helpers/math";
 
 export class Rectangle implements IPointIn{
-
     x:number;
     y:number;
     width:number;

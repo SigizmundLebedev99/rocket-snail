@@ -87,7 +87,11 @@ export class Camera{
     ConvertScreenVector(movement:Vector){
         let view = this._view;
         let node = this. Node;
-        let scale = node.TotalScale;
+        let scale : Vector;
+        if(node.BaseState)
+            scale = node.BaseState.TotalScale;
+        else
+            scale = node.TotalScale;
         movement = new Vector(movement.x / view.PIXELS_METER, - movement.y / view.PIXELS_METER);
         movement = new Vector(movement.x / scale.x,  movement.y / scale.y);
         movement = movement.Rotate(-node.TotalRotation);
