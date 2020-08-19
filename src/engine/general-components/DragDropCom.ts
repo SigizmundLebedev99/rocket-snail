@@ -28,7 +28,8 @@ export class DragDropCom extends Component{
             return !mouseState.IsCaptured
         }, "none")
         .OnCheck(state=>{
-            let mouseState = <MouseState>state; 
+            let mouseState = <MouseState>state;
+            
             let vector = this.node.Camera.ConvertScreenVector(mouseState.Movement);
             this.node.Transition = this.node.Transition.Add(vector);
         })
@@ -36,7 +37,6 @@ export class DragDropCom extends Component{
 
     OnUpdate(): void {
         let state = this.map();
-        
         this.sm.CheckState(state);
     }
 }

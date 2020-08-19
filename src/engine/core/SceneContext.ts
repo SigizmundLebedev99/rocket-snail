@@ -2,12 +2,13 @@ import { Point } from "../primitives/Point";
 import { MouseContext } from "./MouseContext";
 import { Scene } from "./Scene";
 import { SceneElement } from "./SceneElement";
+import { IPointIn } from "../interfaces/IPointIn";
 
 export class SceneContext{
     readonly Canvas : CanvasRenderingContext2D;
-    readonly Mouse : MouseContext;
 
-    private readonly _scene : Scene;
+    private _mouse : MouseContext;
+    private _scene : Scene;
     
     private elementsOnScene : SceneElement[] = [];
 
@@ -48,15 +49,15 @@ export class SceneContext{
     constructor(scene : Scene, mouseContext: MouseContext){
         this._scene = scene;
         this.Canvas = scene.Canvas;
-        this.Mouse = mouseContext;
+        this._mouse = mouseContext;
     }
 
     PriorityChanged(){
-        this.Mouse.Resort();
+        this._mouse.Resort();
         this.Resort();
     }
 
-    Resort(){
+    private Resort(){
         let elements = this.ElementsOnScene
         elements.sort((a,b) => a.Priority - b.Priority);
         this.elementsOnScene = elements;
@@ -91,6 +92,14 @@ export class SceneContext{
             .filter(e=>!(elementsToRemove.some(remove=>remove == e)));
 
         elementsToRemove.forEach(e=>e.IsOnScene = false);
+    }
+
+    CaptureMouse(node: SceneElement, map:()=>IPointIn){
+        return this._mouse.CaptureMouse(node, map);
+    }
+
+    Redraw(){
+        this._scene.Redraw();
     }
 
     Run(){

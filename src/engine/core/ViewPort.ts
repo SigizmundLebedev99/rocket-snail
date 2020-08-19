@@ -53,5 +53,7 @@ export class ViewPort{
             throw "Your brouser doesn't support canvas"
         let scene = new Scene(context, this.Mouse, this.scenes.length);
         this.scenes.push(scene);
+
+        return scene.Context;
     }
 }

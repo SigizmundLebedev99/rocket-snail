@@ -1,5 +1,4 @@
 import { Grid } from "./grid/Grid";
-import { Scene } from "../engine/core/Scene";
 import { Planet } from "./nodes/Planet";
 import { Vector } from "../engine/primitives/Vector";
 import { PerspectiveCom } from "./components/PerspectiveCom";
@@ -11,44 +10,54 @@ import { Ellips } from "../engine/primitives/Ellips";
 import { DrawEllipsCom } from "../engine/general-components/DrawEllipsCom";
 import { Rectangle } from "../engine/primitives/Rectangle";
 import { WheelScaleCom } from "../engine/general-components/WheelScaleCom";
+import { ViewPort } from "../engine/core/ViewPort";
+import { RedrawOnChange } from "./components/RedrawOnChangeCom";
 
 export function Main(){
-    let canvas = <HTMLCanvasElement>document.getElementById('canvas');
-    canvas.width = document.body.clientWidth;
-    canvas.height = document.body.clientHeight;
+    let viewport = new ViewPort("viewport");
+    let back = viewport.AddScene();
+    let grid = new Grid(back);
 
-    let view = new Scene(<CanvasRenderingContext2D>canvas.getContext('2d')).Context;
-    let grid = new Grid(view);
-    let gridMouse = view.Mouse.CaptureMouse(grid, ()=>new Rectangle(0,0, view.Width, view.Height));    
+    back.AddElement(grid);
 
-    grid
-    .AddComponent(new DragDropCom(grid, gridMouse))
-    .AddComponent(new WheelScaleCom(grid, gridMouse))
+    let front = viewport.AddScene();
+    let root = new SceneElement(front);
+    root.Position = 'absolute';
+    root.Priority = -1000;
+    let rootMouse = front.CaptureMouse(root, ()=>new Rectangle(0,0, front.Width, front.Height));    
+
+    root
+    .AddComponent(new DragDropCom(root, rootMouse))
+    .AddComponent(new WheelScaleCom(root, rootMouse))
+    .AddComponent(new RedrawOnChange(back, rootMouse))
+    .AddComponent(new DragDropCom(grid, rootMouse))
+    .AddComponent(new WheelScaleCom(grid, rootMouse))
 
     let pos = new Vector(-6,-6);
     let start = new Vector(-6,-6);
 
-    for(let i = 0; i < 100; i ++){
-        if(i%10 == 0){
+    for(let i = 0; i < 169; i ++){
+        if(i%13 == 0){
             start = start.Add(new Vector(0,1));
             pos = new Vector(start.x, start.y);
         }
+
         pos = pos.Add(new Vector(1,0));
-        let sun = new SceneElement(view);
+        let sun = new SceneElement(front);
         sun.Style.pointRadius = 1.5;
         sun.Style.lineWidth = 0.05;
         sun.Style.fillStyle = 'yellow';
         sun.Style.strokeStyle = 'orange';
-        let sunMouse = view.Mouse.CaptureMouse(sun, ()=>new Ellips(0,0, 1.5, 1.5))
+        let sunMouse = front.CaptureMouse(sun, ()=>new Ellips(0,0, 1.5, 1.5))
         sun.Scale = new Vector(0.2, 0.2);
         sun.Transition = pos;
 
-        let earth = new Planet(view, "Earth", new Vector(5,1.5), 'blue');
+        let earth = new Planet(front, "Earth", new Vector(5,1.5), 'blue');
 
-        let moon = new Planet(view, "Moon", new Vector(2,0.5), 'gray')
+        let moon = new Planet(front, "Moon", new Vector(2,0.5), 'gray')
         moon.Style.pointRadius = 0.3;
 
-        grid.AddChild(sun
+        root.AddChild(sun
             .AddComponent(new DrawEllipsCom(sun, ()=>new Ellips(0,0, 1.5, 1.5)))
             .AddComponent(new DragDropCom(sun, sunMouse))
             .AddComponent(new WheelScaleCom(grid, sunMouse))
@@ -61,9 +70,7 @@ export function Main(){
                     .AddComponent(new TransitionCom(moon, -0.003))
                     .AddComponent(new SatelliteCom(moon)))));
     }
-
-    
-    
-    view.AddElement(grid);
-    view.Run();
+    back.Redraw();
+    front.AddElement(root);
+    front.Run();
 }
