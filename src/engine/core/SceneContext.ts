@@ -43,11 +43,19 @@ export class SceneContext{
     }
     
     PIXELS_METER = 45;
-
+    private _root : SceneElement;
+    get Root(){
+        return this._root;
+    }
     constructor(scene : Scene, mouseContext: MouseContext){
         this._scene = scene;
         this.Canvas = scene.Canvas;
         this._mouse = mouseContext;
+        let root = new SceneElement(this);
+        root.Position = 'absolute';
+        root.Priority = -10000;
+        this.AddElement(root);
+        this._root = root;
     }
 
     PriorityChanged(){

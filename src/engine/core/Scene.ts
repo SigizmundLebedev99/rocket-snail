@@ -1,7 +1,5 @@
 import { SceneContext } from "./SceneContext";
 import { MouseContext } from "./MouseContext";
-import { Point } from "../primitives/Point";
-import { Vector } from "../primitives/Vector";
 import { SceneElement } from "./SceneElement";
 
 export class Scene{
@@ -33,42 +31,10 @@ export class Scene{
             return;
         }
 
-        let _mouseContext = new MouseContext();
-
-        context.canvas.addEventListener("mousedown", (e) => {
-            _mouseContext.HandleState({
-                key:"down",
-                Position: new Point(e.x, e.y),
-                Which : e.which
-            })
-        });
-
-        context.canvas.addEventListener("mouseup", (e) => {
-            _mouseContext.HandleState(
-            {
-                key:"up",
-                Position: new Point(e.x, e.y)
-            });
-        });
-
-        context.canvas.addEventListener("wheel", (e) =>{
-            _mouseContext.HandleState({
-                key:"wheel",
-                Delta: e.deltaY,
-                Position: new Point(e.x, e.y)
-            })
-        });
-
-        context.canvas.addEventListener("mousemove", (e) => {
-            _mouseContext.HandleState({
-                key:"move",
-                Movement: new Vector(e.movementX, e.movementY),
-                Position: new Point(e.x, e.y)
-            })
-        });
-        this._mouseContext = _mouseContext;
-        this.setMouseHandled = _mouseContext.HandleMouseByScene(this.sceneId);
-        this.Context = new SceneContext(this, _mouseContext);
+        this._mouseContext = new MouseContext();
+        this._mouseContext.ListenEvents(context.canvas);
+        this.setMouseHandled = this._mouseContext.HandleMouseByScene(this.sceneId);
+        this.Context = new SceneContext(this, this._mouseContext);
     }
 
     Clear(){
@@ -77,7 +43,7 @@ export class Scene{
 
     Redraw(){
         if(this.ShouldResort){
-            this._mouseContext.Resort();
+            this._mouseContext.Resort(this.sceneId);
             this.Resort();
             this.ShouldResort = false;
         }

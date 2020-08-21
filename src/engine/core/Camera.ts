@@ -2,15 +2,20 @@ import { Vector } from "../primitives/Vector";
 import { Point } from "../primitives/Point";
 import { BaseState } from "./BaseState";
 import { SceneElement } from "./SceneElement";
-import { Scene } from "./Scene";
 import { SceneContext } from "./SceneContext";
 
 export class Camera{
     Node : SceneElement;
     private _view : SceneContext;
+    
     constructor(node : SceneElement, view: SceneContext){
         this.Node = node;
         this._view = view;
+    }
+
+    private actualTransition : Vector = new Vector(0,0);
+    get ActualTransition(){
+        return this.actualTransition;
     }
 
     ConvertFromScreen(point: {x:number, y:number}){
@@ -64,7 +69,7 @@ export class Camera{
     PrepareAxis(){
         let view = this._view;
         let context = view.Canvas;
-
+        
         context.translate(view.Width/2, view.Height/2);
         context.scale(view.PIXELS_METER, - view.PIXELS_METER);
 

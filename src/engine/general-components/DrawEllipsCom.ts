@@ -13,7 +13,6 @@ export class DrawEllipsCom extends Component{
     }
 
     OnUpdate(): void {
-        let camera = this.node.Camera;
         let e = this.map();
         let context = this.node.Scene?.Canvas;
         if(!context)

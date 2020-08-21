@@ -13,7 +13,7 @@ export class RedrawOnChange extends Component{
 
     OnUpdate(): void {
         let state = this.map();
-        if(state.IsCaptured || (state.IsIn && state.KeyState.key != 'wheel'))
+        if(state.IsCaptured || (state.IsIn && state.KeyState.key == 'wheel'))
             this.view.Redraw();
     }
 }

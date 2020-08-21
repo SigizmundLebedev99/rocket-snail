@@ -29,15 +29,15 @@ export function Main(){
     root
     .AddComponent(new DragDropCom(root, rootMouse))
     .AddComponent(new WheelScaleCom(root, rootMouse))
-    .AddComponent(new RedrawOnChange(back, rootMouse))
     .AddComponent(new DragDropCom(grid, rootMouse))
     .AddComponent(new WheelScaleCom(grid, rootMouse))
-
+    .AddComponent(new RedrawOnChange(back, rootMouse))
+    
     let pos = new Vector(-6,-6);
     let start = new Vector(-6,-6);
 
-    for(let i = 0; i < 400; i ++){
-        if(i%20 == 0){
+    for(let i = 0; i < 1000; i ++){
+        if(i%31 == 0){
             start = start.Add(new Vector(0,1));
             pos = new Vector(start.x, start.y);
         }

@@ -12,34 +12,7 @@ export class ViewPort{
         this.container = <HTMLDivElement>document.getElementById(viewportContainerId);
         this.Mouse = new MouseContext();
 
-        this.container.addEventListener("mousedown", (e) => {
-            this.Mouse.HandleState({
-                key:"down",
-                Position: new Point(e.x, e.y),
-                Which : e.which
-            })
-        });
-        this.container.addEventListener("mouseup", (e) => {
-            this.Mouse.HandleState(
-            {
-                key:"up",
-                Position: new Point(e.x, e.y)
-            });
-        });
-        this.container.addEventListener("wheel", (e) =>{
-            this.Mouse.HandleState({
-                key:"wheel",
-                Delta: e.deltaY,
-                Position: new Point(e.x, e.y)
-            })
-        });
-        this.container.addEventListener("mousemove", (e) => {
-            this.Mouse.HandleState({
-                key:"move",
-                Movement: new Vector(e.movementX, e.movementY),
-                Position: new Point(e.x, e.y)
-            })
-        });
+        this.Mouse.ListenEvents(this.container);
     }
 
     AddScene(){
