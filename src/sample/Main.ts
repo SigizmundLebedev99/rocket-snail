@@ -17,7 +17,7 @@ export function Main(){
     let viewport = new ViewPort("viewport");
     let back = viewport.AddScene();
     let grid = new Grid(back);
-
+    grid.Rotation = 0.25 * Math.PI;
     back.AddElement(grid);
 
     let front = viewport.AddScene();
@@ -33,7 +33,7 @@ export function Main(){
     let pos = new Vector(-6,-6);
     let start = new Vector(-6,-6);
 
-    for(let i = 0; i < 1000; i ++){
+    for(let i = 0; i < 1; i ++){
         if(i%31 == 0){
             start = start.Add(new Vector(0,1));
             pos = new Vector(start.x, start.y);

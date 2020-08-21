@@ -97,7 +97,7 @@
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
-exports.push([module.i, "body{\r\n    margin: 0;\r\n    height: 100vh;\r\n}", ""]);
+exports.push([module.i, "body{\r\n    margin: 0;\r\n    height: 100vh;\r\n}\r\n\r\n#viewport{\r\n    height: 100vh;\r\n    width: 100%;\r\n}", ""]);
 // Exports
 module.exports = exports;
 
@@ -581,8 +581,12 @@ const Vector_1 = __webpack_require__(/*! ../primitives/Vector */ "./src/engine/p
 const Point_1 = __webpack_require__(/*! ../primitives/Point */ "./src/engine/primitives/Point.ts");
 class Camera {
     constructor(node, view) {
+        this.actualTransition = new Vector_1.Vector(0, 0);
         this.Node = node;
         this._view = view;
+    }
+    get ActualTransition() {
+        return this.actualTransition;
     }
     ConvertFromScreen(point) {
         let view = this._view;
@@ -645,7 +649,11 @@ class Camera {
     ConvertScreenVector(movement) {
         let view = this._view;
         let node = this.Node;
-        let scale = node.TotalScale;
+        let scale;
+        if (node.BaseState)
+            scale = node.BaseState.TotalScale;
+        else
+            scale = node.TotalScale;
         movement = new Vector_1.Vector(movement.x / view.PIXELS_METER, -movement.y / view.PIXELS_METER);
         movement = new Vector_1.Vector(movement.x / scale.x, movement.y / scale.y);
         movement = movement.Rotate(-node.TotalRotation);
@@ -670,7 +678,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Component = void 0;
 class Component {
     constructor() {
+        this.priority = 1;
         this.Started = false;
+    }
+    get Priority() {
+        return this.priority;
+    }
+    set Priority(v) {
+        if (this.Priority == v)
+            return;
+        this.Priority = v;
+        if (this.PriorityChanged)
+            this.PriorityChanged();
     }
     OnStart() { }
 }
@@ -693,53 +712,107 @@ exports.MouseState = exports.MouseContext = void 0;
 const Vector_1 = __webpack_require__(/*! ../primitives/Vector */ "./src/engine/primitives/Vector.ts");
 const Point_1 = __webpack_require__(/*! ../primitives/Point */ "./src/engine/primitives/Point.ts");
 class Binding {
-    constructor(node, handle) {
+    constructor(node, handle, passEventDown) {
         this.isCaptured = false;
         this.isIn = false;
         this.node = node;
         this.handle = handle;
+        this.passEventDown = passEventDown;
+    }
+}
+class SceneBinding {
+    constructor() {
+        this.movement = new Vector_1.Vector(0, 0);
+        this.lastState = { key: "none" };
+        this.elements = [];
+    }
+    Reset() {
+        this.movement = new Vector_1.Vector(0, 0);
+        this.lastState = { key: "none" };
+    }
+    Resort() {
+        this.elements = [...this.elements].sort((a, b) => b.node.Priority - a.node.Priority);
     }
 }
 class MouseContext {
     constructor() {
-        this.captureStack = [];
+        this.scenesStack = [];
+        this.scenes = {};
         this.isIn = null;
         this.isCaptured = null;
         this.Position = new Point_1.Point(0, 0);
-        this.LastState = { key: 'none' };
-        this.Movement = new Vector_1.Vector(0, 0);
+    }
+    setState(ks) {
+        for (let s in this.scenes)
+            this.scenes[s].lastState = ks;
+    }
+    ListenEvents(htmlElement) {
+        htmlElement.addEventListener("mousedown", (e) => {
+            this.HandleState({
+                key: "down",
+                Position: new Point_1.Point(e.x, e.y),
+                Which: e.which
+            });
+        });
+        htmlElement.addEventListener("mouseup", (e) => {
+            this.HandleState({
+                key: "up",
+                Position: new Point_1.Point(e.x, e.y)
+            });
+        });
+        htmlElement.addEventListener("wheel", (e) => {
+            this.HandleState({
+                key: "wheel",
+                Delta: e.deltaY,
+                Position: new Point_1.Point(e.x, e.y)
+            });
+        });
+        htmlElement.addEventListener("mousemove", (e) => {
+            this.HandleState({
+                key: "move",
+                Movement: new Vector_1.Vector(e.movementX, e.movementY),
+                Position: new Point_1.Point(e.x, e.y)
+            });
+        });
     }
     HandleState(state) {
         this.Position = state.Position;
-        for (let b in this.captureStack) {
-            let binding = this.captureStack[b];
-            let primitive = binding.handle();
-            let point = binding.node.Position == 'absolute' ? state.Position : binding.node.Camera.ConvertFromScreen(state.Position);
-            if (primitive.IsPointIn(point)) {
-                binding.isIn = true;
-                if (this.isIn != null) {
-                    this.isIn.isIn = false;
-                    this.isIn = null;
+        for (let s in this.scenesStack) {
+            let scene = this.scenesStack[s];
+            let next = true;
+            for (let b in scene.elements) {
+                let binding = scene.elements[b];
+                let primitive = binding.handle();
+                let point = binding.node.Position == 'absolute' ? state.Position : binding.node.Camera.ConvertFromScreen(state.Position);
+                if (primitive.IsPointIn(point)) {
+                    if (this.isIn != null)
+                        this.isIn.isIn = false;
+                    this.isIn = binding;
+                    this.isIn.isIn = true;
+                    if (!binding.passEventDown) {
+                        next = false;
+                        break;
+                    }
                 }
-                this.isIn = binding;
-                this.isIn.isIn = true;
-                break;
             }
+            if (!next)
+                break;
         }
         switch (state.key) {
             case 'move': {
-                this.Movement = state.Movement;
+                for (let s in this.scenes)
+                    this.scenes[s].movement = state.Movement;
                 break;
             }
             case 'down': {
-                this.LastState = state;
+                this.setState(state);
                 this.isCaptured = this.isIn;
                 if (this.isIn != null)
                     this.isIn.isCaptured = true;
                 break;
             }
             case 'up': {
-                this.LastState = state;
+                this.setState(state);
                 if (this.isCaptured) {
                     this.isCaptured.isCaptured = false;
                     this.isCaptured = null;
@@ -747,23 +820,28 @@ class MouseContext {
                 break;
             }
             case 'wheel': {
-                this.LastState = state;
+                this.setState(state);
             }
         }
     }
-    Resort() {
-        this.captureStack = [...this.captureStack].sort((a, b) => b.node.Priority - a.node.Priority);
+    Resort(sceneId) {
+        this.scenes[sceneId].Resort();
     }
-    Reset() {
-        this.LastState = { key: "none" };
-        this.Movement = new Vector_1.Vector(0, 0);
-    }
-    CaptureMouse(node, handle) {
-        let bind = new Binding(node, handle);
-        this.captureStack.push(bind);
-        this.Resort();
+    CaptureMouse(node, handle, passEventDown = false) {
+        var scene = this.scenes[node.Scene.Priority];
+        let bind = new Binding(node, handle, passEventDown);
+        scene.elements.push(bind);
+        scene.Resort();
         return () => {
-            return new MouseState(this.LastState, this.Position, this.Movement, bind.isCaptured, bind.isIn);
+            return new MouseState(scene.lastState, this.Position, scene.movement, bind.isCaptured, bind.isIn);
+        };
+    }
+    HandleMouseByScene(id) {
+        let scene = new SceneBinding();
+        this.scenes[id] = scene;
+        this.scenesStack.unshift(scene);
+        return () => {
+            scene.Reset();
         };
     }
 }
@@ -795,62 +873,64 @@ exports.MouseState = MouseState;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Scene = void 0;
-const Point_1 = __webpack_require__(/*! ../primitives/Point */ "./src/engine/primitives/Point.ts");
-const Vector_1 = __webpack_require__(/*! ../primitives/Vector */ "./src/engine/primitives/Vector.ts");
 const SceneContext_1 = __webpack_require__(/*! ./SceneContext */ "./src/engine/core/SceneContext.ts");
+const MouseContext_1 = __webpack_require__(/*! ./MouseContext */ "./src/engine/core/MouseContext.ts");
 class Scene {
-    constructor(context) {
+    constructor(context, mouseContext, id) {
+        this.sceneId = 0;
+        this.ElementsOnScene = [];
+        this.ShouldResort = false;
         this.Canvas = context;
-        this.Context = new SceneContext_1.SceneContext(this);
-        context.canvas.addEventListener("mousedown", (e) => {
-            this.Context.Mouse.HandleState({
-                key: "down",
-                Position: new Point_1.Point(e.x, e.y),
-                Which: e.which
-            });
-        });
-        context.canvas.addEventListener("mouseup", (e) => {
-            this.Context.Mouse.HandleState({
-                key: "up",
-                Position: new Point_1.Point(e.x, e.y)
-            });
-        });
-        context.canvas.addEventListener("wheel", (e) => {
-            this.Context.Mouse.HandleState({
-                key: "wheel",
-                Delta: e.deltaY,
-                Position: new Point_1.Point(e.x, e.y)
-            });
-        });
-        context.canvas.addEventListener("mousemove", (e) => {
-            this.Context.Mouse.HandleState({
-                key: "move",
-                Movement: new Vector_1.Vector(e.movementX, e.movementY),
-                Position: new Point_1.Point(e.x, e.y)
-            });
-        });
+        if (id)
+            this.sceneId = id;
+        if (mouseContext) {
+            this._mouseContext = mouseContext;
+            this.Context = new SceneContext_1.SceneContext(this, mouseContext);
+            this.setMouseHandled = mouseContext.HandleMouseByScene(this.sceneId);
+            return;
+        }
+        this._mouseContext = new MouseContext_1.MouseContext();
+        this._mouseContext.ListenEvents(context.canvas);
+        this.setMouseHandled = this._mouseContext.HandleMouseByScene(this.sceneId);
+        this.Context = new SceneContext_1.SceneContext(this, this._mouseContext);
+    }
+    get Priority() {
+        return this.sceneId;
     }
     Clear() {
         this.Canvas.clearRect(0, 0, this.Canvas.canvas.width, this.Canvas.canvas.height);
     }
+    Redraw() {
+        if (this.ShouldResort) {
+            this._mouseContext.Resort(this.sceneId);
+            this.Resort();
+            this.ShouldResort = false;
+        }
+        this.Clear();
+        this.ElementsOnScene.forEach(node => {
+            if (!node.IsActive)
+                return;
+            this.Canvas.save();
+            node.Style.Apply(this.Canvas);
+            if (node.Position == 'relative')
+                node.Camera.PrepareAxis();
+            node.OnUpdate();
+            this.Canvas.restore();
+        });
+        this.setMouseHandled();
+    }
     Run() {
         this.intervalId = setInterval(() => {
-            this.Clear();
-            this.Context.ElementsOnScene.forEach(node => {
-                if (!node.IsActive)
-                    return;
-                this.Canvas.save();
-                node.Style.Apply(this.Canvas);
-                if (node.Position == 'relative')
-                    node.Camera.PrepareAxis();
-                node.OnUpdate();
-                this.Canvas.restore();
-            });
-            this.Context.Mouse.Reset();
+            this.Redraw();
         }, 8);
     }
     Stop() {
         clearInterval(this.intervalId);
+    }
+    Resort() {
+        let elements = [...this.ElementsOnScene];
+        elements.sort((a, b) => a.Priority - b.Priority);
+        this.ElementsOnScene = elements;
     }
 }
 exports.Scene = Scene;
@@ -870,17 +950,21 @@ exports.Scene = Scene;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SceneContext = void 0;
 const Point_1 = __webpack_require__(/*! ../primitives/Point */ "./src/engine/primitives/Point.ts");
-const MouseContext_1 = __webpack_require__(/*! ./MouseContext */ "./src/engine/core/MouseContext.ts");
+const SceneElement_1 = __webpack_require__(/*! ./SceneElement */ "./src/engine/core/SceneElement.ts");
 class SceneContext {
-    constructor(scene) {
-        this.elementsOnScene = [];
+    constructor(scene, mouseContext) {
         this.PIXELS_METER = 45;
         this._scene = scene;
         this.Canvas = scene.Canvas;
-        this.Mouse = new MouseContext_1.MouseContext();
+        this._mouse = mouseContext;
+        let root = new SceneElement_1.SceneElement(this);
+        root.Position = 'absolute';
+        root.Priority = -10000;
+        this.AddElement(root);
+        this._root = root;
     }
     get ElementsOnScene() {
-        return [...this.elementsOnScene];
+        return [...this._scene.ElementsOnScene];
     }
     get Width() {
         return this.Canvas.canvas.width;
@@ -900,14 +984,14 @@ class SceneContext {
     get RightBottom() {
         return new Point_1.Point(this.Width, this.Height);
     }
-    PriorityChanged() {
-        this.Mouse.Resort();
-        this.Resort();
+    get Priority() {
+        return this._scene.Priority;
     }
-    Resort() {
-        let elements = this.ElementsOnScene;
-        elements.sort((a, b) => a.Priority - b.Priority);
-        this.elementsOnScene = elements;
+    get Root() {
+        return this._root;
+    }
+    PriorityChanged() {
+        this._scene.ShouldResort = true;
     }
     AddElement(element) {
         let elementsToAdd = [element];
@@ -918,7 +1002,7 @@ class SceneContext {
             i++;
         } while (i <= elementsToAdd.length - 1);
         elementsToAdd.forEach(e => {
-            this.elementsOnScene.push(e);
+            this._scene.ElementsOnScene.push(e);
             e.IsOnScene = true;
         });
     }
@@ -930,10 +1014,16 @@ class SceneContext {
             current.Children.forEach(e => elementsToRemove.push(e));
             i++;
         } while (i <= elementsToRemove.length - 1);
-        this.elementsOnScene =
-            this.elementsOnScene
+        this._scene.ElementsOnScene =
+            this._scene.ElementsOnScene
                 .filter(e => !(elementsToRemove.some(remove => remove == e)));
         elementsToRemove.forEach(e => e.IsOnScene = false);
+    }
+    CaptureMouse(node, map) {
+        return this._mouse.CaptureMouse(node, map);
+    }
+    Redraw() {
+        this._scene.Redraw();
     }
     Run() {
         this._scene.Run();
@@ -996,6 +1086,8 @@ class SceneElement extends BaseState_1.BaseState {
         return this.priority;
     }
     set Priority(v) {
+        if (v == this.priority)
+            return;
         this.priority = v;
         this.Scene.PriorityChanged();
     }
@@ -1030,11 +1122,16 @@ class SceneElement extends BaseState_1.BaseState {
             this._view.RemoveElement(element);
     }
     AddComponent(component) {
+        component.PriorityChanged = this.ResortComponents;
         this.components.push(component);
+        this.ResortComponents();
         return this;
     }
+    ResortComponents() {
+        this.components = this.Components.sort((a, b) => b.Priority - a.Priority);
+    }
     OnUpdate() {
-        this.Components.forEach(c => {
+        this.components.forEach(c => {
             if (!c.Started) {
                 c.OnStart();
                 c.Started = true;
@@ -1077,6 +1174,45 @@ class Style {
     }
 }
 exports.Style = Style;
+
+
+/***/ }),
+
+/***/ "./src/engine/core/ViewPort.ts":
+/*!*************************************!*\
+  !*** ./src/engine/core/ViewPort.ts ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ViewPort = void 0;
+const Scene_1 = __webpack_require__(/*! ./Scene */ "./src/engine/core/Scene.ts");
+const MouseContext_1 = __webpack_require__(/*! ./MouseContext */ "./src/engine/core/MouseContext.ts");
+class ViewPort {
+    constructor(viewportContainerId) {
+        this.scenes = [];
+        this.container = document.getElementById(viewportContainerId);
+        this.Mouse = new MouseContext_1.MouseContext();
+        this.Mouse.ListenEvents(this.container);
+    }
+    AddScene() {
+        let canvas = document.createElement('canvas');
+        canvas.width = this.container.clientWidth;
+        canvas.height = this.container.clientHeight;
+        canvas.style.position = 'absolute';
+        this.container.appendChild(canvas);
+        let context = canvas.getContext('2d');
+        if (context == null)
+            throw "Your brouser doesn't support canvas";
+        let scene = new Scene_1.Scene(context, this.Mouse, this.scenes.length);
+        this.scenes.push(scene);
+        return scene.Context;
+    }
+}
+exports.ViewPort = ViewPort;
 
 
 /***/ }),
@@ -1146,7 +1282,6 @@ class DrawEllipsCom extends Component_1.Component {
     }
     OnUpdate() {
         var _a;
-        let camera = this.node.Camera;
         let e = this.map();
         let context = (_a = this.node.Scene) === null || _a === void 0 ? void 0 : _a.Canvas;
         if (!context)
@@ -1728,16 +1863,16 @@ Fns.EPSILON = 1E-9;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(/*! ./css/style.css */ "./src/css/style.css");
-const Main_1 = __webpack_require__(/*! ./logic/Main */ "./src/logic/Main.ts");
+const Main_1 = __webpack_require__(/*! ./sample/Main */ "./src/sample/Main.ts");
 Main_1.Main();
 
 
 /***/ }),
 
-/***/ "./src/logic/Main.ts":
-/*!***************************!*\
-  !*** ./src/logic/Main.ts ***!
-  \***************************/
+/***/ "./src/sample/Main.ts":
+/*!****************************!*\
+  !*** ./src/sample/Main.ts ***!
+  \****************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1745,62 +1880,76 @@ Main_1.Main();
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Main = void 0;
-const Grid_1 = __webpack_require__(/*! ./grid/Grid */ "./src/logic/grid/Grid.ts");
-const Scene_1 = __webpack_require__(/*! ../engine/core/Scene */ "./src/engine/core/Scene.ts");
-const Planet_1 = __webpack_require__(/*! ./nodes/Planet */ "./src/logic/nodes/Planet.ts");
+const Grid_1 = __webpack_require__(/*! ./grid/Grid */ "./src/sample/grid/Grid.ts");
+const Planet_1 = __webpack_require__(/*! ./nodes/Planet */ "./src/sample/nodes/Planet.ts");
 const Vector_1 = __webpack_require__(/*! ../engine/primitives/Vector */ "./src/engine/primitives/Vector.ts");
-const PerspectiveCom_1 = __webpack_require__(/*! ./components/PerspectiveCom */ "./src/logic/components/PerspectiveCom.ts");
-const SatelliteCom_1 = __webpack_require__(/*! ./components/SatelliteCom */ "./src/logic/components/SatelliteCom.ts");
+const PerspectiveCom_1 = __webpack_require__(/*! ./components/PerspectiveCom */ "./src/sample/components/PerspectiveCom.ts");
+const SatelliteCom_1 = __webpack_require__(/*! ./components/SatelliteCom */ "./src/sample/components/SatelliteCom.ts");
 const SceneElement_1 = __webpack_require__(/*! ../engine/core/SceneElement */ "./src/engine/core/SceneElement.ts");
-const TransitionCom_1 = __webpack_require__(/*! ./components/TransitionCom */ "./src/logic/components/TransitionCom.ts");
+const TransitionCom_1 = __webpack_require__(/*! ./components/TransitionCom */ "./src/sample/components/TransitionCom.ts");
 const DragDropCom_1 = __webpack_require__(/*! ../engine/general-components/DragDropCom */ "./src/engine/general-components/DragDropCom.ts");
 const Ellips_1 = __webpack_require__(/*! ../engine/primitives/Ellips */ "./src/engine/primitives/Ellips.ts");
 const DrawEllipsCom_1 = __webpack_require__(/*! ../engine/general-components/DrawEllipsCom */ "./src/engine/general-components/DrawEllipsCom.ts");
 const Rectangle_1 = __webpack_require__(/*! ../engine/primitives/Rectangle */ "./src/engine/primitives/Rectangle.ts");
 const WheelScaleCom_1 = __webpack_require__(/*! ../engine/general-components/WheelScaleCom */ "./src/engine/general-components/WheelScaleCom.ts");
+const ViewPort_1 = __webpack_require__(/*! ../engine/core/ViewPort */ "./src/engine/core/ViewPort.ts");
+const RedrawOnChangeCom_1 = __webpack_require__(/*! ./components/RedrawOnChangeCom */ "./src/sample/components/RedrawOnChangeCom.ts");
 function Main() {
-    let canvas = document.getElementById('canvas');
-    canvas.width = document.body.clientWidth;
-    canvas.height = document.body.clientHeight;
-    let view = new Scene_1.Scene(canvas.getContext('2d')).Context;
-    let grid = new Grid_1.Grid(view);
-    let gridMouse = view.Mouse.CaptureMouse(grid, () => new Rectangle_1.Rectangle(0, 0, view.Width, view.Height));
-    let sun = new SceneElement_1.SceneElement(view);
-    sun.Style.pointRadius = 1.5;
-    sun.Style.lineWidth = 0.01;
-    sun.Style.fillStyle = 'yellow';
-    sun.Style.strokeStyle = 'yellow';
-    let sunMouse = view.Mouse.CaptureMouse(sun, () => new Ellips_1.Ellips(0, 0, 1.5, 1.5));
-    let earth = new Planet_1.Planet(view, "Earth", new Vector_1.Vector(8, 2), 'blue');
-    let moon = new Planet_1.Planet(view, "Moon", new Vector_1.Vector(2, 0.5), 'gray');
-    moon.Style.pointRadius = 0.3;
-    grid
-        .AddComponent(new DragDropCom_1.DragDropCom(grid, gridMouse))
-        .AddComponent(new WheelScaleCom_1.WheelScaleCom(grid, gridMouse))
-        .AddChild(sun
-        .AddComponent(new DrawEllipsCom_1.DrawEllipsCom(sun, () => new Ellips_1.Ellips(0, 0, 1.5, 1.5)))
-        .AddComponent(new DragDropCom_1.DragDropCom(sun, sunMouse))
-        .AddComponent(new WheelScaleCom_1.WheelScaleCom(grid, sunMouse))
-        .AddComponent(new SatelliteCom_1.SatelliteCom(sun))
-        .AddChild(earth
-        .AddComponent(new TransitionCom_1.TransitionCom(earth))
-        .AddComponent(new SatelliteCom_1.SatelliteCom(earth))
-        .AddComponent(new PerspectiveCom_1.PerspectiveCom(earth, 6))
-        .AddChild(moon
-        .AddComponent(new TransitionCom_1.TransitionCom(moon, -0.003))
-        .AddComponent(new SatelliteCom_1.SatelliteCom(moon)))));
-    view.AddElement(grid);
-    view.Run();
+    let viewport = new ViewPort_1.ViewPort("viewport");
+    let back = viewport.AddScene();
+    let grid = new Grid_1.Grid(back);
+    back.AddElement(grid);
+    let front = viewport.AddScene();
+    let rootMouse = front.CaptureMouse(front.Root, () => new Rectangle_1.Rectangle(0, 0, front.Width, front.Height));
+    front.Root
+        .AddComponent(new DragDropCom_1.DragDropCom(front.Root, rootMouse))
+        .AddComponent(new WheelScaleCom_1.WheelScaleCom(front.Root, rootMouse))
+        .AddComponent(new DragDropCom_1.DragDropCom(grid, rootMouse))
+        .AddComponent(new WheelScaleCom_1.WheelScaleCom(grid, rootMouse))
+        .AddComponent(new RedrawOnChangeCom_1.RedrawOnChange(back, rootMouse));
+    let pos = new Vector_1.Vector(-6, -6);
+    let start = new Vector_1.Vector(-6, -6);
+    for (let i = 0; i < 1000; i++) {
+        if (i % 31 == 0) {
+            start = start.Add(new Vector_1.Vector(0, 1));
+            pos = new Vector_1.Vector(start.x, start.y);
+        }
+        pos = pos.Add(new Vector_1.Vector(1, 0));
+        let sun = new SceneElement_1.SceneElement(front);
+        sun.Style.pointRadius = 1.5;
+        sun.Style.lineWidth = 0.05;
+        sun.Style.fillStyle = 'yellow';
+        sun.Style.strokeStyle = 'orange';
+        let sunMouse = front.CaptureMouse(sun, () => new Ellips_1.Ellips(0, 0, 1.5, 1.5));
+        sun.Scale = new Vector_1.Vector(0.2, 0.2);
+        sun.Transition = pos;
+        let earth = new Planet_1.Planet(front, "Earth", new Vector_1.Vector(5, 1.5), 'blue');
+        let moon = new Planet_1.Planet(front, "Moon", new Vector_1.Vector(2, 0.5), 'gray');
+        moon.Style.pointRadius = 0.3;
+        front.Root.AddChild(sun
+            .AddComponent(new DrawEllipsCom_1.DrawEllipsCom(sun, () => new Ellips_1.Ellips(0, 0, 1.5, 1.5)))
+            .AddComponent(new DragDropCom_1.DragDropCom(sun, sunMouse))
+            .AddComponent(new SatelliteCom_1.SatelliteCom(sun))
+            .AddChild(earth
+            .AddComponent(new TransitionCom_1.TransitionCom(earth))
+            .AddComponent(new SatelliteCom_1.SatelliteCom(earth))
+            .AddComponent(new PerspectiveCom_1.PerspectiveCom(earth, 6))
+            .AddChild(moon
+            .AddComponent(new TransitionCom_1.TransitionCom(moon, -0.003))
+            .AddComponent(new SatelliteCom_1.SatelliteCom(moon)))));
+    }
+    back.Redraw();
+    front.Run();
 }
 exports.Main = Main;
 
 
 /***/ }),
 
-/***/ "./src/logic/components/PerspectiveCom.ts":
-/*!************************************************!*\
-  !*** ./src/logic/components/PerspectiveCom.ts ***!
-  \************************************************/
+/***/ "./src/sample/components/PerspectiveCom.ts":
+/*!*************************************************!*\
+  !*** ./src/sample/components/PerspectiveCom.ts ***!
+  \*************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1838,10 +1987,39 @@ exports.PerspectiveCom = PerspectiveCom;
 
 /***/ }),
 
-/***/ "./src/logic/components/SatelliteCom.ts":
-/*!**********************************************!*\
-  !*** ./src/logic/components/SatelliteCom.ts ***!
-  \**********************************************/
+/***/ "./src/sample/components/RedrawOnChangeCom.ts":
+/*!****************************************************!*\
+  !*** ./src/sample/components/RedrawOnChangeCom.ts ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RedrawOnChange = void 0;
+const Component_1 = __webpack_require__(/*! ../../engine/core/Component */ "./src/engine/core/Component.ts");
+class RedrawOnChange extends Component_1.Component {
+    constructor(viewToRedraw, map) {
+        super();
+        this.view = viewToRedraw;
+        this.map = map;
+    }
+    OnUpdate() {
+        let state = this.map();
+        if (state.IsCaptured || (state.IsIn && state.KeyState.key == 'wheel'))
+            this.view.Redraw();
+    }
+}
+exports.RedrawOnChange = RedrawOnChange;
+
+
+/***/ }),
+
+/***/ "./src/sample/components/SatelliteCom.ts":
+/*!***********************************************!*\
+  !*** ./src/sample/components/SatelliteCom.ts ***!
+  \***********************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1864,10 +2042,10 @@ exports.SatelliteCom = SatelliteCom;
 
 /***/ }),
 
-/***/ "./src/logic/components/TransitionCom.ts":
-/*!***********************************************!*\
-  !*** ./src/logic/components/TransitionCom.ts ***!
-  \***********************************************/
+/***/ "./src/sample/components/TransitionCom.ts":
+/*!************************************************!*\
+  !*** ./src/sample/components/TransitionCom.ts ***!
+  \************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1897,10 +2075,10 @@ exports.TransitionCom = TransitionCom;
 
 /***/ }),
 
-/***/ "./src/logic/grid/Grid.ts":
-/*!********************************!*\
-  !*** ./src/logic/grid/Grid.ts ***!
-  \********************************/
+/***/ "./src/sample/grid/Grid.ts":
+/*!*********************************!*\
+  !*** ./src/sample/grid/Grid.ts ***!
+  \*********************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1912,8 +2090,8 @@ const SceneElement_1 = __webpack_require__(/*! ../../engine/core/SceneElement */
 const Point_1 = __webpack_require__(/*! ../../engine/primitives/Point */ "./src/engine/primitives/Point.ts");
 const Straight_Line_1 = __webpack_require__(/*! ../../engine/primitives/Straight-Line */ "./src/engine/primitives/Straight-Line.ts");
 const DrawLineCom_1 = __webpack_require__(/*! ../../engine/general-components/DrawLineCom */ "./src/engine/general-components/DrawLineCom.ts");
-const XAxis_1 = __webpack_require__(/*! ./XAxis */ "./src/logic/grid/XAxis.ts");
-const YAxis_1 = __webpack_require__(/*! ./YAxis */ "./src/logic/grid/YAxis.ts");
+const XAxis_1 = __webpack_require__(/*! ./XAxis */ "./src/sample/grid/XAxis.ts");
+const YAxis_1 = __webpack_require__(/*! ./YAxis */ "./src/sample/grid/YAxis.ts");
 class Grid extends SceneElement_1.SceneElement {
     constructor(view) {
         super(view);
@@ -1935,10 +2113,10 @@ exports.Grid = Grid;
 
 /***/ }),
 
-/***/ "./src/logic/grid/XAxis.ts":
-/*!*********************************!*\
-  !*** ./src/logic/grid/XAxis.ts ***!
-  \*********************************/
+/***/ "./src/sample/grid/XAxis.ts":
+/*!**********************************!*\
+  !*** ./src/sample/grid/XAxis.ts ***!
+  \**********************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1969,10 +2147,10 @@ exports.XAxis = XAxis;
 
 /***/ }),
 
-/***/ "./src/logic/grid/YAxis.ts":
-/*!*********************************!*\
-  !*** ./src/logic/grid/YAxis.ts ***!
-  \*********************************/
+/***/ "./src/sample/grid/YAxis.ts":
+/*!**********************************!*\
+  !*** ./src/sample/grid/YAxis.ts ***!
+  \**********************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1999,10 +2177,10 @@ exports.YAxis = YAxis;
 
 /***/ }),
 
-/***/ "./src/logic/nodes/Planet.ts":
-/*!***********************************!*\
-  !*** ./src/logic/nodes/Planet.ts ***!
-  \***********************************/
+/***/ "./src/sample/nodes/Planet.ts":
+/*!************************************!*\
+  !*** ./src/sample/nodes/Planet.ts ***!
+  \************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
