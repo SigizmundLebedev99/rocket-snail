@@ -47,6 +47,7 @@ export class SceneContext{
     get Root(){
         return this._root;
     }
+
     constructor(scene : Scene, mouseContext: MouseContext){
         this._scene = scene;
         this.Canvas = scene.Canvas;
@@ -63,34 +64,14 @@ export class SceneContext{
     }
 
     AddElement(element: SceneElement){
-        let elementsToAdd = [element];
-        let i = 0;
-        do{
-            let current = elementsToAdd[i];
-            current.Children.forEach(e=>elementsToAdd.push(e));
-            i++;
-        }while(i <= elementsToAdd.length - 1);
-
-        elementsToAdd.forEach(e=>{
-            this._scene.ElementsOnScene.push(e);
-            e.IsOnScene = true;
-        })
+        this._scene.ElementsOnScene.push(element);       
     }
 
     RemoveElement(element: SceneElement){
-        let elementsToRemove = [element];
-        let i = 0;
-        do{
-            let current = elementsToRemove[i];
-            current.Children.forEach(e=>elementsToRemove.push(e));
-            i++;
-        }while(i <= elementsToRemove.length - 1);
 
         this._scene.ElementsOnScene = 
             this._scene.ElementsOnScene
-            .filter(e=>!(elementsToRemove.some(remove=>remove == e)));
-
-        elementsToRemove.forEach(e=>e.IsOnScene = false);
+            .filter(e=> e != element);
     }
 
     CaptureMouse(node: SceneElement, map:()=>IPointIn){
