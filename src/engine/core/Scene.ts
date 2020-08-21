@@ -2,6 +2,7 @@ import { SceneContext } from "./SceneContext";
 import { MouseContext } from "./MouseContext";
 import { Point } from "../primitives/Point";
 import { Vector } from "../primitives/Vector";
+import { SceneElement } from "./SceneElement";
 
 export class Scene{
     private intervalId;
@@ -11,10 +12,14 @@ export class Scene{
         return this.sceneId;
     }
 
+    ElementsOnScene : SceneElement[] = [];
     readonly Canvas : CanvasRenderingContext2D;
     readonly Context : SceneContext;
 
     private setMouseHandled : () => void;
+    private _mouseContext : MouseContext;
+
+    ShouldResort : boolean = false;
 
     constructor(context : CanvasRenderingContext2D, mouseContext?:MouseContext, id? : number){
         this.Canvas = context;
@@ -22,6 +27,7 @@ export class Scene{
             this.sceneId = id;
 
         if(mouseContext){
+            this._mouseContext = mouseContext;
             this.Context = new SceneContext(this, mouseContext);
             this.setMouseHandled = mouseContext.HandleMouseByScene(this.sceneId);
             return;
@@ -60,7 +66,7 @@ export class Scene{
                 Position: new Point(e.x, e.y)
             })
         });
-        
+        this._mouseContext = _mouseContext;
         this.setMouseHandled = _mouseContext.HandleMouseByScene(this.sceneId);
         this.Context = new SceneContext(this, _mouseContext);
     }
@@ -70,6 +76,11 @@ export class Scene{
     }
 
     Redraw(){
+        if(this.ShouldResort){
+            this._mouseContext.Resort();
+            this.Resort();
+            this.ShouldResort = false;
+        }
         this.Clear();
         this.Context.ElementsOnScene.forEach(node => {
             if(!node.IsActive)
@@ -96,5 +107,11 @@ export class Scene{
 
     Stop(){
         clearInterval(this.intervalId);
+    }
+
+    private Resort(){
+        let elements = [...this.ElementsOnScene];
+        elements.sort((a,b) => a.Priority - b.Priority);
+        this.ElementsOnScene = elements;
     }
 }

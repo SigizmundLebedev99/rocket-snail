@@ -9,11 +9,9 @@ export class SceneContext{
 
     private _mouse : MouseContext;
     private _scene : Scene;
-    
-    private elementsOnScene : SceneElement[] = [];
 
     get ElementsOnScene(){
-        return [...this.elementsOnScene];
+        return [...this._scene.ElementsOnScene];
     }
 
     get Width(){
@@ -53,14 +51,7 @@ export class SceneContext{
     }
 
     PriorityChanged(){
-        this._mouse.Resort();
-        this.Resort();
-    }
-
-    private Resort(){
-        let elements = this.ElementsOnScene
-        elements.sort((a,b) => a.Priority - b.Priority);
-        this.elementsOnScene = elements;
+        this._scene.ShouldResort = true;
     }
 
     AddElement(element: SceneElement){
@@ -73,7 +64,7 @@ export class SceneContext{
         }while(i <= elementsToAdd.length - 1);
 
         elementsToAdd.forEach(e=>{
-            this.elementsOnScene.push(e);
+            this._scene.ElementsOnScene.push(e);
             e.IsOnScene = true;
         })
     }
@@ -87,8 +78,8 @@ export class SceneContext{
             i++;
         }while(i <= elementsToRemove.length - 1);
 
-        this.elementsOnScene = 
-            this.elementsOnScene
+        this._scene.ElementsOnScene = 
+            this._scene.ElementsOnScene
             .filter(e=>!(elementsToRemove.some(remove=>remove == e)));
 
         elementsToRemove.forEach(e=>e.IsOnScene = false);

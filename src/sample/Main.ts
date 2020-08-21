@@ -36,8 +36,8 @@ export function Main(){
     let pos = new Vector(-6,-6);
     let start = new Vector(-6,-6);
 
-    for(let i = 0; i < 169; i ++){
-        if(i%13 == 0){
+    for(let i = 0; i < 400; i ++){
+        if(i%20 == 0){
             start = start.Add(new Vector(0,1));
             pos = new Vector(start.x, start.y);
         }

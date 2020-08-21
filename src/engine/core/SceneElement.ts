@@ -42,6 +42,8 @@ export class SceneElement extends BaseState {
         return this.priority;
     }
     set Priority(v : number){
+        if(v == this.priority)
+            return;
         this.priority = v;
         this.Scene.PriorityChanged();
     }
