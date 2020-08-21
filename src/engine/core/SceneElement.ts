@@ -98,12 +98,18 @@ export class SceneElement extends BaseState {
     }
 
     AddComponent(component : Component){
+        component.PriorityChanged = this.ResortComponents;
         this.components.push(component);
+        this.ResortComponents();
         return this;
     }
 
+    private ResortComponents(){
+        this.components = this.Components.sort((a,b) => b.Priority - a.Priority);
+    }
+
     OnUpdate(){
-        this.Components.forEach(c=>{
+        this.components.forEach(c=>{
             if(!c.Started){
                 c.OnStart();
                 c.Started = true;

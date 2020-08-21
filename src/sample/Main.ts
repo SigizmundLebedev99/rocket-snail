@@ -21,14 +21,11 @@ export function Main(){
     back.AddElement(grid);
 
     let front = viewport.AddScene();
-    let root = new SceneElement(front);
-    root.Position = 'absolute';
-    root.Priority = -1000;
-    let rootMouse = front.CaptureMouse(root, ()=>new Rectangle(0,0, front.Width, front.Height));    
+    let rootMouse = front.CaptureMouse(front.Root, ()=>new Rectangle(0,0, front.Width, front.Height));    
 
-    root
-    .AddComponent(new DragDropCom(root, rootMouse))
-    .AddComponent(new WheelScaleCom(root, rootMouse))
+    front.Root
+    .AddComponent(new DragDropCom(front.Root, rootMouse))
+    .AddComponent(new WheelScaleCom(front.Root, rootMouse))
     .AddComponent(new DragDropCom(grid, rootMouse))
     .AddComponent(new WheelScaleCom(grid, rootMouse))
     .AddComponent(new RedrawOnChange(back, rootMouse))
@@ -57,10 +54,9 @@ export function Main(){
         let moon = new Planet(front, "Moon", new Vector(2,0.5), 'gray')
         moon.Style.pointRadius = 0.3;
 
-        root.AddChild(sun
+        front.Root.AddChild(sun
             .AddComponent(new DrawEllipsCom(sun, ()=>new Ellips(0,0, 1.5, 1.5)))
             .AddComponent(new DragDropCom(sun, sunMouse))
-            .AddComponent(new WheelScaleCom(grid, sunMouse))
             .AddComponent(new SatelliteCom(sun))
             .AddChild(earth
                 .AddComponent(new TransitionCom(earth))
@@ -71,6 +67,5 @@ export function Main(){
                     .AddComponent(new SatelliteCom(moon)))));
     }
     back.Redraw();
-    front.AddElement(root);
     front.Run();
 }

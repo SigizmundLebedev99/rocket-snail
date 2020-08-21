@@ -48,7 +48,7 @@ export class Scene{
             this.ShouldResort = false;
         }
         this.Clear();
-        this.Context.ElementsOnScene.forEach(node => {
+        this.ElementsOnScene.forEach(node => {
             if(!node.IsActive)
                 return;
 
