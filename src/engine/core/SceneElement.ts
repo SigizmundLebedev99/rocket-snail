@@ -10,30 +10,15 @@ export class SceneElement extends BaseState {
 
     private _view : SceneContext;
 
-    private isOnScene : boolean = false;
-
     get Scene(){
         return this._view;
     }
 
-    get IsOnScene(){
-        return this.isOnScene
+    private isActive : boolean = true;
+    get IsActive(){
+        return this.isActive;
     }
 
-    set IsOnScene(val: boolean){
-        if(this._view.ElementsOnScene.some(e=>e == this)){
-            if(!val)
-                throw "You can't set <IsOnScene> property to false, when element is on scene";
-            this.isOnScene = true;
-        }
-        else{
-            if(val)
-                throw "You can't set <IsOnScene> property to true, when element isn't on scene";
-            this.isOnScene = false;
-        }
-    }
-
-    IsActive : boolean = true;
     Position : NodePosition = "relative";
 
     private priority : number = 1;
@@ -68,33 +53,44 @@ export class SceneElement extends BaseState {
     constructor(view: SceneContext){
         super();
         this._view = view;
+        view.AddElement(this);
     }
 
     get Camera(){
         return new Camera(this,this.Scene);
     }
 
+    private setActive(val: boolean){
+        this.isActive = val;
+        this.children.forEach(e=>e.setActive(val));
+    }
+
+    ActivateTree(){
+        this.setActive(true);
+    }
+
+    DeactivateTree(){
+        this.setActive(false);
+    }
+
     AddChild(element: SceneElement){
         if(element.Parent != null)
-            element.Parent.RemoveChild(element, false);
+            element.Parent.RemoveChild(element);
 
         element.BaseState = this;
         element.Style.Copy(this.Style);
         element.parent = this;
-
-        if(this.isOnScene && !element.isOnScene)
-            this._view.AddElement(element);
         this.children.push(element);
         return this;
     }
 
-    RemoveChild(element: SceneElement, removeFromScene? : boolean){
-        if(!this.children.some(e=>e==element))
+    RemoveChild(element: SceneElement){
+        if(element.Parent != this || !this.children.some(e=>e==element))
             throw "Unable to remove. Element is not child element";
-
+        element.BaseState = null;
+        element.parent = null;
+        //TODO: Add styles backuping;
         this.children = this.children.filter(e=>e!= element);
-        if(removeFromScene)
-            this._view.RemoveElement(element);
     }
 
     AddComponent(component : Component){

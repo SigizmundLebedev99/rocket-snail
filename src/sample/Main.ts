@@ -18,10 +18,9 @@ export function Main(){
     let back = viewport.AddScene();
     let grid = new Grid(back);
     grid.Rotation = 0.25 * Math.PI;
-    back.AddElement(grid);
-
+    let rootMouse = viewport.CaptureMouse(grid, ()=>new Rectangle(0,0, front.Width, front.Height));
     let front = viewport.AddScene();
-    let rootMouse = front.CaptureMouse(front.Root, ()=>new Rectangle(0,0, front.Width, front.Height));    
+        
 
     front.Root
     .AddComponent(new DragDropCom(front.Root, rootMouse))
@@ -33,7 +32,7 @@ export function Main(){
     let pos = new Vector(-6,-6);
     let start = new Vector(-6,-6);
 
-    for(let i = 0; i < 1; i ++){
+    for(let i = 0; i < 100; i ++){
         if(i%31 == 0){
             start = start.Add(new Vector(0,1));
             pos = new Vector(start.x, start.y);
