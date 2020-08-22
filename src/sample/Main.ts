@@ -17,23 +17,21 @@ export function Main(){
     let viewport = new ViewPort("viewport");
     let back = viewport.AddScene();
     let grid = new Grid(back);
-    grid.Rotation = 0.25 * Math.PI;
-    let rootMouse = viewport.CaptureMouse(grid, ()=>new Rectangle(0,0, front.Width, front.Height));
+    let gridMouse = viewport.CaptureMouse(grid, ()=>new Rectangle(0,0, front.Width, front.Height));
     let front = viewport.AddScene();
-        
-
     front.Root
-    .AddComponent(new DragDropCom(front.Root, rootMouse))
-    .AddComponent(new WheelScaleCom(front.Root, rootMouse))
-    .AddComponent(new DragDropCom(grid, rootMouse))
-    .AddComponent(new WheelScaleCom(grid, rootMouse))
-    .AddComponent(new RedrawOnChange(back, rootMouse))
+    .AddComponent(new RedrawOnChange(back, gridMouse))  
+
+    grid
+    .AddComponent(new DragDropCom(grid, gridMouse))
+    .AddComponent(new WheelScaleCom(grid, gridMouse))
+    
     
     let pos = new Vector(-6,-6);
     let start = new Vector(-6,-6);
 
-    for(let i = 0; i < 100; i ++){
-        if(i%31 == 0){
+    for(let i = 0; i < 81; i ++){
+        if(i%9 == 0){
             start = start.Add(new Vector(0,1));
             pos = new Vector(start.x, start.y);
         }
@@ -53,7 +51,7 @@ export function Main(){
         let moon = new Planet(front, "Moon", new Vector(2,0.5), 'gray')
         moon.Style.pointRadius = 0.3;
 
-        front.Root.AddChild(sun
+        grid.AddChild(sun
             .AddComponent(new DrawEllipsCom(sun, ()=>new Ellips(0,0, 1.5, 1.5)))
             .AddComponent(new DragDropCom(sun, sunMouse))
             .AddComponent(new SatelliteCom(sun))

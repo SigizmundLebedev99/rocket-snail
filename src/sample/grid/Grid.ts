@@ -10,7 +10,7 @@ import { SceneContext } from "../../engine/core/SceneContext";
 export class Grid extends SceneElement{
     constructor(view : SceneContext){
         super(view);
-        this.Priority = -10000;
+        this.Priority = -1000;
         this.Position = "absolute";
         this.Style.lineWidth = 0.5;
         this.AddChild(new XAxis(view));

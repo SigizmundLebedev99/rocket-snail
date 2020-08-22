@@ -14,7 +14,6 @@ export class Scene{
     readonly Canvas : CanvasRenderingContext2D;
     readonly Context : SceneContext;
 
-    private setMouseHandled : () => void;
     private _mouseContext : MouseContext;
 
     ShouldResort : boolean = false;
@@ -27,13 +26,11 @@ export class Scene{
         if(mouseContext){
             this._mouseContext = mouseContext;
             this.Context = new SceneContext(this, mouseContext);
-            this.setMouseHandled = mouseContext.HandleMouseByScene(this.sceneId);
             return;
         }
 
         this._mouseContext = new MouseContext();
         this._mouseContext.ListenEvents(context.canvas);
-        this.setMouseHandled = this._mouseContext.HandleMouseByScene(this.sceneId);
         this.Context = new SceneContext(this, this._mouseContext);
     }
 
@@ -43,7 +40,7 @@ export class Scene{
 
     Redraw(){
         if(this.ShouldResort){
-            this._mouseContext.Resort(this.sceneId);
+            this._mouseContext.Resort();
             this.Resort();
             this.ShouldResort = false;
         }
@@ -62,7 +59,7 @@ export class Scene{
             this.Canvas.restore();
         });
         
-        this.setMouseHandled();
+        this._mouseContext.Reset();
     }
 
     Run(){
