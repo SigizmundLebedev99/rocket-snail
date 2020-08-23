@@ -8,7 +8,7 @@ export abstract class BaseState{
 
     get TotalTransition(){
         if(this.BaseState != null)
-            return this.Transition.Add(this.BaseState.TotalTransition);
+            return this.Transition.Copy().AddV(this.BaseState.TotalTransition);
         return this.Transition;
     }
 
@@ -21,7 +21,7 @@ export abstract class BaseState{
     get TotalScale(){
         if(this.BaseState != null){
             let baseScale = this.BaseState.TotalScale;
-            return new Vector(this.Scale.x * baseScale.x, this.Scale.y * baseScale.y);
+            return this.Scale.Copy().MultiplyV(baseScale);
         }
         return this.Scale;
     }

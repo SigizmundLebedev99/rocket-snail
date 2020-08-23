@@ -12,9 +12,6 @@ export class XAxis extends SceneElement{
         this.Style.strokeStyle = "red";
         this.Style.pointRadius = 5;
         this.Style.lineWidth = 1;
-        let map = () =>{
-            return new StraightLine(new Point(0,0), new Point(1,0))
-        }
-        this.AddComponent(new DrawLineCom(this, map));
+        this.AddComponent(new DrawLineCom(() =>new StraightLine(new Point(0,0), new Point(1,0))));
     }
 }

@@ -4,13 +4,13 @@ import { BaseState } from "./BaseState";
 import { SceneElement } from "./SceneElement";
 import { SceneContext } from "./SceneContext";
 
-export class Camera{
+export class CoordinateGrid{
     Node : SceneElement;
     private _view : SceneContext;
     
-    constructor(node : SceneElement, view: SceneContext){
+    constructor(node : SceneElement){
         this.Node = node;
-        this._view = view;
+        this._view = node.Scene;
     }
 
     private actualTransition : Vector = new Vector(0,0);
@@ -21,23 +21,23 @@ export class Camera{
     ConvertFromScreen(point: {x:number, y:number}){
         let view = this._view;
         let vector = Vector.FromPoint(point);
-        vector = vector.Add(new Vector(-view.Width/2, -view.Height/2));
-        vector = new Vector(vector.x / view.PIXELS_METER, vector.y / (- view.PIXELS_METER));
+        vector.Add(-view.Width/2, -view.Height/2);
+        vector.Multiply(1 / view.PIXELS_METER, 1 / (- view.PIXELS_METER));
 
         function transformVector(state : BaseState){
             if(state.BaseState == null){
-                vector = new Vector(vector.x / state.Scale.x, vector.y / state.Scale.y);
-                vector = vector.Add(new Vector(-state.Transition.x, -state.Transition.y));
-                vector = vector.Rotate(-state.Rotation);
+                vector.Multiply(1 / state.Scale.x, 1 / state.Scale.y);
+                vector.Add(-state.Transition.x, -state.Transition.y);
+                vector.Rotate(-state.Rotation);
                 return;
             }
             
             transformVector(state.BaseState);
-            vector = vector.Add(new Vector(-state.Transition.x, -state.Transition.y));
-            vector = vector.Rotate(-state.Rotation);
-            vector = new Vector(vector.x / state.Scale.x, vector.y / state.Scale.y);
+            vector.Add(-state.Transition.x, -state.Transition.y);
+            vector.Rotate(-state.Rotation);
+            vector.Multiply(1 / state.Scale.x, 1 / state.Scale.y);
         }
-        transformVector(this.Node); 
+        transformVector(this.Node);
         return Point.From(vector);
     }
 
@@ -47,28 +47,26 @@ export class Camera{
 
         function transformCamera(state:BaseState){
             if(state.BaseState == null){
-                p = p.Rotate(-state.Rotation);
-                p = p.Add(state.Transition);
-                p = new Vector(p.x * state.Scale.x, p.y * state.Scale.y)
+                p.Rotate(-state.Rotation);
+                p.Add(state.Transition.x, state.Transition.y);
+                p.Multiply(state.Scale.x, state.Scale.y);
                 return;
             }
             
             transformCamera(state.BaseState);
-            p = new Vector(p.x * state.Scale.x, p.y * state.Scale.y)
-            p = p.Rotate(-state.Rotation);
-            p = p.Add(state.Transition);
-                
+            p.Multiply(state.Scale.x, p.y * state.Scale.y);
+            p.Rotate(-state.Rotation);
+            p.Add(state.Transition.x, state.Transition.y);       
         }
 
         transformCamera(this.Node);
         
-        p = new Vector(p.x * view.PIXELS_METER, p.y * view.PIXELS_METER);
+        p.Multiply(view.PIXELS_METER, view.PIXELS_METER);
         return new Point(p.x + view.Width/2, -(p.y - view.Height/2));
     }
 
-    PrepareAxis(){
+    PrepareAxis(context:CanvasRenderingContext2D){
         let view = this._view;
-        let context = view.Canvas;
         
         context.translate(view.Width/2, view.Height/2);
         context.scale(view.PIXELS_METER, - view.PIXELS_METER);
@@ -97,9 +95,9 @@ export class Camera{
             scale = node.BaseState.TotalScale;
         else
             scale = node.TotalScale;
-        movement = new Vector(movement.x / view.PIXELS_METER, - movement.y / view.PIXELS_METER);
-        movement = new Vector(movement.x / scale.x,  movement.y / scale.y);
-        movement = movement.Rotate(-node.TotalRotation);
+        movement.Multiply(1 / view.PIXELS_METER, - 1 / view.PIXELS_METER);
+        movement.Multiply(1 / scale.x,  1 / scale.y);
+        movement.Rotate(-node.TotalRotation);
         return movement;
     }
 }

@@ -18,6 +18,6 @@ export class Planet extends SceneElement{
         this.Style.fillStyle = color??"red";
         this.Style.pointRadius = 1;
         this.Style.lineWidth = 0.1;
-        this.AddComponent(new DrawPointCom(this, () => new Point(0,0)));
+        this.AddComponent(new DrawPointCom(() => new Point(0,0)));
     }  
 }

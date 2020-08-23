@@ -1,23 +1,24 @@
 
 export class Style{
-    strokeStyle? : string;
-    fillStyle? : string;
+    strokeStyle? : string | CanvasGradient | CanvasPattern;
+    fillStyle? : string | CanvasGradient | CanvasPattern;
     pointRadius? : number;
     lineWidth? : number;
     textAlign? : CanvasTextAlign;
+    globalAlpha?: number;
+    globalCompositeOperation?: string;
 
     Copy(style : Style){
-        this.fillStyle = this.fillStyle??style.fillStyle;
-        this.lineWidth = this.lineWidth??style.lineWidth;
-        this.pointRadius = this.pointRadius??style.pointRadius;
-        this.strokeStyle = this.strokeStyle??style.strokeStyle;
-        this.textAlign = this.textAlign??style.textAlign;
+        Object.getOwnPropertyNames(this).forEach(p => {
+            if(!this[p])
+                this[p] = style[p];
+        });
     }
 
     Apply(context : CanvasRenderingContext2D){
-        context.fillStyle = this.fillStyle?? "black";
-        context.strokeStyle = this.strokeStyle?? "black";
-        context.lineWidth = this.lineWidth?? 0.5;
-        context.textAlign = this.textAlign?? 'start';
+        Object.getOwnPropertyNames(this).forEach(p => {
+            if(this[p] && context[p])
+                context[p] = this[p];
+        });
     }
 }

@@ -37,10 +37,6 @@ export class SceneContext{
     get RightBottom(){
         return new Point(this.Width, this.Height);
     }
-
-    get Priority(){
-        return this._scene.Priority;
-    }
     
     PIXELS_METER = 45;
     private _root : SceneElement;
@@ -64,6 +60,7 @@ export class SceneContext{
     }
 
     AddElement(element: SceneElement){
+        element.MouseContext = this._mouse;
         this._scene.ElementsOnScene.push(element);       
     }
 
@@ -72,10 +69,6 @@ export class SceneContext{
         this._scene.ElementsOnScene = 
             this._scene.ElementsOnScene
             .filter(e=> e != element);
-    }
-
-    CaptureMouse(node: SceneElement, map:()=>IPointIn){
-        return this._mouse.CaptureMouse(node, map);
     }
 
     Redraw(){

@@ -11,7 +11,7 @@ export class YAxis extends SceneElement{
         this.Position = "absolute";
         this.Style.lineWidth = 1;
         this.Style.strokeStyle = "blue";
-        this.AddComponent(new DrawLineCom(this, () => 
+        this.AddComponent(new DrawLineCom(() => 
             new StraightLine(new Point(0,0), new Point(0,1))));
     }
 }

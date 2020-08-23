@@ -1,6 +1,7 @@
 import { SceneElement } from "./SceneElement";
+import { MouseState } from "./MouseContext";
 
-export abstract class Component{
+export abstract class BaseComponent{
     protected priority : number = 1;
     PriorityChanged? : () => void;
 
@@ -9,16 +10,26 @@ export abstract class Component{
     }
 
     set Priority(v: number){
-        if(this.Priority == v)
+        if(this.priority == v)
             return;
-        this.Priority = v;
+        this.priority = v;
         if(this.PriorityChanged)
             this.PriorityChanged();
     }
 
     Started : boolean = false;
 
-    OnStart() : void{}
+    OnStart(node: SceneElement) : void{}
+}
 
-    abstract OnUpdate() : void;
+export abstract class Component extends BaseComponent{
+    abstract OnUpdate(node: SceneElement) : void;
+}
+
+export abstract class DrawComponent extends BaseComponent{
+    abstract OnUpdate(node: SceneElement, context: CanvasRenderingContext2D) : void;
+}
+
+export abstract class MouseComponent extends BaseComponent{
+    abstract OnUpdate(node: SceneElement, mouseState: MouseState) : void;
 }

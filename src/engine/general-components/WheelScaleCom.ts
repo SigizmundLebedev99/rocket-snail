@@ -1,26 +1,20 @@
-import { Component } from "../core/Component";
+import { Component, MouseComponent } from "../core/Component";
 import { MouseState } from "../core/MouseContext";
 import { SceneElement } from "../core/SceneElement";
 
-export class WheelScaleCom extends Component{
-    map: (() => MouseState);
-    node: SceneElement;
-    
-    constructor(node: SceneElement, map: () => MouseState){
+export class WheelScaleCom extends MouseComponent{    
+    constructor(){
         super();
-        this.map = map;
-        this.node = node;
     }
     
-    OnUpdate(): void {
-        let state = this.map();
-        if(!state.IsIn || state.KeyState.key != 'wheel')
+    OnUpdate(node: SceneElement, mouseState: MouseState): void {
+        if(!mouseState.IsIn || mouseState.KeyState.key != 'wheel')
             return;
-        let delta = state.KeyState.Delta;
-        let s = this.node.Scale;
+        let delta = mouseState.KeyState.Delta;
+
         if(delta > 0)
-            this.node.Scale = s.Product(1.1);
+            node.Scale.Multiply(1.1);
         else if(delta < 0)
-            this.node.Scale = s.Product(0.9);
+            node.Scale.Multiply(0.9);
     }
 }

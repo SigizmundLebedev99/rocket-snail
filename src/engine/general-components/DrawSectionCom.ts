@@ -1,21 +1,17 @@
-import { Component } from "../core/Component";
-import { SceneElement } from "../core/SceneElement";
+import { Component, DrawComponent } from "../core/Component";
 import { Section } from "../primitives/Section";
+import { SceneElement } from "../core/SceneElement";
 
-export class DrawSectionCom extends Component{
-    node : SceneElement;
+export class DrawSectionCom extends DrawComponent{
     map: () => Section;
 
-    constructor(node : SceneElement, map: () => Section){
+    constructor(map: () => Section){
         super();
-        this.node = node;
         this.map = map;
+        this.Priority = -10000;
     }
 
-    OnUpdate(): void {
-        let context = this.node.Scene?.Canvas;
-        if(!context)
-            return;
+    OnUpdate(node:SceneElement, context: CanvasRenderingContext2D): void {
         let section = this.map();
         context.beginPath();
         context.moveTo(section.Point1.x, section.Point1.y);

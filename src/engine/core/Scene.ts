@@ -5,23 +5,15 @@ import { SceneElement } from "./SceneElement";
 export class Scene{
     private intervalId;
 
-    private sceneId :number = 0;
-    get Priority(){
-        return this.sceneId;
-    }
-
     ElementsOnScene : SceneElement[] = [];
     readonly Canvas : CanvasRenderingContext2D;
     readonly Context : SceneContext;
 
     private _mouseContext : MouseContext;
-
     ShouldResort : boolean = false;
 
-    constructor(context : CanvasRenderingContext2D, mouseContext?:MouseContext, id? : number){
+    constructor(context : CanvasRenderingContext2D, mouseContext?:MouseContext){
         this.Canvas = context;
-        if(id)
-            this.sceneId = id;
 
         if(mouseContext){
             this._mouseContext = mouseContext;
@@ -45,17 +37,26 @@ export class Scene{
             this.ShouldResort = false;
         }
         this.Clear();
+        
         this.ElementsOnScene.forEach(node => {
             if(!node.IsActive)
                 return;
+            node.OnMouseUpdate();
+        });
+        
 
+        this.ElementsOnScene.forEach(node =>{
+            if(!node.IsActive)
+                return;
+            node.OnComponentsUpdate();
+        });
+        
+        this.ElementsOnScene.forEach(node =>{
+            if(!node.IsActive)
+                return;
             this.Canvas.save();
             node.Style.Apply(this.Canvas);
-
-            if(node.Position == 'relative')
-                node.Camera.PrepareAxis();
-
-            node.OnUpdate()
+            node.OnDrawUpdate();
             this.Canvas.restore();
         });
         

@@ -11,6 +11,6 @@ export class LabelNode extends SceneElement{
         this.Position = 'absolute';
         this.Style.fillStyle = 'white';
         this.Priority = 10000;
-        this.AddComponent(new DrawLabelCom(this, ()=>new Label(text, position)));
+        this.AddComponent(new DrawLabelCom(()=>new Label(text, position)));
     }
 }

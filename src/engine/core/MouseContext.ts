@@ -18,14 +18,13 @@ export type KeyState =
 
 class Binding{
     node:SceneElement;
-    handle:() => IPointIn;
+    handlers:(() => IPointIn)[] = [];
 
     isCaptured: boolean = false;
     isIn: boolean = false;
 
-    constructor(node:SceneElement, handle:() => IPointIn){
+    constructor(node:SceneElement){
         this.node = node;
-        this.handle = handle;
     }
 }
 
@@ -41,21 +40,24 @@ export class MouseContext{
     HandleState(state: MouseEvent){
         this.Position = state.Position;
 
+        if(this.isIn != null){
+            this.isIn.isIn = false;
+            this.isIn = null;
+        }
+
         for(let b in this.captureStack){
             let binding = this.captureStack[b];
-            let primitive = binding.handle();
-            let point = binding.node.Position == 'absolute' ? state.Position : binding.node.Camera.ConvertFromScreen(state.Position);
-
-            if(primitive.IsPointIn(point)){
-                binding.isIn = true;
-                if(this.isIn != null){
-                    this.isIn.isIn = false;
-                    this.isIn = null;
-                }   
-                this.isIn = binding;
-                this.isIn.isIn = true;
-                break;
+            for(let p in binding.handlers){
+                let primitive = binding.handlers[p]();
+                let point = binding.node.Position == 'absolute' ? state.Position : binding.node.CoordinateGrid.ConvertFromScreen(state.Position);
+                if(primitive.IsPointIn(point)){
+                    binding.isIn = true;
+                    this.isIn = binding;
+                    break;
+                }
             }
+            if(binding.isIn)
+                break;
         }
 
         switch(state.key){
@@ -126,12 +128,19 @@ export class MouseContext{
     }
 
     CaptureMouse(node:SceneElement, handle: () => IPointIn) : () => MouseState{
-        let bind = new Binding(node, handle);
-        this.captureStack.push(bind);
-        this.Resort();
-        
+        let binding = this.captureStack.find(e=>e.node == node);
+        if(binding){
+            binding.handlers.push(handle);
+        }
+        else{
+            binding = new Binding(node);
+            binding.handlers.push(handle);
+            this.captureStack.push(binding);
+            this.Resort();
+        }
+        let bind = binding;
         return () => {
-            return new MouseState(this.LastState, this.Position, this.Movement, bind.isCaptured, bind.isIn)
+            return new MouseState(this.LastState, this.Position, this.Movement, bind.isCaptured, bind.isIn);
         }
     }
 }

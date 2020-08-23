@@ -1,20 +1,16 @@
-import { Component } from '../core/Component'
+import { Component, MouseComponent } from '../core/Component'
 import { SceneElement } from "../core/SceneElement";
 import { StateMachine } from "../state-machine/StateMachine";
 import { MouseState } from '../core/MouseContext';
 
 type dragState = "drag"|"none"
 
-export class DragDropCom extends Component{
-    map: (() => MouseState);
-    node: SceneElement;
+export class DragDropCom extends MouseComponent{
     sm: StateMachine<dragState>;
-    
-    constructor(node: SceneElement, map: () => MouseState){
-        super();
-        this.map = map;
-        this.node = node;
+    node?: SceneElement;
 
+    constructor(){
+        super();
         this.sm = new StateMachine<dragState>("none");
         this.sm.AddState('none')
         .AddCondition((state)=>{
@@ -29,14 +25,18 @@ export class DragDropCom extends Component{
         }, "none")
         .OnCheck(state=>{
             let mouseState = <MouseState>state;
-            
-            let vector = this.node.Camera.ConvertScreenVector(mouseState.Movement);
-            this.node.Transition = this.node.Transition.Add(vector);
+            if(!this.node)
+                return;
+            let vector = this.node.CoordinateGrid.ConvertScreenVector(mouseState.Movement);
+            this.node.Transition.Add(vector.x, vector.y);
         })
     }
 
-    OnUpdate(): void {
-        let state = this.map();
-        this.sm.CheckState(state);
+    OnStart(node: SceneElement){
+        this.node = node;
+    }
+
+    OnUpdate(node: SceneElement, mouseState: MouseState): void {
+        this.sm.CheckState(mouseState);
     }
 }

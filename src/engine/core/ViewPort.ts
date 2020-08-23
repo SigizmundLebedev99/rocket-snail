@@ -1,9 +1,5 @@
 import { Scene } from "./Scene";
 import { MouseContext } from "./MouseContext";
-import { Point } from "../primitives/Point";
-import { Vector } from "../primitives/Vector";
-import { SceneElement } from "./SceneElement";
-import { IPointIn } from "../interfaces/IPointIn";
 
 export class ViewPort{
     private scenes : Scene[] = [];
@@ -26,13 +22,8 @@ export class ViewPort{
         let context = canvas.getContext('2d');
         if(context == null)
             throw "Your brouser doesn't support canvas"
-        let scene = new Scene(context, this.Mouse, this.scenes.length);
+        let scene = new Scene(context, this.Mouse);
         this.scenes.push(scene);
-
         return scene.Context;
-    }
-
-    CaptureMouse(node : SceneElement, map: () => IPointIn){
-        return this.Mouse.CaptureMouse(node, map);
     }
 }

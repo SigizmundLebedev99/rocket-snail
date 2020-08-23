@@ -1,18 +1,16 @@
-import { Component } from "../../engine/core/Component";
+import { MouseComponent } from "../../engine/core/Component";
 import { SceneContext } from "../../engine/core/SceneContext";
 import { MouseState } from "../../engine/core/MouseContext";
+import { SceneElement } from "../../engine/core/SceneElement";
 
-export class RedrawOnChange extends Component{
+export class RedrawOnChange extends MouseComponent{
     view:SceneContext;
-    map: () => MouseState;
-    constructor(viewToRedraw: SceneContext, map:() => MouseState){
+    constructor(viewToRedraw: SceneContext){
         super();
         this.view = viewToRedraw;
-        this.map = map;
     }
 
-    OnUpdate(): void {
-        let state = this.map();
+    OnUpdate(node: SceneElement, state:MouseState): void {
         if(state.IsCaptured || (state.IsIn && state.KeyState.key == 'wheel'))
             this.view.Redraw();
     }

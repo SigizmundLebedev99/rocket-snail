@@ -1,36 +1,31 @@
-import { Component } from "../core/Component";
+import { Component, DrawComponent } from "../core/Component";
 import { SceneElement } from "../core/SceneElement";
 import { Point } from "../primitives/Point";
 
-export class DrawPointCom extends Component{
-
-    node : SceneElement;
+export class DrawPointCom extends DrawComponent{
     map: () => Point;
 
-    constructor(node : SceneElement, map: () => Point){
+    constructor(map: () => Point){
         super();
-        this.node = node;
         this.map = map;
+        this.Priority = -10000;
     }
 
-    OnUpdate(): void {
+    OnUpdate(node: SceneElement, context: CanvasRenderingContext2D): void {
         let point = this.map();
-        if(this.node.Position == "absolute"){
-            let camera = this.node.Camera;
+        if(node.Position == "absolute"){
+            let camera = node.CoordinateGrid;
             let p = camera.Convert(point)
             if(p)
-                this.DrawPoint(p);
+                this.DrawPoint(p, node, context);
         }
         else{
-            this.DrawPoint(point);
+            this.DrawPoint(point, node, context);
         }    
     }
 
-    DrawPoint(p:Point){
-        let context = this.node.Scene?.Canvas;
-        if(!context)
-            return;
-        let style = this.node.Style;
+    DrawPoint(p:Point, node:SceneElement, context: CanvasRenderingContext2D){
+        let style = node.Style;
         let radius = style.pointRadius??0.3;
         context.beginPath();
         context.arc(p.x, p.y, radius, 0, 2*Math.PI,true);

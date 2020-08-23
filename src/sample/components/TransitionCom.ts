@@ -1,23 +1,23 @@
 import { Component } from "../../engine/core/Component";
 import { Vector } from "../../engine/primitives/Vector";
 import { Planet } from "../nodes/Planet";
+import { SceneElement } from "../../engine/core/SceneElement";
 
 export class TransitionCom extends Component{
-    node : Planet;
     private transition = 0;
     increment:number;
 
-    constructor(node : Planet, speed? : number){
+    constructor(speed? : number){
         super();
-        this.node = node;
         this.increment = speed??0.005;
     }
 
-    OnUpdate(): void {
-        let altitude = this.node.orbitEllips;
-        let kx = altitude.x * this.node.orbitYCoefficient;
-        let ky = -this.node.orbitYCoefficient * altitude.y
-        this.transition += this.node.orbitYCoefficient * this.increment;
-        this.node.Transition = new Vector(kx * Math.sin(this.transition), ky * Math.cos(this.transition));
+    OnUpdate(node:SceneElement): void {
+        let planet = <Planet>node;
+        let altitude = planet.orbitEllips;
+        let kx = altitude.x * planet.orbitYCoefficient;
+        let ky = -planet.orbitYCoefficient * altitude.y
+        this.transition += planet.orbitYCoefficient * this.increment;
+        planet.Transition = new Vector(kx * Math.sin(this.transition), ky * Math.cos(this.transition));
     }
 }

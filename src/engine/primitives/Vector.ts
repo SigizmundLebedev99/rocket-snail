@@ -2,8 +2,8 @@ import {Point} from './Point'
 import {Complex} from '../../helpers/Complex'
 
 export class Vector{
-    readonly x:number;
-    readonly y:number;
+    x:number;
+    y:number;
 
     get Length(){
         let length = Math.sqrt(this.x * this.x + this.y * this.y)
@@ -19,27 +19,57 @@ export class Vector{
         this.y = y;
     }
     
-    Add(anower : Vector){
-        return new Vector(this.x + anower.x, this.y + anower.y);
+    Add(x:number, y:number){
+        this.x += x;
+        this.y += y;
+        return this;
     }
 
-    Subtract(anower: Vector){
-        return new Vector(this.x - anower.x, this.y - anower.y);
+    AddV(vector: Vector){
+        this.x += vector.x;
+        this.y += vector.y;
+        return this;
     }
 
-    Product(num : number){
-        return new Vector(this.x * num, this.y * num);
+    Subtract(x:number, y:number){
+        this.x -= x;
+        this.y -= y;
+        return this;
     }
 
-    Scalar(anower:Vector){
-        return this.x * anower.x + this.y * anower.y;
+    SubstractV(vector: Vector){
+        this.x += vector.x;
+        this.y += vector.y;
+        return this;
+    }
+
+    Multiply(x:number, y?:number){
+        if(!y){
+            this.x *= x; 
+            this.y *= x;
+        }
+        else{
+            this.x *= x; 
+            this.y *= y;
+        }
+        return this;
+    }
+
+    MultiplyV(vector: Vector){
+        this.x *= vector.x; 
+        this.y *= vector.y;
+        return this;
+    }
+
+    Scalar(vector: Vector){
+        return this.x * vector.x + this.y * vector.y;
     }
 
     Pseudo(anower:Vector){
         return this.x * anower.y - this.y * anower.x;
     }
 
-    Unit(){
+    GetUnit(){
         let length = this.Length;
         return new Vector(this.x/length, this.y/this.Length);
     }
@@ -53,7 +83,12 @@ export class Vector{
         let v = new Vector(Math.cos(angle), Math.sin(angle));
         let complex = new Complex(this.x, this.y);
         let result = complex.Mul(new Complex(v.x, v.y));
-        return new Vector(result.x, result.y);
+        this.x = result.x;
+        this.y = result.y;
+    }
+
+    Copy(){
+        return new Vector(this.x, this.y);
     }
 
     static FromPoints(begin:{x:number, y:number}, end:{x:number, y:number}){

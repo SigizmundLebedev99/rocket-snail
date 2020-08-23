@@ -1,20 +1,19 @@
-import { Component } from "../core/Component";
+import { Component, DrawComponent } from "../core/Component";
 import { SceneElement } from "../core/SceneElement";
 import { Label } from "../primitives/Label";
 
-export class DrawLabelCom extends Component{
-    node : SceneElement;
+export class DrawLabelCom extends DrawComponent{
+
     map : () => Label;
-    constructor(node:SceneElement, map:() => Label){
+    constructor(map:() => Label){
         super();
-        this.node = node;
         this.map = map;
+        this.Priority = -10000;
     }
 
-    OnUpdate(): void {
+    OnUpdate(node: SceneElement, context: CanvasRenderingContext2D): void {
         let label = this.map();
-        let context = this.node.Scene.Canvas;
-        let point = this.node.Position == 'absolute' ? this.node.Camera.Convert(label.position) : label.position ;
+        let point = node.Position == 'absolute' ? node.CoordinateGrid.Convert(label.position) : label.position ;
         
         context.save();
         if(label.stroke){

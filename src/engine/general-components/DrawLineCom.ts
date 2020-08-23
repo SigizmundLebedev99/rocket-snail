@@ -1,50 +1,45 @@
-import { Component } from "../core/Component";
+import { Component, DrawComponent } from "../core/Component";
 import { StraightLine } from "../primitives/Straight-Line";
 import { SceneElement } from "../core/SceneElement";
 import { Point } from "../primitives/Point";
 
-export class DrawLineCom<TNode extends SceneElement> extends Component{
-    node: TNode;
+export class DrawLineCom extends DrawComponent{
     map: () => StraightLine;
 
-    constructor(node: TNode, map: () => StraightLine){
+    constructor(map: () => StraightLine){
         super();
-        this.node = node;
         this.map = map;
+        this.Priority = -10000;
     }
 
-    OnUpdate(): void {
-        let camera = this.node.Camera;
+    OnUpdate(node: SceneElement, context: CanvasRenderingContext2D): void {
+        let camera = node.CoordinateGrid;
         let line = this.map();
-        let view = this.node.Scene;
-        if(!view)
-            return;
-
         let screenLineP = camera.Convert(line.Point);
         if(!screenLineP)
             return;
-        let screenLineV = line.DirectionVector.GetRotatedUnit(this.node.TotalRotation);
+        let screenLineV = line.DirectionVector.GetRotatedUnit(node.TotalRotation);
         let screenLine = StraightLine.FromPointAndVector(screenLineP, screenLineV);
 
         let hpg = (p: Point) => screenLine.HalfPlane(p) == 1;
         let hpl = (p: Point) => screenLine.HalfPlane(p) == -1;
 
-        if((hpg(view.LeftTop) && hpg(view.LeftBottom) && hpg(view.RightTop) && hpg(view.RightBottom)) 
-        || (hpl(view.LeftTop) && hpl(view.LeftBottom) && hpl(view.RightTop) && hpl(view.RightBottom)))
+        if((hpg(node.Scene.LeftTop) && hpg(node.Scene.LeftBottom) && hpg(node.Scene.RightTop) && hpg(node.Scene.RightBottom)) 
+        || (hpl(node.Scene.LeftTop) && hpl(node.Scene.LeftBottom) && hpl(node.Scene.RightTop) && hpl(node.Scene.RightBottom)))
             return;
-        view.Canvas.beginPath();
+        context.beginPath();
         if(screenLine.DirectionVector.x == 0){
-            view.Canvas.moveTo(Math.abs(screenLine.C), 0);
-            view.Canvas.lineTo(Math.abs(screenLine.C), view.Height);
-            view.Canvas.stroke();
+            context.moveTo(Math.abs(screenLine.C), 0);
+            context.lineTo(Math.abs(screenLine.C), node.Scene.Height);
+            context.stroke();
         }
    
         let startX = 0,
             startY = screenLine.DefineY(startX);
-        let endX = view.Width,
+        let endX = node.Scene.Width,
             endY = screenLine.DefineY(endX);
-        view.Canvas.moveTo(startX, startY);
-        view.Canvas.lineTo(endX, endY);
-        view.Canvas.stroke();
+        context.moveTo(startX, startY);
+        context.lineTo(endX, endY);
+        context.stroke();
     }
 }
