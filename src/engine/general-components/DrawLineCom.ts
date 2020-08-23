@@ -5,16 +5,15 @@ import { Point } from "../primitives/Point";
 
 export class DrawLineCom extends DrawComponent{
     map: () => StraightLine;
-
     constructor(map: () => StraightLine){
         super();
         this.map = map;
-        this.Priority = -10000;
     }
 
-    OnUpdate(node: SceneElement, context: CanvasRenderingContext2D): void {
+    OnUpdate(node: SceneElement, context:CanvasRenderingContext2D): void {
         let camera = node.CoordinateGrid;
         let line = this.map();
+
         let screenLineP = camera.Convert(line.Point);
         if(!screenLineP)
             return;

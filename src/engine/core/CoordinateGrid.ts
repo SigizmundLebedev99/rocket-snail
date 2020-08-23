@@ -47,16 +47,17 @@ export class CoordinateGrid{
 
         function transformCamera(state:BaseState){
             if(state.BaseState == null){
-                p.Rotate(-state.Rotation);
-                p.Add(state.Transition.x, state.Transition.y);
-                p.Multiply(state.Scale.x, state.Scale.y);
+                p.Rotate(-state.Rotation)
+                .AddV(state.Transition)
+                .MultiplyV(state.Scale);
                 return;
             }
             
             transformCamera(state.BaseState);
-            p.Multiply(state.Scale.x, p.y * state.Scale.y);
-            p.Rotate(-state.Rotation);
-            p.Add(state.Transition.x, state.Transition.y);       
+            p.MultiplyV(state.Scale)
+            .Rotate(-state.Rotation)
+            .AddV(state.Transition);
+                
         }
 
         transformCamera(this.Node);

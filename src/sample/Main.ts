@@ -18,18 +18,19 @@ export function Main(){
     let back = viewport.AddScene();
 
     let grid = new Grid(back);
-    grid
+    grid.Rotation = Math.PI * 0.25;
+    let front = viewport.AddScene(); 
+    front.Root
         .CaptureMouse(()=>new Rectangle(0,0, front.Width, front.Height))
-        .AddComponent(new RedrawOnChange(back))
         .AddComponent(new DragDropCom())
-        .AddComponent(new WheelScaleCom());
-
-    let front = viewport.AddScene();
-    
+        .AddComponent(new WheelScaleCom())
+        .AddComponent(new RedrawOnChange(back))
+        .AddChild(grid);
+        
     let pos = new Vector(-6,-6);
     let start = new Vector(-6,-6);
 
-    for(let i = 0; i < 1; i ++){
+    for(let i = 0; i < 81; i ++){
         if(i%9 == 0){
             start.Add(0,1);
             pos = new Vector(start.x, start.y);

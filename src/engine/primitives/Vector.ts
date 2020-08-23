@@ -85,6 +85,7 @@ export class Vector{
         let result = complex.Mul(new Complex(v.x, v.y));
         this.x = result.x;
         this.y = result.y;
+        return this;
     }
 
     Copy(){
