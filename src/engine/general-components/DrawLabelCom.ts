@@ -13,6 +13,7 @@ export class DrawLabelCom extends DrawComponent{
 
     OnUpdate(node: SceneElement, context: CanvasRenderingContext2D): void {
         let label = this.map();
+        
         let point = node.Position == 'absolute' ? node.CoordinateGrid.Convert(label.position) : label.position ;
         
         context.save();

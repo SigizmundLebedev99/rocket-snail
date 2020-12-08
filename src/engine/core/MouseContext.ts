@@ -1,14 +1,13 @@
 import { Vector } from "../primitives/Vector";
-import { Point } from "../primitives/Point";
 import { IPointIn } from "../interfaces/IPointIn";
 import { SceneElement } from "./SceneElement";
 
 export type MouseEvent = 
-| {key:"down",      Which:number,       Position: Point}
-| {key:"up",                            Position: Point}
-| {key:"wheel",     Delta:number,       Position: Point}
-| {key:"move",      Movement: Vector,   Position: Point}
-| {key:"none",                          Position: Point}
+| {key:"down",      Which:number,       Position: Vector}
+| {key:"up",                            Position: Vector}
+| {key:"wheel",     Delta:number,       Position: Vector}
+| {key:"move",      Movement: Vector,   Position: Vector}
+| {key:"none",                          Position: Vector}
 
 export type KeyState = 
 | {key:"down",      Which:number}
@@ -33,7 +32,15 @@ export class MouseContext{
     private isIn : Binding | null = null;
     private isCaptured: Binding | null = null;
 
-    Position : Point = new Point(0,0);
+    get In(){
+        return this.isIn;
+    }
+
+    get Captured(){
+        return this.isCaptured;
+    }
+
+    Position : Vector = new Vector(0,0);
     LastState : KeyState = {key:'none'};
     Movement : Vector = new Vector(0,0);
 
@@ -91,7 +98,7 @@ export class MouseContext{
         htmlElement.addEventListener("mousedown", (e) => {
             this.HandleState({
                 key:"down",
-                Position: new Point(e.x, e.y),
+                Position: new Vector(e.x, e.y),
                 Which : e.which
             })
         });
@@ -99,21 +106,21 @@ export class MouseContext{
             this.HandleState(
             {
                 key:"up",
-                Position: new Point(e.x, e.y)
+                Position: new Vector(e.x, e.y)
             });
         });
         htmlElement.addEventListener("wheel", (e) =>{
             this.HandleState({
                 key:"wheel",
                 Delta: e.deltaY,
-                Position: new Point(e.x, e.y)
+                Position: new Vector(e.x, e.y)
             })
         });
         htmlElement.addEventListener("mousemove", (e) => {
             this.HandleState({
                 key:"move",
                 Movement: new Vector(e.movementX, e.movementY),
-                Position: new Point(e.x, e.y)
+                Position: new Vector(e.x, e.y)
             })
         });
     }
@@ -140,7 +147,7 @@ export class MouseContext{
         }
         let bind = binding;
         return () => {
-            return new MouseState(this.LastState, this.Position, this.Movement, bind.isCaptured, bind.isIn);
+            return new MouseState(this, bind);
         }
     }
 }
@@ -149,14 +156,18 @@ export class MouseState{
     IsCaptured : boolean = false;
     IsIn : boolean = false;
     KeyState : KeyState;
-    Position : Point;
+    Position : Vector;
     Movement : Vector;
+    In : Binding | null = null;
+    Captured : Binding | null = null;
 
-    constructor(keyState : KeyState, position : Point, movement : Vector, isC, isI){
-        this.KeyState = keyState;
-        this.Position = position;
-        this.Movement = movement;
-        this.IsCaptured = isC;
-        this.IsIn = isI;
+    constructor(context: MouseContext, bind: Binding){
+        this.KeyState = context.LastState;
+        this.Position = context.Position;
+        this.Movement = context.Movement;
+        this.IsCaptured = bind.isCaptured;
+        this.IsIn = bind.isIn;
+        this.In = context.In;
+        this.Captured = context.Captured;
     }
 }

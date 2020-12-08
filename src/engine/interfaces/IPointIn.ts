@@ -1,5 +1,5 @@
-import { Point } from "../primitives/Point";
+import { Vector } from "../primitives/Vector";
 
 export interface IPointIn{
-    IsPointIn(point:Point) : boolean;
+    IsPointIn(point:Vector) : boolean;
 }

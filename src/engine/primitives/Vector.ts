@@ -1,6 +1,3 @@
-import {Point} from './Point'
-import {Complex} from '../../helpers/Complex'
-
 export class Vector{
     x:number;
     y:number;
@@ -14,9 +11,23 @@ export class Vector{
         return Math.acos(this.x / this.Length);
     }
 
-    constructor(x:number, y: number){
-        this.x = x;
-        this.y = y;
+    constructor(state: any, state2: number = 0){
+        if(state.x !== null && state.y != null && isNaN(state.x) && isNaN(state.y)){
+            this.x = state.x;
+            this.y = state.y;
+            return;
+        }
+        if(state != null && state2 != null && isNaN(state) && isNaN(state2)){
+            this.x = state;
+            this.y = state2;
+            return;
+        }
+        if(Array.isArray(state) && state.length == 2 && isNaN(state[0]) && isNaN(state[1])){
+            this.x = state[0];
+            this.y = state[1];
+            return;
+        }
+        throw "Invalid input";
     }
     
     Add(x:number, y:number){
@@ -71,7 +82,7 @@ export class Vector{
 
     GetUnit(){
         let length = this.Length;
-        return new Vector(this.x/length, this.y/this.Length);
+        return new Vector(this.x/length, this.y/length);
     }
 
     GetRotatedUnit(angle){
@@ -80,23 +91,13 @@ export class Vector{
     }
 
     Rotate(angle){
-        let v = new Vector(Math.cos(angle), Math.sin(angle));
-        let complex = new Complex(this.x, this.y);
-        let result = complex.Mul(new Complex(v.x, v.y));
-        this.x = result.x;
-        this.y = result.y;
+        let {x,y} = this;
+        this.x=x*Math.cos(angle)-y*Math.sin(angle);
+        this.y=y*Math.cos(angle)+x*Math.sin(angle);
         return this;
     }
 
     Copy(){
         return new Vector(this.x, this.y);
-    }
-
-    static FromPoints(begin:{x:number, y:number}, end:{x:number, y:number}){
-        return new Vector(end.x - begin.x, end.y - begin.y);
-    }
-
-    static FromPoint(end: {x:number, y:number}){
-        return new Vector(end.x, end.y);
     }
 }

@@ -10,6 +10,7 @@ export class WheelScaleCom extends MouseComponent{
     OnUpdate(node: SceneElement, mouseState: MouseState): void {
         if(!mouseState.IsIn || mouseState.KeyState.key != 'wheel')
             return;
+            
         let delta = mouseState.KeyState.Delta;
 
         if(delta > 0)

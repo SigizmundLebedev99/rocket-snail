@@ -1,6 +1,6 @@
 import { IPointIn } from "../interfaces/IPointIn";
-import { Point } from "./Point";
 import { Fns } from "../../helpers/math";
+import { Vector } from "./Vector";
 
 export class Rectangle implements IPointIn{
     x:number;
@@ -15,7 +15,7 @@ export class Rectangle implements IPointIn{
         this.width = width;
     }
 
-    IsPointIn(point: Point): boolean {
+    IsPointIn(point: Vector): boolean {
         let xIn = Fns.Between(this.x, this.x + this.width, point.x);
         let yIn = Fns.Between(this.y, this.y + this.height, point.y);
         return xIn && yIn;

@@ -1,14 +1,15 @@
-import {Point} from './Point'
+import { IPointIn } from '../interfaces/IPointIn';
+import { Vector } from './Vector';
 
-export class Polygon{
+export class Polygon implements IPointIn{
 
-    private _vertexes : Point[];
+    public vertexes : Vector[];
 
-    get vertexes(){
-        return [...this._vertexes]
+    constructor(vertexes : Vector[]){
+        this.vertexes = vertexes;
     }
-
-    constructor(vertexes : Point[]){
-        this._vertexes = vertexes;
+    
+    IsPointIn(point: Vector): boolean {
+        throw new Error("Method not implemented.");
     }
 }

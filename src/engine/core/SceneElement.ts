@@ -1,14 +1,14 @@
 import { Component, DrawComponent, MouseComponent, BaseComponent } from "./Component";
 import { Style } from "./Style";
 import { CoordinateGrid } from "./CoordinateGrid";
-import { BaseState } from "./BaseState";
 import { SceneContext } from "./SceneContext";
 import { IPointIn } from "../interfaces/IPointIn";
 import { MouseState, MouseContext } from "./MouseContext";
+import { Vector } from "../primitives/Vector";
 
 export type NodePosition = "relative" | "absolute"
 
-export class SceneElement extends BaseState {
+export class SceneElement {
     private _scene : SceneContext;
 
     get Scene(){
@@ -51,16 +51,37 @@ export class SceneElement extends BaseState {
 
     readonly Style : Style = new Style();
 
-    private mouseContext? : MouseContext;
-    set MouseContext(val:MouseContext){
-        this.mouseContext = val;
+    Transition : Vector = new Vector(0,0);
+    Rotation : number = 0;
+    Scale : Vector = new Vector(1,1);
+
+    get TotalTransition(){
+        if(this.Parent != null)
+            return this.Transition.Copy().AddV(this.Parent.TotalTransition);
+        return this.Transition;
     }
 
+    get TotalRotation(){
+        if(this.Parent != null)
+            return this.Rotation + this.Parent.TotalRotation;
+        return this.Rotation;
+    }
+
+    get TotalScale(){
+        if(this.Parent != null){
+            let baseScale = this.Parent.TotalScale;
+            return this.Scale.Copy().MultiplyV(baseScale);
+        }
+        return this.Scale;
+    }
+
+    private mouseContext : MouseContext;
+
     constructor(view: SceneContext, active:boolean = true){
-        super();
         this._scene = view;
-        this.isActive = active;
+        this.mouseContext = view.Mouse;
         view.AddElement(this);
+        this.isActive = active;
     }
 
     get CoordinateGrid(){
@@ -84,17 +105,24 @@ export class SceneElement extends BaseState {
         if(element.Parent != null)
             element.Parent.RemoveChild(element);
 
-        element.BaseState = this;
         element.Style.Copy(this.Style);
         element.parent = this;
         this.children.push(element);
         return this;
     }
 
+    Remove(){
+        this._scene.RemoveElement(this);
+        if(this.parent != null){
+            this.parent.children = this.parent.children.filter(e=>e != this);
+        }
+        this.children.forEach(e => e.Remove());
+    }
+
     RemoveChild(element: SceneElement){
         if(element.Parent != this || !this.children.some(e=>e==element))
             throw "Unable to remove. Element is not child element";
-        element.BaseState = null;
+
         element.parent = null;
         //TODO: Add styles backuping;
         this.children = this.children.filter(e=>e!= element);

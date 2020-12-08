@@ -27,8 +27,8 @@ export class DragDropCom extends MouseComponent{
             let mouseState = <MouseState>state;
             if(!this.node)
                 return;
-            let vector = this.node.CoordinateGrid.ConvertScreenVector(mouseState.Movement);
-            this.node.Transition.Add(vector.x, vector.y);
+            let vector = this.node.CoordinateGrid.ConvertFromScreen(mouseState.Movement);
+            this.node.Transition.AddV(vector);
         })
     }
 

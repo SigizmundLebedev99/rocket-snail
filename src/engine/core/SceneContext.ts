@@ -1,14 +1,18 @@
-import { Point } from "../primitives/Point";
 import { MouseContext } from "./MouseContext";
 import { Scene } from "./Scene";
 import { SceneElement } from "./SceneElement";
 import { IPointIn } from "../interfaces/IPointIn";
+import { Vector } from "../primitives/Vector";
 
 export class SceneContext{
     readonly Canvas : CanvasRenderingContext2D;
 
     private _mouse : MouseContext;
     private _scene : Scene;
+
+    get Mouse(){
+        return this._mouse;
+    }
 
     get ElementsOnScene(){
         return [...this._scene.ElementsOnScene];
@@ -23,23 +27,23 @@ export class SceneContext{
     }
 
     get LeftTop(){
-        return new Point(0,0);
+        return new Vector(0,0);
     }
 
     get LeftBottom(){
-        return new Point(0, this.Height);
+        return new Vector(0, this.Height);
     }
 
     get RightTop(){
-        return new Point(this.Width, 0);
+        return new Vector(this.Width, 0);
     }
 
     get RightBottom(){
-        return new Point(this.Width, this.Height);
+        return new Vector(this.Width, this.Height);
     }
-    
-    PIXELS_METER = 45;
+
     private _root : SceneElement;
+    
     get Root(){
         return this._root;
     }
@@ -60,12 +64,11 @@ export class SceneContext{
     }
 
     AddElement(element: SceneElement){
-        element.MouseContext = this._mouse;
-        this._scene.ElementsOnScene.push(element);       
+        this._scene.ElementsOnScene.push(element);  
+        this._scene.ShouldResort = true;     
     }
 
     RemoveElement(element: SceneElement){
-
         this._scene.ElementsOnScene = 
             this._scene.ElementsOnScene
             .filter(e=> e != element);

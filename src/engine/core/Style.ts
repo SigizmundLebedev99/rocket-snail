@@ -1,4 +1,3 @@
-
 export class Style{
     strokeStyle? : string | CanvasGradient | CanvasPattern;
     fillStyle? : string | CanvasGradient | CanvasPattern;
