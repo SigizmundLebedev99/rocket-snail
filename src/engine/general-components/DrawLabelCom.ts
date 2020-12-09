@@ -16,15 +16,6 @@ export class DrawLabelCom extends DrawComponent{
         
         let point = node.Position == 'absolute' ? node.CoordinateGrid.Convert(label.position) : label.position ;
         
-        context.save();
-        if(label.stroke){
-            context.strokeStyle = label.stroke;
-            context.strokeText(label.text, point.x, point.y);
-        }
-        if(label.fill){
-            context.fillStyle = label.fill;
-        }
         context.fillText(label.text, point.x, point.y);
-        context.restore();
     }
 }

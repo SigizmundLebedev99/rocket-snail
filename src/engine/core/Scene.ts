@@ -39,16 +39,14 @@ export class Scene{
         this.Clear();
         
         this.ElementsOnScene.forEach(node => {
-            if(!node.IsActive)
-                return;
-            node.OnMouseUpdate();
+            if(node.IsActive)
+                node.OnMouseUpdate();
         });
         
 
         this.ElementsOnScene.forEach(node =>{
-            if(!node.IsActive)
-                return;
-            node.OnComponentsUpdate();
+            if(node.IsActive)
+                node.OnComponentsUpdate();
         });
         
         this.ElementsOnScene.forEach(node =>{

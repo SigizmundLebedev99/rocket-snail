@@ -41,6 +41,10 @@ export class SceneContext{
         return new Vector(this.Width, this.Height);
     }
 
+    get Center(){
+        return new Vector(this.Width / 2, this.Height / 2);
+    }
+
     private _root : SceneElement;
     
     get Root(){

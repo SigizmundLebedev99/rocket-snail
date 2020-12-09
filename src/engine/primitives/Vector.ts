@@ -12,21 +12,22 @@ export class Vector{
     }
 
     constructor(state: any, state2: number = 0){
-        if(state.x !== null && state.y != null && isNaN(state.x) && isNaN(state.y)){
+        if(state.x !== null && state.y != null && !isNaN(state.x) && !isNaN(state.y)){
             this.x = state.x;
             this.y = state.y;
             return;
         }
-        if(state != null && state2 != null && isNaN(state) && isNaN(state2)){
-            this.x = state;
-            this.y = state2;
-            return;
-        }
-        if(Array.isArray(state) && state.length == 2 && isNaN(state[0]) && isNaN(state[1])){
+        if(Array.isArray(state) && state.length == 2 && !isNaN(state[0]) && !isNaN(state[1])){
             this.x = state[0];
             this.y = state[1];
             return;
         }
+        if(state != null && !isNaN(state) && !isNaN(state2)){
+            this.x = state;
+            this.y = state2;
+            return;
+        }
+        
         throw "Invalid input";
     }
     

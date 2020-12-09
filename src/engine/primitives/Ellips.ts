@@ -7,11 +7,17 @@ export class Ellips implements IPointIn{
     a:number;
     b:number;
 
-    constructor(x:number, y:number, a?:number, b?:number){
+    constructor(x:number, y:number, a:number, b?:number){
         this.x = x;
         this.y = y;
-        this.a = a ? a : 1;
-        this.b = b ? b : 1;
+        if(b){
+            this.a = a ? a : 1;
+            this.b = b ? b : 1;
+        }
+        else{
+            this.a = a;
+            this.b = a;
+        }
     }
 
     IsPointIn(point: Vector): boolean {

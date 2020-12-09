@@ -1,9 +1,9 @@
 import { SceneElement } from "../../engine/core/SceneElement";
-import { DrawPointCom } from "../../engine/general-components/DrawPointCom";
-import { Point } from "../../engine/primitives/Point";
 import { Vector } from "../../engine/primitives/Vector";
 import { Scene } from "../../engine/core/Scene";
 import { SceneContext } from "../../engine/core/SceneContext";
+import { DrawEllipsCom } from "../../engine/general-components/DrawEllipsCom";
+import { Ellips } from "../../engine/primitives/Ellips";
 
 export class Planet extends SceneElement{
 
@@ -16,8 +16,7 @@ export class Planet extends SceneElement{
         this.orbitEllips = orbitEllips
         this.Name = name;
         this.Style.fillStyle = color??"red";
-        this.Style.pointRadius = 1;
-        this.Style.lineWidth = 0.1;
-        this.AddComponent(new DrawPointCom(() => new Point(0,0)));
+        this.Style.lineWidth= 0.1;
+        this.AddComponent(new DrawEllipsCom(() => new Ellips(0,0,1)));
     }  
 }

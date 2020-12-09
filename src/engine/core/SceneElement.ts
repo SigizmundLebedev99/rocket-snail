@@ -5,6 +5,8 @@ import { SceneContext } from "./SceneContext";
 import { IPointIn } from "../interfaces/IPointIn";
 import { MouseState, MouseContext } from "./MouseContext";
 import { Vector } from "../primitives/Vector";
+import { GeneralComponent } from "../general-components/GeneralComponent";
+import { GeneralMouseComponent } from "../general-components/GeneralMouseComponent";
 
 export type NodePosition = "relative" | "absolute"
 
@@ -105,7 +107,6 @@ export class SceneElement {
         if(element.Parent != null)
             element.Parent.RemoveChild(element);
 
-        element.Style.Copy(this.Style);
         element.parent = this;
         this.children.push(element);
         return this;
@@ -128,14 +129,31 @@ export class SceneElement {
         this.children = this.children.filter(e=>e!= element);
     }
 
-    AddComponent(component : Component | DrawComponent | MouseComponent){
-        component.PriorityChanged = this.ResortComponents;
+    AddComponent(component : Component | DrawComponent | MouseComponent | ((node: SceneElement) => void)){
+        
         if(component instanceof Component)
             this.components.push(component);
         else if(component instanceof DrawComponent)
             this.drawComponents.push(component);
-        else
+        else if(component instanceof MouseComponent)
             this.mouseComponents.push(component);
+        else{
+            component = new GeneralComponent(component)
+            this.components.push(<Component>component);
+        }
+        component.PriorityChanged = this.ResortComponents;
+        this.ResortComponents();
+        return this;
+    }
+
+    AddMouseComponent(component : MouseComponent | ((node: SceneElement, state: MouseState) => void)){
+        if(component instanceof MouseComponent)
+            this.mouseComponents.push(component);
+        else{
+            component = new GeneralMouseComponent(component);
+            this.mouseComponents.push(<MouseComponent>component);
+        }
+        component.PriorityChanged = this.ResortComponents;
         this.ResortComponents();
         return this;
     }

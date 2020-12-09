@@ -1,4 +1,4 @@
-import { Component, DrawComponent } from "../core/Component";
+import { DrawComponent } from "../core/Component";
 import { SceneElement } from "../core/SceneElement";
 import { Ellips } from "../primitives/Ellips";
 
