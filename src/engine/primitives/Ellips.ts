@@ -11,8 +11,8 @@ export class Ellips implements IPointIn{
         this.x = x;
         this.y = y;
         if(b){
-            this.a = a ? a : 1;
-            this.b = b ? b : 1;
+            this.a = a;
+            this.b = b;
         }
         else{
             this.a = a;

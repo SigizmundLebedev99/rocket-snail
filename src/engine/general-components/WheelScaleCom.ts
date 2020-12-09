@@ -11,11 +11,8 @@ export class WheelScaleCom extends MouseComponent{
         if(!mouseState.IsIn || mouseState.KeyState.key != 'wheel')
             return;
             
-        let delta = mouseState.KeyState.Delta;
+        var delta = 1 + mouseState.KeyState.Delta / 1000;
+        node.Scale.Multiply(delta);
 
-        if(delta > 0)
-            node.Scale.Multiply(1.1);
-        else if(delta < 0)
-            node.Scale.Multiply(0.9);
     }
 }

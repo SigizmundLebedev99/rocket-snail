@@ -59,7 +59,7 @@ export class SceneElement {
 
     get TotalTransition(){
         if(this.Parent != null)
-            return this.Transition.Copy().AddV(this.Parent.TotalTransition);
+            return this.Transition.Copy().MultiplyV(this.Parent.Scale).AddV(this.Parent.TotalTransition);
         return this.Transition;
     }
 
@@ -69,7 +69,7 @@ export class SceneElement {
         return this.Rotation;
     }
 
-    get TotalScale(){
+    get TotalScale() : Vector{
         if(this.Parent != null){
             let baseScale = this.Parent.TotalScale;
             return this.Scale.Copy().MultiplyV(baseScale);

@@ -69,6 +69,8 @@ export class SceneContext{
     AddElement(element: SceneElement){
         this._scene.ElementsOnScene.push(element);  
         this._scene.ShouldResort = true;     
+        if(this._root)
+            this._root.AddChild(element);
     }
 
     RemoveElement(element: SceneElement){

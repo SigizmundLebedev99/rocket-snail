@@ -1,7 +1,6 @@
 import { Vector } from "../primitives/Vector";
 
 import { SceneElement } from "./SceneElement";
-import { SceneContext } from "./SceneContext";
 
 export class CoordinateGrid{
     Node : SceneElement;
@@ -13,16 +12,18 @@ export class CoordinateGrid{
     ConvertFromScreen(point: Vector){
         function transformVector(state : SceneElement){
             if(state.Parent == null){
-                point.Multiply(1 / state.Scale.x, 1 / state.Scale.y)
+                point
                 .Add(-state.Transition.x, -state.Transition.y)
+                .Multiply(1/state.Scale.x, 1/state.Scale.y)
                 .Rotate(-state.Rotation);
                 return;
             }
             
             transformVector(state.Parent);
-            point.Add(-state.Transition.x, -state.Transition.y)
-            .Rotate(-state.Rotation)
-            .Multiply(1 / state.Scale.x, 1 / state.Scale.y);
+            point
+            .Add(-state.Transition.x, -state.Transition.y)
+            .Multiply(1 / state.Scale.x, 1 / state.Scale.y)
+            .Rotate(-state.Rotation);
         }
         
         transformVector(this.Node);
@@ -31,21 +32,23 @@ export class CoordinateGrid{
     }
 
     Convert(point: Vector){
-        function transformCamera(state:SceneElement){
+        function transformVector(state:SceneElement){
             if(state.Parent == null){
-                point.Rotate(-state.Rotation)
-                .AddV(state.Transition)
-                .MultiplyV(state.Scale);
+                point
+                .Rotate(state.Rotation)
+                .MultiplyV(state.Scale)
+                .AddV(state.Transition);
                 return;
             }
             
-            transformCamera(state.Parent);
-            point.MultiplyV(state.Scale)
-            .Rotate(-state.Rotation)
+            transformVector(state.Parent);
+            point
+            .Rotate(state.Rotation)
+            .MultiplyV(state.Scale)
             .AddV(state.Transition);
         }
 
-        transformCamera(this.Node);
+        transformVector(this.Node);
         
         return point;
     }
@@ -53,16 +56,16 @@ export class CoordinateGrid{
     PrepareAxis(context:CanvasRenderingContext2D){
         function transformContext(state : SceneElement){
             if(state.Parent == null){
-                context.scale(state.Scale.x, state.Scale.y);
                 context.translate(state.Transition.x, state.Transition.y);
+                context.scale(state.Scale.x, state.Scale.y);
                 context.rotate(state.Rotation);
                 return;
             }
             
             transformContext(state.Parent);
             context.translate(state.Transition.x, state.Transition.y);
-            context.rotate(state.Rotation);
             context.scale(state.Scale.x, state.Scale.y);
+            context.rotate(state.Rotation);
         }
         transformContext(this.Node);
     }

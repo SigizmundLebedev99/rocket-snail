@@ -2,6 +2,7 @@ import { Component, MouseComponent } from '../core/Component'
 import { SceneElement } from "../core/SceneElement";
 import { StateMachine } from "../state-machine/StateMachine";
 import { MouseState } from '../core/MouseContext';
+import { Vector } from '../primitives/Vector';
 
 type dragState = "drag"|"none"
 
@@ -27,8 +28,15 @@ export class DragDropCom extends MouseComponent{
             let mouseState = <MouseState>state;
             if(!this.node)
                 return;
-            let vector = this.node.CoordinateGrid.ConvertFromScreen(mouseState.Movement);
-            this.node.Transition.AddV(vector);
+            let d = mouseState.Movement;
+            if(this.node.Position == 'relative' && this.node.Parent != null){
+                let scale = this.node.Parent.TotalScale;
+                var v = new Vector(d.x / scale.x, d.y / scale.y);
+                v.Rotate(-this.node.TotalRotation);
+                this.node.Transition.AddV(v);
+            }
+            else
+            this.node.Transition.Add(d.x, d.y);
         })
     }
 

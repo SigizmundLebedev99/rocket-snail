@@ -56,7 +56,7 @@ export class MouseContext{
             let binding = this.captureStack[b];
             for(let p in binding.handlers){
                 let primitive = binding.handlers[p]();
-                let point = binding.node.Position == 'absolute' ? state.Position : binding.node.CoordinateGrid.ConvertFromScreen(state.Position);
+                let point = binding.node.Position == 'absolute' ? state.Position : binding.node.CoordinateGrid.ConvertFromScreen(state.Position.Copy());
                 if(primitive.IsPointIn(point)){
                     binding.isIn = true;
                     this.isIn = binding;

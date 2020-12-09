@@ -17,7 +17,7 @@ export class DrawLineCom extends DrawComponent{
         let line : Line;
         if(this.map instanceof Line)
             line = this.map;
-        else 
+        else
             line = this.map()
         if(this.style){
             context.save()
