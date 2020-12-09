@@ -1,3 +1,5 @@
+import { SceneElement } from "./SceneElement";
+
 export class Style{
     strokeStyle? : string | CanvasGradient | CanvasPattern;
     fillStyle? : string | CanvasGradient | CanvasPattern;
@@ -14,10 +16,12 @@ export class Style{
         });
     }
 
-    Apply(context : CanvasRenderingContext2D){
-        Object.getOwnPropertyNames(this).forEach(p => {
-            if(this[p] && context[p])
-                context[p] = this[p];
+    static Apply(context : CanvasRenderingContext2D, node : SceneElement){
+        if(node.Parent != null)
+            this.Apply(context, node.Parent);
+        Object.getOwnPropertyNames(node.Style).forEach(p => {
+            if(node.Style[p] && context[p])
+                context[p] = node.Style[p];
         });
     }
 }

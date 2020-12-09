@@ -55,7 +55,6 @@ export class Scene{
             if(!node.IsActive)
                 return;
             this.Canvas.save();
-            node.Style.Apply(this.Canvas);
             node.OnDrawUpdate();
             this.Canvas.restore();
         });

@@ -5,11 +5,9 @@ import { SceneContext } from "./SceneContext";
 
 export class CoordinateGrid{
     Node : SceneElement;
-    private _view : SceneContext;
-    
+
     constructor(node : SceneElement){
         this.Node = node;
-        this._view = node.Scene;
     }
 
     ConvertFromScreen(point: Vector){

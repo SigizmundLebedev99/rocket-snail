@@ -178,6 +178,8 @@ export class SceneElement {
         if(this.Position == 'relative')
             this.CoordinateGrid.PrepareAxis(this._scene.Canvas)
 
+        Style.Apply(this._scene.Canvas, this);
+
         this.drawComponents.forEach(c=>{
             this.CheckIfStarted(c);
             c.OnUpdate(this, this._scene.Canvas);

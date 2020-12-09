@@ -1,7 +1,6 @@
 import { MouseContext } from "./MouseContext";
 import { Scene } from "./Scene";
 import { SceneElement } from "./SceneElement";
-import { IPointIn } from "../interfaces/IPointIn";
 import { Vector } from "../primitives/Vector";
 
 export class SceneContext{
