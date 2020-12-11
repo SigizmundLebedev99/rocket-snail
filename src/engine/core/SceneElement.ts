@@ -17,10 +17,7 @@ export class SceneElement {
         return this._scene;
     }
 
-    private isActive : boolean = true;
-    get IsActive(){
-        return this.isActive;
-    }
+    IsActive : boolean;
 
     Position : NodePosition = "relative";
 
@@ -57,12 +54,6 @@ export class SceneElement {
     Rotation : number = 0;
     Scale : Vector = new Vector(1,1);
 
-    get TotalTransition(){
-        if(this.Parent != null)
-            return this.Transition.Copy().MultiplyV(this.Parent.Scale).AddV(this.Parent.TotalTransition);
-        return this.Transition;
-    }
-
     get TotalRotation(){
         if(this.Parent != null)
             return this.Rotation + this.Parent.TotalRotation;
@@ -83,24 +74,11 @@ export class SceneElement {
         this._scene = view;
         this.mouseContext = view.Mouse;
         view.AddElement(this);
-        this.isActive = active;
+        this.IsActive = active;
     }
 
     get CoordinateGrid(){
         return new CoordinateGrid(this);
-    }
-
-    private setActive(val: boolean){
-        this.isActive = val;
-        this.children.forEach(e=>e.setActive(val));
-    }
-
-    ActivateTree(){
-        this.setActive(true);
-    }
-
-    DeactivateTree(){
-        this.setActive(false);
     }
 
     AddChild(element: SceneElement){

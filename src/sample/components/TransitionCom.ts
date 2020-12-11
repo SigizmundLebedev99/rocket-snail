@@ -9,7 +9,7 @@ export class TransitionCom extends Component{
 
     constructor(speed? : number){
         super();
-        this.increment = speed??0.005;
+        this.increment = speed ?? 0.005;
     }
 
     OnUpdate(node:SceneElement): void {

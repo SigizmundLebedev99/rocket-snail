@@ -4,6 +4,8 @@ import { Scene } from "../../engine/core/Scene";
 import { SceneContext } from "../../engine/core/SceneContext";
 import { DrawEllipsCom } from "../../engine/general-components/DrawEllipsCom";
 import { Ellips } from "../../engine/primitives/Ellips";
+import { SatelliteCom } from "../components/SatelliteCom";
+import { PerspectiveCom } from "../components/PerspectiveCom";
 
 export class Planet extends SceneElement{
 
@@ -16,7 +18,8 @@ export class Planet extends SceneElement{
         this.orbitEllips = orbitEllips
         this.Name = name;
         this.Style.fillStyle = color??"red";
-        this.Style.lineWidth= 0.1;
-        this.AddComponent(new DrawEllipsCom(() => new Ellips(0,0,1)));
+        this.AddComponent(new SatelliteCom())
+        .AddComponent(new PerspectiveCom(6))
+        .CaptureMouse(() => new Ellips(0,0,1))
     }  
 }

@@ -1,4 +1,4 @@
-import { Component, MouseComponent } from "../core/Component";
+import { MouseComponent } from "../core/Component";
 import { MouseState } from "../core/MouseContext";
 import { SceneElement } from "../core/SceneElement";
 
@@ -11,8 +11,7 @@ export class WheelScaleCom extends MouseComponent{
         if(!mouseState.IsIn || mouseState.KeyState.key != 'wheel')
             return;
             
-        var delta = 1 + mouseState.KeyState.Delta / 1000;
+        var delta = 1 + mouseState.KeyState.Delta / 2000;
         node.Scale.Multiply(delta);
-
     }
 }

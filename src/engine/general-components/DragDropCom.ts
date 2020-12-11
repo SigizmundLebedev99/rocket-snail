@@ -29,6 +29,8 @@ export class DragDropCom extends MouseComponent{
             if(!this.node)
                 return;
             let d = mouseState.Movement;
+            if(!d.x && !d.y)
+                return;
             if(this.node.Position == 'relative' && this.node.Parent != null){
                 let scale = this.node.Parent.TotalScale;
                 var v = new Vector(d.x / scale.x, d.y / scale.y);
@@ -36,7 +38,7 @@ export class DragDropCom extends MouseComponent{
                 this.node.Transition.AddV(v);
             }
             else
-            this.node.Transition.Add(d.x, d.y);
+            this.node.Transition.Add(d.x / 2, d.y / 2);
         })
     }
 

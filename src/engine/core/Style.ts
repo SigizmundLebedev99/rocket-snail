@@ -3,6 +3,7 @@ import { SceneElement } from "./SceneElement";
 export class Style{
     strokeStyle? : string | CanvasGradient | CanvasPattern;
     fillStyle? : string | CanvasGradient | CanvasPattern;
+    font?: string;
     lineWidth? : number;
     textAlign? : CanvasTextAlign;
     globalAlpha?: number;
@@ -23,6 +24,7 @@ export class Style{
     }
 
     static Apply(context : CanvasRenderingContext2D, node : SceneElement | Style){
+        context.font
         if(node instanceof Style){
             Object.getOwnPropertyNames(node).forEach(p => {
                 if(node[p] && context[p])

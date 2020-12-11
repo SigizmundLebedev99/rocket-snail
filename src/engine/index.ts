@@ -10,6 +10,7 @@ import {Ellips} from './primitives/Ellips';
 import {Line} from './primitives/Line';
 import {Vector} from './primitives/Vector';
 import {Rectangle} from './primitives/Rectangle';
+import {Polygon} from './primitives/Polygon';
 
 import {StateMachine} from './state-machine/StateMachine';
 
@@ -30,6 +31,7 @@ export default {
     Style,
     Ellips,
     Line,
+    Polygon,
     Vector,
     Rectangle,
     StateMachine,

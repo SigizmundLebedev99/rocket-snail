@@ -22,7 +22,7 @@ export class Vector{
             this.y = state[1];
             return;
         }
-        if(state != null && !isNaN(state) && !isNaN(state2)){
+        if(state != null && state2 != null && !isNaN(state) && !isNaN(state2)){
             this.x = state;
             this.y = state2;
             return;

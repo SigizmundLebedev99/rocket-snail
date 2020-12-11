@@ -8,7 +8,6 @@ export class DrawLabelCom extends DrawComponent{
     constructor(map:() => Label){
         super();
         this.map = map;
-        this.Priority = -10000;
     }
 
     OnUpdate(node: SceneElement, context: CanvasRenderingContext2D): void {

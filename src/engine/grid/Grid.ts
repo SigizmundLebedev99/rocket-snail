@@ -4,10 +4,18 @@ import { DrawLineCom } from "../../engine/general-components/DrawLineCom";
 import { SceneContext } from "../../engine/core/SceneContext";
 import { Vector } from "../primitives/Vector";
 import { Style } from "../core/Style";
+import { IgnorePlugin } from "webpack";
 
 export class Grid extends SceneElement{
+
+    private gap : number;
+    private xk : number;
+    private yk : number;
     constructor(view : SceneContext, gap: number){
         super(view);
+        this.gap = gap;
+        this.xk = 1;
+        this.yk = 1;
         this.Priority = -1000;
         this.Style.lineWidth = 0.2;
         this.Style.strokeStyle = "black";
@@ -15,56 +23,78 @@ export class Grid extends SceneElement{
         this.Transition = view.Center;
 
         let {Width, Height} = view;
-        let x_c = view.Center.x;
-        let y_c = view.Center.y;
 
-        let x = x_c - Width + (Width % gap);
-        let y = y_c - Height + (Height % gap);
+        this.AddComponent(new DrawLineCom(() => this.GetLongitudes()));
+        this.AddComponent(new DrawLineCom(() => this.GetLatitudes()));
 
+        this.AddComponent(new DrawLineCom(() => new Line(
+            new Vector(- Width,  this.Parent?this.Parent.Transition.y:0), 
+            new Vector(Width,  this.Parent?this.Parent.Transition.y:0)
+        ), new Style({
+            lineWidth:1
+        })))
+
+        this.AddComponent(new DrawLineCom(() => new Line(
+            new Vector( this.Parent?this.Parent.Transition.x:0, - Height), 
+            new Vector( this.Parent?this.Parent.Transition.x:0, Height)
+        ), new Style({
+            lineWidth:1
+        })))
+    }
+
+    private GetLatitudes(){
+        let {Width, Height} = this.Scene;
+        let arr : Line[] = [];
+        let position = this.Parent?this.Parent.Transition : new Vector(0,0);
+        let gap = this.Parent ? Math.abs(this.Parent.Scale.x) : this.gap;
+        
+        if(gap * this.xk > this.gap){
+            this.xk /=2;
+        }
+        else if(gap * this.xk < this.gap)
+            this.xk *= 2;
+
+        gap *= this.xk;
+
+        let x = position.x % gap;
         
         while(x < Width){
             let _x = x;
-            this.AddComponent(new DrawLineCom(() => {
-                return new Line(
-                new Vector(
-                    (x_c - _x + (<SceneElement>this.Parent).Transition.x % gap) * this.Scale.x,
-                    - Height / 2
-                ), 
-                new Vector(
-                    (x_c - _x + (<SceneElement>this.Parent).Transition.x % gap) * this.Scale.x, 
-                    Height * 1.5
-                )
-            )}));
+            arr.push(new Line(
+                new Vector(_x, 0), 
+                new Vector(_x, Height)
+            ));
             x += gap;
         }
+        return arr;
+    }
 
+    private GetLongitudes(){
+        let {Width, Height} = this.Scene;
+        if(!this.Parent)
+            return [];
+        let arr : Line[] = [];
+        let position = this.Parent?this.Parent.Transition : new Vector(0,0);
+        let gap = this.Parent ? Math.abs(this.Parent.Scale.y) : this.gap;
+
+        if(gap * this.yk > this.gap){
+            this.yk /=2;
+        }
+        else if(gap * this.yk < this.gap)
+            this.yk *= 2;
+
+        gap *= this.yk;
+
+        let y = position.y % gap;
+        
         while(y < Height){
             let _y = y;
-            this.AddComponent(new DrawLineCom(() => new Line(
-                new Vector(
-                    - Width * 2, 
-                    (y_c - _y + (<SceneElement>this.Parent).Transition.y % gap) * this.Scale.y
-                ), 
-                new Vector(
-                    Width * 1.5, 
-                    (y_c - _y + (<SceneElement>this.Parent).Transition.y % gap) * this.Scale.y
-                )
-            )));
+            arr.push(new Line(
+                new Vector(0, _y), 
+                new Vector(Width, _y)
+            ));
             y += gap;
         }
-
-        this.AddComponent(new DrawLineCom(() => new Line(
-            new Vector(- Width,  (<SceneElement>this.Parent).Transition.y * this.Scale.x), 
-            new Vector(Width,  (<SceneElement>this.Parent).Transition.y * this.Scale.x)
-        ), new Style({
-            lineWidth:1
-        })))
-
-        this.AddComponent(new DrawLineCom(() => new Line(
-            new Vector( (<SceneElement>this.Parent).Transition.x * this.Scale.x, - Height), 
-            new Vector( (<SceneElement>this.Parent).Transition.x * this.Scale.x, Height)
-        ), new Style({
-            lineWidth:1
-        })))
+        return arr;
     }
 }

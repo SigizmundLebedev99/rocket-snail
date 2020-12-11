@@ -32,20 +32,16 @@ export class CoordinateGrid{
     }
 
     Convert(point: Vector){
-        function transformVector(state:SceneElement){
-            if(state.Parent == null){
-                point
-                .Rotate(state.Rotation)
-                .MultiplyV(state.Scale)
-                .AddV(state.Transition);
-                return;
-            }
-            
-            transformVector(state.Parent);
+        function transformVector(state:SceneElement){ 
             point
             .Rotate(state.Rotation)
             .MultiplyV(state.Scale)
             .AddV(state.Transition);
+            
+            if(state.Parent == null)
+                return;
+
+            transformVector(state.Parent);
         }
 
         transformVector(this.Node);
