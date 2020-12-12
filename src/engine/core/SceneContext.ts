@@ -1,6 +1,6 @@
 import { MouseContext } from "./MouseContext";
 import { Scene } from "./Scene";
-import { SceneElement } from "./SceneElement";
+import { Item } from "./Item";
 import { Vector } from "../primitives/Vector";
 
 export class SceneContext{
@@ -45,7 +45,7 @@ export class SceneContext{
         return new Vector(this.Width / 2, this.Height / 2);
     }
 
-    private _root : SceneElement;
+    private _root : Item;
     
     get Root(){
         return this._root;
@@ -55,7 +55,7 @@ export class SceneContext{
         this._scene = scene;
         this.Canvas = scene.Canvas;
         this._mouse = mouseContext;
-        let root = new SceneElement(this);
+        let root = new Item(this);
         root.Position = 'absolute';
         root.Priority = -10000;
         this.AddElement(root);
@@ -66,14 +66,14 @@ export class SceneContext{
         this._scene.ShouldResort = true;
     }
 
-    AddElement(element: SceneElement){
+    AddElement(element: Item){
         this._scene.ElementsOnScene.push(element);  
         this._scene.ShouldResort = true;     
         if(this._root)
             this._root.AddChild(element);
     }
 
-    RemoveElement(element: SceneElement){
+    RemoveElement(element: Item){
         this._scene.ElementsOnScene = 
             this._scene.ElementsOnScene
             .filter(e=> e != element);

@@ -1,17 +1,17 @@
-import { MouseComponent } from "../../engine/core/Component";
-import { SceneElement } from "../../engine/core/SceneElement";
+import { Component } from "../../engine/core/Component";
+import { Item } from "../../engine/core/Item";
 import { DrawLabelCom } from "../../engine/general-components/DrawLabelCom";
 import { Label } from "../../engine/primitives/Label";
 import { MouseState } from "../../engine/core/MouseContext";
 
-export class PositionShowCom extends MouseComponent {
-    lable? : SceneElement;
+export class PositionShowCom extends Component {
+    lable? : Item;
     constructor() {
         super();
     }
 
-    OnStart(node: SceneElement) {
-        var lable = new SceneElement(node.Scene, false);
+    OnStart({node}) {
+        var lable = new Item(node.Scene, false);
         lable.Style.fillStyle = "black";
         lable.Style.font = "15px serif"
         lable.Position = "absolute";
@@ -21,7 +21,7 @@ export class PositionShowCom extends MouseComponent {
         node.AddChild(lable)
     }
 
-    OnUpdate(node: SceneElement, mouseState: MouseState){
+    OnUpdate({node, mouseState}){
         if(!this.lable)
             return;
         if(mouseState.IsIn)

@@ -1,7 +1,7 @@
 import { Component } from "../../engine/core/Component";
 import { Vector } from "../../engine/primitives/Vector";
 import { Planet } from "../nodes/Planet";
-import { SceneElement } from "../../engine/core/SceneElement";
+import { Item } from "../../engine/core/Item";
 
 export class PerspectiveCom extends Component{
 
@@ -13,11 +13,11 @@ export class PerspectiveCom extends Component{
         this.planeAngle = planeAngle;
     }
 
-    OnStart(node:SceneElement){
+    OnStart({node}){
         this.originalScale = node.Scale;
     }
 
-    OnUpdate(node:SceneElement): void {
+    OnUpdate({node}): void {
         let planet = <Planet>node;
         let nodeY = planet.Transition.y;
         if(nodeY == 0){

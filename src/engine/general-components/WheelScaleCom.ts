@@ -1,13 +1,13 @@
-import { MouseComponent } from "../core/Component";
+import { Component } from "../core/Component";
 import { MouseState } from "../core/MouseContext";
-import { SceneElement } from "../core/SceneElement";
+import { Item } from "../core/Item";
 
-export class WheelScaleCom extends MouseComponent{    
+export class WheelScaleCom extends Component{    
     constructor(){
         super();
     }
     
-    OnUpdate(node: SceneElement, mouseState: MouseState): void {
+    OnUpdate({node, mouseState}): void {
         if(!mouseState.IsIn || mouseState.KeyState.key != 'wheel')
             return;
             

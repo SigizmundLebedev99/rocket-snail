@@ -1,9 +1,9 @@
-import { Component, DrawComponent } from "../core/Component";
+import { Component, IState } from "../core/Component";
 import { Line } from "../primitives/Line";
-import { SceneElement } from "../core/SceneElement";
+import { Item } from "../core/Item";
 import { Style } from "../core/Style";
 
-export class DrawLineCom extends DrawComponent{
+export class DrawLineCom extends Component{
     map: (() => Line) | (() => Line[])| Line;
     style? : Style;
 
@@ -13,7 +13,7 @@ export class DrawLineCom extends DrawComponent{
         this.style = style;
     }
 
-    OnUpdate(node: SceneElement, context:CanvasRenderingContext2D): void {
+    OnUpdate({context}): void {
         let state : Line | Line[];
         if(this.map instanceof Line)
             state = this.map;

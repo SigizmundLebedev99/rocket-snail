@@ -1,15 +1,15 @@
-import { Component, MouseComponent } from "../core/Component";
-import { SceneElement } from "../core/SceneElement";
+import { Component, IState } from "../core/Component";
+import { Item } from "../core/Item";
 
 export class GeneralComponent extends Component{    
-    private action : (node:SceneElement) => void; 
+    private action : (state:IState) => void; 
 
-    constructor(action : (node:SceneElement) => void){
+    constructor(action : (state:IState) => void){
         super();
         this.action = action;
     }
     
-    OnUpdate(node: SceneElement): void {
-        this.action(node);
+    OnUpdate(state: IState): void {
+        this.action(state);
     }
 }

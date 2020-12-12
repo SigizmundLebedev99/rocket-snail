@@ -1,7 +1,9 @@
-import { SceneElement } from "./SceneElement";
+import { Item } from "./Item";
 import { MouseState } from "./MouseContext";
 
-export abstract class BaseComponent{
+export interface IState{node: Item, context: CanvasRenderingContext2D, mouseState: MouseState};
+
+export abstract class Component{
     protected priority : number = 1;
     PriorityChanged? : () => void;
 
@@ -19,17 +21,7 @@ export abstract class BaseComponent{
 
     Started : boolean = false;
 
-    OnStart(node: SceneElement) : void{}
-}
+    OnStart(state: IState) : void{}
 
-export abstract class Component extends BaseComponent{
-    abstract OnUpdate(node: SceneElement) : void;
-}
-
-export abstract class DrawComponent extends BaseComponent{
-    abstract OnUpdate(node: SceneElement, context: CanvasRenderingContext2D) : void;
-}
-
-export abstract class MouseComponent extends BaseComponent{
-    abstract OnUpdate(node: SceneElement, mouseState: MouseState) : void;
+    abstract OnUpdate(state: IState) : void;
 }

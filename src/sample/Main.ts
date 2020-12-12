@@ -1,5 +1,5 @@
 import { Grid } from "../engine/grid/Grid";
-import { SceneElement } from "../engine/core/SceneElement";
+import { Item } from "../engine/core/Item";
 import { Rectangle } from "../engine/primitives/Rectangle";
 import { ViewPort } from "../engine/core/ViewPort";
 import { Vector } from "../engine/primitives/Vector";
@@ -34,14 +34,15 @@ export function Main(){
     let pos = new Vector(-6,-6);
     let start = new Vector(-6,-6);
 
-    for(let i = 0; i < 255; i ++){
+    // for(let i = 0; i < 255; i ++){
+    for(let i = 0; i < 2; i ++){
         if(i%15 == 0){
             start.Add(0,2);
             pos = new Vector(start.x, start.y);
         }
 
         pos.Add(2,0);
-        let sun = new SceneElement(front);
+        let sun = new Item(front);
         sun.Style.lineWidth = 0.1;
         sun.Style.fillStyle = 'yellow';
         sun.Style.strokeStyle = 'orange';

@@ -1,11 +1,11 @@
 import { SceneContext } from "./SceneContext";
 import { MouseContext } from "./MouseContext";
-import { SceneElement } from "./SceneElement";
+import { Item } from "./Item";
 
 export class Scene{
     private intervalId;
 
-    ElementsOnScene : SceneElement[] = [];
+    ElementsOnScene : Item[] = [];
     readonly Canvas : CanvasRenderingContext2D;
     readonly Context : SceneContext;
 
@@ -38,22 +38,11 @@ export class Scene{
         }
         this.Clear();
         
-        this.ElementsOnScene.forEach(node => {
-            if(node.IsActive)
-                node.OnMouseUpdate();
-        });
-        
-
-        this.ElementsOnScene.forEach(node =>{
-            if(node.IsActive)
-                node.OnComponentsUpdate();
-        });
-        
         this.ElementsOnScene.forEach(node =>{
             if(!node.IsActive)
                 return;
             this.Canvas.save();
-            node.OnDrawUpdate();
+            node.OnUpdate();
             this.Canvas.restore();
         });
         

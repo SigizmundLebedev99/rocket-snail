@@ -1,8 +1,8 @@
-import { DrawComponent } from "../core/Component";
-import { SceneElement } from "../core/SceneElement";
+import { Component, IState } from "../core/Component";
+import { Item } from "../core/Item";
 import { Ellips } from "../primitives/Ellips";
 
-export class DrawEllipsCom extends DrawComponent{
+export class DrawEllipsCom extends Component{
     map : () => Ellips;
     
     constructor(map : () => Ellips){
@@ -11,7 +11,7 @@ export class DrawEllipsCom extends DrawComponent{
         this.Priority = -10000;
     }
 
-    OnUpdate(node: SceneElement, context: CanvasRenderingContext2D): void {
+    OnUpdate({context}): void {
         let e = this.map();
         context.beginPath();
         context.save();

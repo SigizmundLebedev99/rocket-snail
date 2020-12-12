@@ -1,7 +1,7 @@
-import {Component, DrawComponent, MouseComponent} from './core/Component';
+import {Component} from './core/Component';
 import {ViewPort} from './core/ViewPort';
 import {Scene} from './core/Scene';
-import {SceneElement} from './core/SceneElement';
+import {Item} from './core/Item';
 import {SceneContext} from './core/SceneContext';
 import {Style} from './core/Style';
 import {MouseContext, MouseState, MouseEvent} from './core/MouseContext';
@@ -22,11 +22,9 @@ import {DragDropCom} from './general-components/DragDropCom';
 
 export default {
     Component,
-    DrawComponent,
-    MouseComponent,
     ViewPort,
     Scene,
-    SceneElement,
+    Item,
     SceneContext,
     Style,
     Ellips,

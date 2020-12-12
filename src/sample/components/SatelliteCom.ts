@@ -1,5 +1,5 @@
 import { Component } from "../../engine/core/Component";
-import { SceneElement } from "../../engine/core/SceneElement";
+import { Item } from "../../engine/core/Item";
 import { Vector } from "../../engine/primitives/Vector";
 
 export class SatelliteCom extends Component{
@@ -7,7 +7,7 @@ export class SatelliteCom extends Component{
         super();
     }
 
-    OnUpdate(node:SceneElement): void {
-        node.Priority = node.CoordinateGrid.Convert(new Vector(0,0)).y;
+    OnUpdate({node}): void {
+        node.Priority = node.ToGlobal(new Vector(0,0)).y;
     }
 }

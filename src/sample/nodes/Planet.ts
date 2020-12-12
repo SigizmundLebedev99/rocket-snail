@@ -1,4 +1,4 @@
-import { SceneElement } from "../../engine/core/SceneElement";
+import { Item } from "../../engine/core/Item";
 import { Vector } from "../../engine/primitives/Vector";
 import { Scene } from "../../engine/core/Scene";
 import { SceneContext } from "../../engine/core/SceneContext";
@@ -7,7 +7,7 @@ import { Ellips } from "../../engine/primitives/Ellips";
 import { SatelliteCom } from "../components/SatelliteCom";
 import { PerspectiveCom } from "../components/PerspectiveCom";
 
-export class Planet extends SceneElement{
+export class Planet extends Item{
 
     orbitYCoefficient : number = 1;
     orbitEllips : Vector;

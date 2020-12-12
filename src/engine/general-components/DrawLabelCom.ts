@@ -1,8 +1,8 @@
-import { Component, DrawComponent } from "../core/Component";
-import { SceneElement } from "../core/SceneElement";
+import { Component } from "../core/Component";
+import { Item } from "../core/Item";
 import { Label } from "../primitives/Label";
 
-export class DrawLabelCom extends DrawComponent{
+export class DrawLabelCom extends Component{
 
     map : () => Label;
     constructor(map:() => Label){
@@ -10,10 +10,10 @@ export class DrawLabelCom extends DrawComponent{
         this.map = map;
     }
 
-    OnUpdate(node: SceneElement, context: CanvasRenderingContext2D): void {
+    OnUpdate({node, context}): void {
         let label = this.map();
         
-        let point = node.Position == 'absolute' ? node.CoordinateGrid.Convert(label.position) : label.position ;
+        let point = node.Position == 'absolute' ? node.ToGlobal(label.position) : label.position ;
         
         context.fillText(label.text, point.x, point.y);
     }

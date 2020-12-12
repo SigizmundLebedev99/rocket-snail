@@ -1,6 +1,6 @@
 import { Vector } from "../primitives/Vector";
 import { IPointIn } from "../interfaces/IPointIn";
-import { SceneElement } from "./SceneElement";
+import { Item } from "./Item";
 
 export type MouseEvent = 
 | {key:"down",      Which:number,       Position: Vector}
@@ -16,13 +16,13 @@ export type KeyState =
 | {key:"none"}
 
 class Binding{
-    node:SceneElement;
+    node:Item;
     handlers:(() => IPointIn)[] = [];
 
     isCaptured: boolean = false;
     isIn: boolean = false;
 
-    constructor(node:SceneElement){
+    constructor(node:Item){
         this.node = node;
     }
 }
@@ -56,7 +56,7 @@ export class MouseContext{
             let binding = this.captureStack[b];
             for(let p in binding.handlers){
                 let primitive = binding.handlers[p]();
-                let point = binding.node.Position == 'absolute' ? state.Position : binding.node.CoordinateGrid.ConvertFromScreen(state.Position.Copy());
+                let point = binding.node.Position == 'absolute' ? state.Position : binding.node.ToLocal(state.Position.Copy());
                 if(primitive.IsPointIn(point)){
                     binding.isIn = true;
                     this.isIn = binding;
@@ -134,7 +134,7 @@ export class MouseContext{
         this.Movement = new Vector(0,0);
     }
 
-    CaptureMouse(node:SceneElement, handle: () => IPointIn) : () => MouseState{
+    CaptureMouse(node:Item, handle: () => IPointIn) : () => MouseState{
         let binding = this.captureStack.find(e=>e.node == node);
         if(binding){
             binding.handlers.push(handle);
@@ -150,6 +150,10 @@ export class MouseContext{
             return new MouseState(this, bind);
         }
     }
+
+    GetState() : MouseState{
+        return new MouseState(this, {isIn:false, isCaptured:false});
+    }
 }
 
 export class MouseState{
@@ -161,7 +165,7 @@ export class MouseState{
     In : Binding | null = null;
     Captured : Binding | null = null;
 
-    constructor(context: MouseContext, bind: Binding){
+    constructor(context: MouseContext, bind:{isIn:boolean, isCaptured:boolean}){
         this.KeyState = context.LastState;
         this.Position = context.Position;
         this.Movement = context.Movement;

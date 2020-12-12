@@ -1,4 +1,4 @@
-import { SceneElement } from "../../engine/core/SceneElement";
+import { Item } from "../core/Item";
 import { Line } from "../primitives/Line";
 import { DrawLineCom } from "../../engine/general-components/DrawLineCom";
 import { SceneContext } from "../../engine/core/SceneContext";
@@ -6,7 +6,7 @@ import { Vector } from "../primitives/Vector";
 import { Style } from "../core/Style";
 import { IgnorePlugin } from "webpack";
 
-export class Grid extends SceneElement{
+export class Grid extends Item{
 
     private gap : number;
     private xk : number;

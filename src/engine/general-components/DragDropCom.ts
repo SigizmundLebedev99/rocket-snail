@@ -1,14 +1,14 @@
-import { Component, MouseComponent } from '../core/Component'
-import { SceneElement } from "../core/SceneElement";
+import { Component, IState } from '../core/Component'
+import { Item } from "../core/Item";
 import { StateMachine } from "../state-machine/StateMachine";
 import { MouseState } from '../core/MouseContext';
 import { Vector } from '../primitives/Vector';
 
 type dragState = "drag"|"none"
 
-export class DragDropCom extends MouseComponent{
+export class DragDropCom extends Component{
     sm: StateMachine<dragState>;
-    node?: SceneElement;
+    node?: Item;
 
     constructor(){
         super();
@@ -42,11 +42,11 @@ export class DragDropCom extends MouseComponent{
         })
     }
 
-    OnStart(node: SceneElement){
-        this.node = node;
+    OnStart(state: IState){
+        this.node = state.node;
     }
 
-    OnUpdate(node: SceneElement, mouseState: MouseState): void {
-        this.sm.CheckState(mouseState);
+    OnUpdate(state: IState): void {
+        this.sm.CheckState(state.mouseState);
     }
 }

@@ -1,4 +1,4 @@
-import { SceneElement } from "./SceneElement";
+import { Item } from "./Item";
 
 export class Style{
     strokeStyle? : string | CanvasGradient | CanvasPattern;
@@ -23,7 +23,7 @@ export class Style{
         });
     }
 
-    static Apply(context : CanvasRenderingContext2D, node : SceneElement | Style){
+    static Apply(context : CanvasRenderingContext2D, node : Item | Style){
         context.font
         if(node instanceof Style){
             Object.getOwnPropertyNames(node).forEach(p => {
