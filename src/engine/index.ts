@@ -2,7 +2,6 @@ import {Component} from './core/Component';
 import {ViewPort} from './core/ViewPort';
 import {Scene} from './core/Scene';
 import {Item} from './core/Item';
-import {SceneContext} from './core/SceneContext';
 import {Style} from './core/Style';
 import {MouseContext, MouseState, MouseEvent} from './core/MouseContext';
 
@@ -25,7 +24,6 @@ export default {
     ViewPort,
     Scene,
     Item,
-    SceneContext,
     Style,
     Ellips,
     Line,

@@ -1,18 +1,18 @@
 import { Item } from "../core/Item";
 import { Line } from "../primitives/Line";
 import { DrawLineCom } from "../../engine/general-components/DrawLineCom";
-import { SceneContext } from "../../engine/core/SceneContext";
 import { Vector } from "../primitives/Vector";
 import { Style } from "../core/Style";
 import { IgnorePlugin } from "webpack";
+import { Scene } from "../core/Scene";
 
 export class Grid extends Item{
 
     private gap : number;
     private xk : number;
     private yk : number;
-    constructor(view : SceneContext, gap: number){
-        super(view);
+    constructor(gap: number, scene? : Scene){
+        super(scene);
         this.gap = gap;
         this.xk = 1;
         this.yk = 1;
@@ -20,9 +20,9 @@ export class Grid extends Item{
         this.Style.lineWidth = 0.2;
         this.Style.strokeStyle = "black";
         this.Position = 'absolute';
-        this.Transition = view.Center;
+        this.Transition = this.Scene.Center;
 
-        let {Width, Height} = view;
+        let {Width, Height} = this.Scene;
 
         this.AddComponent(new DrawLineCom(() => this.GetLongitudes()));
         this.AddComponent(new DrawLineCom(() => this.GetLatitudes()));

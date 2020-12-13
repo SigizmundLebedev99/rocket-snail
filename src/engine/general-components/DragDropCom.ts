@@ -1,52 +1,30 @@
-import { Component, IState } from '../core/Component'
-import { Item } from "../core/Item";
-import { StateMachine } from "../state-machine/StateMachine";
-import { MouseState } from '../core/MouseContext';
+import { Component, IState } from '../core/Component';
 import { Vector } from '../primitives/Vector';
 
-type dragState = "drag"|"none"
-
 export class DragDropCom extends Component{
-    sm: StateMachine<dragState>;
-    node?: Item;
-
-    constructor(){
-        super();
-        this.sm = new StateMachine<dragState>("none");
-        this.sm.AddState('none')
-        .AddCondition((state)=>{
-            let mouseState = <MouseState>state;
-            return mouseState.IsCaptured
-        }, 'drag')
-
-        this.sm.AddState('drag')
-        .AddCondition((state)=>{
-            let mouseState = <MouseState>state;
-            return !mouseState.IsCaptured
-        }, "none")
-        .OnCheck(state=>{
-            let mouseState = <MouseState>state;
-            if(!this.node)
-                return;
-            let d = mouseState.Movement;
-            if(!d.x && !d.y)
-                return;
-            if(this.node.Position == 'relative' && this.node.Parent != null){
-                let scale = this.node.Parent.TotalScale;
-                var v = new Vector(d.x / scale.x, d.y / scale.y);
-                v.Rotate(-this.node.TotalRotation);
-                this.node.Transition.AddV(v);
-            }
-            else
-            this.node.Transition.Add(d.x / 2, d.y / 2);
-        })
-    }
-
-    OnStart(state: IState){
-        this.node = state.node;
-    }
+    mouseDown = false;
 
     OnUpdate(state: IState): void {
-        this.sm.CheckState(state.mouseState);
+        let {mouseState, node} = state;
+        if(mouseState.IsCaptured && ! this.mouseDown)
+            this.mouseDown = true;
+        if(!mouseState.IsCaptured && this.mouseDown)
+            this.mouseDown = false;
+        if(!this.mouseDown)
+            return;
+        
+        let d = mouseState.Movement;
+
+        if(d == null)
+            return;
+
+        if(node.Position == 'relative' && node.Parent != null){
+            let scale = node.Parent.TotalScale;
+            var v = new Vector(d.x / scale.x, d.y / scale.y);
+            v.Rotate(-node.TotalRotation);
+            node.Transition.AddV(v);
+        }
+        else
+            node.Transition.Add(d.x, d.y);
     }
 }

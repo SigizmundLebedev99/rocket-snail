@@ -1,29 +1,82 @@
-import { SceneContext } from "./SceneContext";
 import { MouseContext } from "./MouseContext";
 import { Item } from "./Item";
+import { Vector } from "../primitives/Vector";
 
 export class Scene{
-    private intervalId;
+   
+    public static ActiveScene : Scene;
 
-    ElementsOnScene : Item[] = [];
+    elementsOnScene : Item[] = [];
+   
     readonly Canvas : CanvasRenderingContext2D;
-    readonly Context : SceneContext;
 
     private _mouseContext : MouseContext;
-    ShouldResort : boolean = false;
 
-    constructor(context : CanvasRenderingContext2D, mouseContext?:MouseContext){
+    get Mouse(){
+        return this._mouseContext;
+    }
+
+    get ElementsOnScene(){
+        return [...this.elementsOnScene];
+    }
+
+    get Width(){
+        return this.Canvas.canvas.width;
+    }
+
+    get Height(){
+        return this.Canvas.canvas.height;
+    }
+
+    get LeftTop(){
+        return new Vector(0,0);
+    }
+
+    get LeftBottom(){
+        return new Vector(0, this.Height);
+    }
+
+    get RightTop(){
+        return new Vector(this.Width, 0);
+    }
+
+    get RightBottom(){
+        return new Vector(this.Width, this.Height);
+    }
+
+    get Center(){
+        return new Vector(this.Width / 2, this.Height / 2);
+    }
+
+    private shouldResort : boolean = false;
+
+    PriorityChanged(){
+        this.shouldResort = true;
+    }
+
+    AddElement(element: Item){
+        element.Scene
+        this.elementsOnScene.push(element);  
+        this.shouldResort = true;
+    }
+
+    RemoveElement(element: Item){
+        this.elementsOnScene = 
+            this.elementsOnScene
+            .filter(e=> e != element);
+    }
+
+    constructor(context : CanvasRenderingContext2D, container? : HTMLDivElement){
         this.Canvas = context;
 
-        if(mouseContext){
-            this._mouseContext = mouseContext;
-            this.Context = new SceneContext(this, mouseContext);
-            return;
-        }
-
         this._mouseContext = new MouseContext();
-        this._mouseContext.ListenEvents(context.canvas);
-        this.Context = new SceneContext(this, this._mouseContext);
+        
+        if(container)
+            this._mouseContext.ListenEvents(container);
+        else
+            this._mouseContext.ListenEvents(context.canvas);
+
+        Scene.ActiveScene = this;
     }
 
     Clear(){
@@ -31,10 +84,10 @@ export class Scene{
     }
 
     Redraw(){
-        if(this.ShouldResort){
+        if(this.shouldResort){
             this._mouseContext.Resort();
             this.Resort();
-            this.ShouldResort = false;
+            this.shouldResort = false;
         }
         this.Clear();
         
@@ -49,6 +102,8 @@ export class Scene{
         this._mouseContext.Reset();
     }
 
+    private intervalId;
+
     Run(){
         this.intervalId = setInterval(() => {
             this.Redraw();
@@ -60,8 +115,8 @@ export class Scene{
     }
 
     private Resort(){
-        let elements = [...this.ElementsOnScene];
+        let elements = [...this.elementsOnScene];
         elements.sort((a,b) => a.Priority - b.Priority);
-        this.ElementsOnScene = elements;
+        this.elementsOnScene = elements;
     }
 }

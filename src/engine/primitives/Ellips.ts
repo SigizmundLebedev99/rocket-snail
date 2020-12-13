@@ -1,7 +1,7 @@
-import { IPointIn } from "../interfaces/IPointIn";
+import { IPointIn, IPath } from "../interfaces/IPointIn";
 import { Vector } from "./Vector";
 
-export class Ellips implements IPointIn{
+export class Ellips implements IPath{
     x:number;
     y:number;
     a:number;
@@ -18,6 +18,10 @@ export class Ellips implements IPointIn{
             this.a = a;
             this.b = a;
         }
+    }
+    GetPath(): Path2D {
+        var path = new Path2D();
+        path.moveTo(this.x, this.y);
     }
 
     IsPointIn(point: Vector): boolean {

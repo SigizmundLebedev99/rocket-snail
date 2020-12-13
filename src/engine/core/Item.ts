@@ -1,21 +1,32 @@
 import { Component, IState } from "./Component";
 import { Style } from "./Style";
-import { SceneContext } from "./SceneContext";
-import { IPointIn } from "../interfaces/IPointIn";
 import { MouseState, MouseContext } from "./MouseContext";
 import { Vector } from "../primitives/Vector";
 import { GeneralComponent } from "../general-components/GeneralComponent";
+import { Scene } from "./Scene";
+import { IPath } from "../interfaces/IPath";
 
 export type NodePosition = "relative" | "absolute"
 
 export class Item {
-    private _scene: SceneContext;
+
+    public static Root : Item | null;
+
+    private _scene: Scene;
 
     get Scene() {
         return this._scene;
     }
 
-    IsActive: boolean;
+    set Scene(val : Scene){
+        if(this._scene == val)
+            return;
+        this.Remove();
+        this._scene = val;
+        this._scene.AddElement(this);    
+    }
+
+    IsActive: boolean = true;
 
     Position: NodePosition = "relative";
 
@@ -38,15 +49,15 @@ export class Item {
         return this.parent;
     }
 
-    set Parent(val: Item | null){
-        if(val == null && this.parent != null){
+    set Parent(val: Item | null) {
+        if (val == null && this.parent != null) {
             this.parent.RemoveChild(this);
         }
-        else if(val != null && this.parent != null){
+        else if (val != null && this.parent != null) {
             this.parent.RemoveChild(this);
             val.AddChild(this);
         }
-        else{
+        else {
             val?.AddChild(this);
         }
     }
@@ -56,8 +67,6 @@ export class Item {
     get Children() {
         return [...this.children];
     }
-
-    private components: Component[] = [];
 
     readonly Style: Style = new Style();
 
@@ -81,11 +90,25 @@ export class Item {
 
     private mouseContext: MouseContext;
 
-    constructor(view: SceneContext, active: boolean = true) {
-        this._scene = view;
-        this.mouseContext = view.Mouse;
-        view.AddElement(this);
-        this.IsActive = active;
+    constructor(view?: Scene) {
+        if(Item.Root != null){
+            this._scene = view?view:Item.Root.Scene;
+            this._scene.AddElement(this);
+            this.mouseContext = this._scene.Mouse;
+            this.Parent = Item.Root;
+        }
+        else if(view){
+            this.mouseContext = view.Mouse;
+            this._scene = view;
+            view.AddElement(this);
+        }
+        else if(Scene.ActiveScene){
+            this.mouseContext = Scene.ActiveScene.Mouse;
+            this._scene = Scene.ActiveScene;
+            Scene.ActiveScene.AddElement(this);
+        }
+        else
+            throw "No active scene found";
     }
 
     AddChild(element: Item) {
@@ -97,18 +120,13 @@ export class Item {
         return this;
     }
 
-    Remove() {
-        this._scene.RemoveElement(this);
-        if (this.parent != null) {
-            this.parent.children = this.parent.children.filter(e => e != this);
-        }
-        this.children.forEach(e => e.Remove());
-    }
-
     private RemoveChild(element: Item) {
         element.parent = null;
         this.children = this.children.filter(e => e != element);
     }
+
+
+    private components: Component[] = [];
 
     AddComponent(component: Component | ((node: IState) => void), priority = 0) {
 
@@ -124,9 +142,17 @@ export class Item {
         return this;
     }
 
+    Remove(fromParent = true) {
+        this._scene.RemoveElement(this);
+        if (fromParent && this.parent != null) {
+            this.parent.children = this.parent.children.filter(e => e != this);
+        }
+        this.children.forEach(e => e.Remove(false));
+    }
+
     private map?: () => MouseState;
 
-    CaptureMouse(map: () => IPointIn) {
+    CaptureMouse(map: () => IPath) {
         if (this.mouseContext)
             this.map = this.mouseContext.CaptureMouse(this, map);
         return this;
@@ -145,14 +171,14 @@ export class Item {
 
         Style.Apply(this._scene.Canvas, this);
 
+        let mouseState: MouseState;
+        if (this.map)
+            mouseState = this.map();
+        else
+            mouseState = this.mouseContext.GetState();
+
         this.components.forEach(c => {
-            let mouseState : MouseState | null;
-            if(this.map){
-                mouseState = this.map();
-            }
-            else
-                mouseState = this.mouseContext.GetState();
-            let state = {node: this, context: this._scene.Canvas, mouseState: mouseState};
+            let state = { node: this, context: this._scene.Canvas, mouseState: mouseState };
             this.CheckIfStarted(c, state);
             c.OnUpdate(state);
         });

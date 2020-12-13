@@ -41,8 +41,8 @@ export class MouseContext{
     }
 
     Position : Vector = new Vector(0,0);
-    LastState : KeyState = {key:'none'};
-    Movement : Vector = new Vector(0,0);
+    LastEvent : KeyState = {key:'none'};
+    Movement : Vector | null = null;
 
     HandleState(state: MouseEvent){
         this.Position = state.Position;
@@ -73,14 +73,14 @@ export class MouseContext{
                 break;
             }
             case 'down':{
-                this.LastState = state;
+                this.LastEvent = state;
                 this.isCaptured = this.isIn;
                 if(this.isIn != null)
                     this.isIn.isCaptured = true;
                 break;
             }   
             case 'up':{
-                this.LastState = state;
+                this.LastEvent = state;
                 if(this.isCaptured){
                     this.isCaptured.isCaptured = false;
                     this.isCaptured = null;
@@ -88,10 +88,9 @@ export class MouseContext{
                 break;
             }  
             case 'wheel':{
-                this.LastState = state;
+                this.LastEvent = state;
             }       
-        }
-        
+        } 
     }
 
     ListenEvents(htmlElement : HTMLElement){
@@ -130,8 +129,8 @@ export class MouseContext{
     }
 
     Reset(){
-        this.LastState = {key:"none"};
-        this.Movement = new Vector(0,0);
+        this.LastEvent = {key:"none"};
+        this.Movement = null;
     }
 
     CaptureMouse(node:Item, handle: () => IPointIn) : () => MouseState{
@@ -146,9 +145,7 @@ export class MouseContext{
             this.Resort();
         }
         let bind = binding;
-        return () => {
-            return new MouseState(this, bind);
-        }
+        return () =>  new MouseState(this, bind);
     }
 
     GetState() : MouseState{
@@ -159,16 +156,16 @@ export class MouseContext{
 export class MouseState{
     IsCaptured : boolean = false;
     IsIn : boolean = false;
-    KeyState : KeyState;
+    LastEvent : KeyState;
     Position : Vector;
-    Movement : Vector;
+    Movement : Vector | null;
     In : Binding | null = null;
     Captured : Binding | null = null;
 
     constructor(context: MouseContext, bind:{isIn:boolean, isCaptured:boolean}){
-        this.KeyState = context.LastState;
-        this.Position = context.Position;
-        this.Movement = context.Movement;
+        this.LastEvent = context.LastEvent;
+        this.Position = context.Position.Copy();
+        this.Movement = context.Movement == null?null:context.Movement.Copy();
         this.IsCaptured = bind.isCaptured;
         this.IsIn = bind.isIn;
         this.In = context.In;

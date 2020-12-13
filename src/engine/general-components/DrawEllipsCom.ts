@@ -8,7 +8,6 @@ export class DrawEllipsCom extends Component{
     constructor(map : () => Ellips){
         super();
         this.map = map;
-        this.Priority = -10000;
     }
 
     OnUpdate({context}): void {

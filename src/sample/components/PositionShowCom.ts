@@ -2,7 +2,6 @@ import { Component } from "../../engine/core/Component";
 import { Item } from "../../engine/core/Item";
 import { DrawLabelCom } from "../../engine/general-components/DrawLabelCom";
 import { Label } from "../../engine/primitives/Label";
-import { MouseState } from "../../engine/core/MouseContext";
 
 export class PositionShowCom extends Component {
     lable? : Item;
@@ -11,7 +10,8 @@ export class PositionShowCom extends Component {
     }
 
     OnStart({node}) {
-        var lable = new Item(node.Scene, false);
+        var lable = new Item();
+        lable.IsActive = false;
         lable.Style.fillStyle = "black";
         lable.Style.font = "15px serif"
         lable.Position = "absolute";
@@ -21,7 +21,7 @@ export class PositionShowCom extends Component {
         node.AddChild(lable)
     }
 
-    OnUpdate({node, mouseState}){
+    OnUpdate({mouseState}){
         if(!this.lable)
             return;
         if(mouseState.IsIn)
