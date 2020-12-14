@@ -65,8 +65,8 @@ export class MouseContext {
       let binding = this.captureStack[b];
       let point = state.Position;
       let path = binding.getPath();
-      if (binding.node.ApplyTransform)
-        point = binding.node.ToLocal(point.Copy());
+
+      point = binding.node.ToLocal(point.Copy());
 
       let isIn: boolean;
 

@@ -1,23 +1,25 @@
-import {Component} from './core/Component';
-import {ViewPort} from './core/ViewPort';
-import {Scene} from './core/Scene';
-import {Item} from './core/Item';
-import {Style} from './core/Style';
-import {MouseContext, MouseState, MouseEvent} from './core/MouseContext';
+import { Component } from './core/Component';
+import { ViewPort } from './core/ViewPort';
+import { Scene } from './core/Scene';
+import { Item } from './core/Item';
+import { Style } from './core/Style';
+import { MouseContext, MouseState } from './core/MouseContext';
 
-import {Circle} from './primitives/Circle';
-import {Line} from './primitives/Line';
-import {Vector} from './primitives/Vector';
-import {Rectangle} from './primitives/Rectangle';
-import {Polygon} from './primitives/Polygon';
+import { Circle } from './primitives/Circle';
+import { Line } from './primitives/Line';
+import { Vector } from './primitives/Vector';
+import { Rectangle } from './primitives/Rectangle';
+import { Polygon } from './primitives/Polygon';
 
-import {StateMachine} from './state-machine/StateMachine';
+import { StateMachine } from './state-machine/StateMachine';
 
-import {DrawLineCom} from './general-components/DrawLineCom';
-import {DrawPath} from './general-components/DrawPathCom';
-import {DrawLabelCom} from './general-components/DrawLabelCom';
-import {WheelScaleCom} from './general-components/WheelScaleCom';
-import {DragDrop} from './general-components/DragDropCom';
+import { DrawLine } from './general-components/DrawLineCom';
+import { DrawPath } from './general-components/DrawPathCom';
+import { DrawLabel } from './general-components/DrawLabelCom';
+import { WheelScale } from './general-components/WheelScaleCom';
+import { DragDrop } from './general-components/DragDropCom';
+
+import { Grid } from './grid/Grid';
 
 export default {
     Component,
@@ -31,12 +33,12 @@ export default {
     Vector,
     Rectangle,
     StateMachine,
-    DrawLineCom,
-    DrawLabelCom,
+    DrawLine,
+    DrawLabel,
     DrawPath,
-    WheelScaleCom,
+    WheelScale,
     DragDrop,
     MouseContext,
     MouseState,
-    MouseEvent
+    Grid
 }

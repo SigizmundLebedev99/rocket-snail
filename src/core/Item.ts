@@ -25,7 +25,7 @@ export class Item {
 
   IsActive: boolean = true;
 
-  ApplyTransform: boolean = true;
+  InheritTransform: boolean = true;
 
   private priority: number = 1;
 
@@ -169,8 +169,7 @@ export class Item {
     if (this.components.length == 0)
       return;
 
-    if (this.ApplyTransform)
-      this.TransformCanvas(this._scene.Canvas)
+    this.TransformCanvas(this._scene.Canvas)
 
     Style.Apply(this._scene.Canvas, this);
 
@@ -197,7 +196,7 @@ export class Item {
 
   ToLocal(point: Vector) {
     function transformVector(state: Item) {
-      if (state.Parent == null) {
+      if (state.Parent == null || !state.InheritTransform) {
         point
           .Add(-state.Transition.x, -state.Transition.y)
           .Multiply(1 / state.Scale.x, 1 / state.Scale.y)
@@ -224,7 +223,7 @@ export class Item {
         .MultiplyV(state.Scale)
         .AddV(state.Transition);
 
-      if (state.Parent == null)
+      if (state.Parent == null || !state.InheritTransform)
         return;
 
       transformVector(state.Parent);
@@ -237,7 +236,8 @@ export class Item {
 
   TransformCanvas(context: CanvasRenderingContext2D) {
     function transformContext(state: Item) {
-      if (state.Parent == null) {
+
+      if (state.Parent == null || !state.InheritTransform) {
         context.translate(state.Transition.x, state.Transition.y);
         context.scale(state.Scale.x, state.Scale.y);
         context.rotate(state.Rotation);

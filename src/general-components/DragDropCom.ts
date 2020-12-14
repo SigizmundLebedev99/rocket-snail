@@ -1,8 +1,15 @@
 import { Component, IState } from '../core/Component';
+import { Item } from '../core/Item';
 import { Vector } from '../primitives/Vector';
 
 export class DragDrop extends Component {
   mouseDown = false;
+  itemToDrag?: Item;
+
+  constructor(drag?: Item){
+    super();
+    this.itemToDrag = drag;
+  }
 
   OnUpdate(state: IState): void {
     let { mouseState, node } = state;
@@ -13,12 +20,15 @@ export class DragDrop extends Component {
     if (!this.mouseDown)
       return;
 
+    if(this.itemToDrag)
+      node = this.itemToDrag;
+
     let d = mouseState.Movement;
 
     if (d == null)
       return;
 
-    if (node.ApplyTransform && node.Parent != null) {
+    if (node.Parent != null) {
       let scale = node.Parent.TotalScale;
       var v = new Vector(d.x / scale.x, d.y / scale.y);
       v.Rotate(-node.TotalRotation);

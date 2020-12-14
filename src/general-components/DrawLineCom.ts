@@ -2,7 +2,7 @@ import { Component, IState } from "../core/Component";
 import { Line } from "../primitives/Line";
 import { Style } from "../core/Style";
 
-export class DrawLineCom extends Component {
+export class DrawLine extends Component {
   map: (() => Line) | (() => Line[]) | Line;
   style?: Style;
 

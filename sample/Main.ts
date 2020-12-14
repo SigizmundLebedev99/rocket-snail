@@ -8,31 +8,35 @@ import { Planet } from "./nodes/Planet";
 import { DragDrop } from "../src/general-components/DragDropCom";
 import { SatelliteCom } from "./components/SatelliteCom";
 import { TransitionCom } from "./components/TransitionCom";
-import { WheelScaleCom } from "../src/general-components/WheelScaleCom";
+import { WheelScale } from "../src/general-components/WheelScaleCom";
 import { PositionShowCom } from "./components/PositionShowCom";
 import { DrawPath } from "../src/general-components/DrawPathCom";
 
 export function Main() {
   let viewport = new ViewPort("viewport");
+  
   let back = viewport.AddScene();
 
   let grid = new Grid(50);
 
   let front = viewport.AddScene();
-  var root =
-    new Item()
-      .CaptureInner(() => new Rectangle(0, 0, front.Width, front.Height).GetPath())
-      .AddComponent(new DragDrop(), 2)
-      .AddComponent(new WheelScaleCom())
-      .AddChild(grid)
-      .AddComponent(({ mouseState }) => {
-        if (mouseState.Movement != null || mouseState.LastEvent.key == 'wheel')
-          back.Redraw();
-      })
 
+  let root = new Item();
   root.Scale = new Vector(50, -50);
   root.Transition = front.Center;
-  root.ApplyTransform = false;
+  root.AddChild(grid);
+
+  // camera
+  new Item()
+    .CaptureInner(() => new Rectangle(0, 0, front.Width, front.Height).GetPath())
+    .AddComponent(new DragDrop(root), 2)
+    .AddComponent(new WheelScale(root))
+    .AddComponent(({ mouseState }) => {
+      if (mouseState.Movement != null || mouseState.LastEvent.key == 'wheel'){
+        back.Redraw();
+      }
+    });
+  
   Item.Root = root;
 
   let pos = new Vector(-6, -6);

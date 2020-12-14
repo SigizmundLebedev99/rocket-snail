@@ -1,6 +1,6 @@
 import { Item } from "../core/Item";
 import { Line } from "../primitives/Line";
-import { DrawLineCom } from "../general-components/DrawLineCom";
+import { DrawLine } from "../general-components/DrawLineCom";
 import { Vector } from "../primitives/Vector";
 import { Style } from "../core/Style";
 import { Scene } from "../core/Scene";
@@ -13,27 +13,24 @@ export class Grid extends Item {
   constructor(gap: number, scene?: Scene) {
     super(scene);
     this.gap = gap;
-    // this.xk = 1;
-    // this.yk = 1;
     this.Priority = -1000;
     this.Style.lineWidth = 0.2;
     this.Style.strokeStyle = "black";
-    this.ApplyTransform = false;
-    this.Transition = this.Scene.Center;
+    this.InheritTransform = false;
 
     let { Width, Height } = this.Scene;
 
-    this.AddComponent(new DrawLineCom(() => this.GetLongitudes()));
-    this.AddComponent(new DrawLineCom(() => this.GetLatitudes()));
+    this.AddComponent(new DrawLine(() => this.GetLongitudes()));
+    this.AddComponent(new DrawLine(() => this.GetLatitudes()));
 
-    this.AddComponent(new DrawLineCom(() => new Line(
+    this.AddComponent(new DrawLine(() => new Line(
       new Vector(- Width, this.Parent ? this.Parent.Transition.y : 0),
       new Vector(Width, this.Parent ? this.Parent.Transition.y : 0)
     ), new Style({
       lineWidth: 1
     })))
 
-    this.AddComponent(new DrawLineCom(() => new Line(
+    this.AddComponent(new DrawLine(() => new Line(
       new Vector(this.Parent ? this.Parent.Transition.x : 0, - Height),
       new Vector(this.Parent ? this.Parent.Transition.x : 0, Height)
     ), new Style({
@@ -44,8 +41,8 @@ export class Grid extends Item {
   private GetLatitudes() {
     let { Width, Height } = this.Scene;
     let arr: Line[] = [];
-    let position = this.Parent ? this.Parent.ToGlobal(new Vector(0, 0)) : new Vector(0, 0);
-    let gap = this.Parent ? Math.abs(this.Parent.TotalScale.x) : this.gap;
+    let position = this.Parent ? this.Parent.Transition : new Vector(0, 0);
+    let gap = this.Parent ? Math.abs(this.Parent.Scale.x) : this.gap;
 
     // if(gap * this.xk > this.gap){
     //     this.xk /=2;
@@ -73,8 +70,8 @@ export class Grid extends Item {
     if (!this.Parent)
       return [];
     let arr: Line[] = [];
-    let position = this.Parent ? this.Parent.ToGlobal(new Vector(0, 0)) : new Vector(0, 0);
-    let gap = this.Parent ? Math.abs(this.Parent.TotalScale.y) : this.gap;
+    let position = this.Parent ? this.Parent.Transition : new Vector(0, 0);
+    let gap = this.Parent ? Math.abs(this.Parent.Scale.y) : this.gap;
 
     let y = position.y % gap;
 
