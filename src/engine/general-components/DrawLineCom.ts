@@ -1,6 +1,5 @@
 import { Component, IState } from "../core/Component";
 import { Line } from "../primitives/Line";
-import { Item } from "../core/Item";
 import { Style } from "../core/Style";
 
 export class DrawLineCom extends Component{
@@ -19,6 +18,7 @@ export class DrawLineCom extends Component{
             state = this.map;
         else
             state = this.map()
+            
         if(this.style){
             context.save()
             Style.Apply(context, this.style);

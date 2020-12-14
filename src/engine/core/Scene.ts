@@ -69,7 +69,7 @@ export class Scene{
     constructor(context : CanvasRenderingContext2D, container? : HTMLDivElement){
         this.Canvas = context;
 
-        this._mouseContext = new MouseContext();
+        this._mouseContext = new MouseContext(context);
         
         if(container)
             this._mouseContext.ListenEvents(container);

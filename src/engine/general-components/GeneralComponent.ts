@@ -1,5 +1,4 @@
 import { Component, IState } from "../core/Component";
-import { Item } from "../core/Item";
 
 export class GeneralComponent extends Component{    
     private action : (state:IState) => void; 

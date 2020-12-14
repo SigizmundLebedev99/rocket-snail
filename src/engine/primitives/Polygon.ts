@@ -1,7 +1,7 @@
-import { IPointIn } from '../interfaces/IPointIn';
+import { IPath } from '../interfaces/IPath';
 import { Vector } from './Vector';
 
-export class Polygon implements IPointIn{
+export class Polygon implements IPath{
 
     public vertexes : Vector[];
 
@@ -9,7 +9,7 @@ export class Polygon implements IPointIn{
         this.vertexes = vertexes;
     }
     
-    IsPointIn(point: Vector): boolean {
+    GetPath(): Path2D {
         throw new Error("Method not implemented.");
     }
 }

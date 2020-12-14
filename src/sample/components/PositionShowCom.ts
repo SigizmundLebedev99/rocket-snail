@@ -14,7 +14,7 @@ export class PositionShowCom extends Component {
         lable.IsActive = false;
         lable.Style.fillStyle = "black";
         lable.Style.font = "15px serif"
-        lable.Position = "absolute";
+        lable.ApplyTransform = false;
         lable.Priority = Number.MAX_VALUE;
         lable.AddComponent(new DrawLabelCom(() => new Label(node.Transition.x.toFixed(2) + ", " + node.Transition.y.toFixed(2))));
         this.lable = lable;

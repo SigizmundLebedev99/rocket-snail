@@ -4,13 +4,10 @@ import { MouseState, MouseContext } from "./MouseContext";
 import { Vector } from "../primitives/Vector";
 import { GeneralComponent } from "../general-components/GeneralComponent";
 import { Scene } from "./Scene";
-import { IPath } from "../interfaces/IPath";
-
-export type NodePosition = "relative" | "absolute"
 
 export class Item {
 
-    public static Root : Item | null;
+    public static Root: Item | null;
 
     private _scene: Scene;
 
@@ -18,17 +15,17 @@ export class Item {
         return this._scene;
     }
 
-    set Scene(val : Scene){
-        if(this._scene == val)
+    set Scene(val: Scene) {
+        if (this._scene == val)
             return;
         this.Remove();
         this._scene = val;
-        this._scene.AddElement(this);    
+        this._scene.AddElement(this);
     }
 
     IsActive: boolean = true;
 
-    Position: NodePosition = "relative";
+    ApplyTransform : boolean = true;
 
     private priority: number = 1;
 
@@ -91,18 +88,18 @@ export class Item {
     private mouseContext: MouseContext;
 
     constructor(view?: Scene) {
-        if(Item.Root != null){
-            this._scene = view?view:Item.Root.Scene;
+        if (Item.Root != null) {
+            this._scene = view ? view : Item.Root.Scene;
             this._scene.AddElement(this);
             this.mouseContext = this._scene.Mouse;
             this.Parent = Item.Root;
         }
-        else if(view){
+        else if (view) {
             this.mouseContext = view.Mouse;
             this._scene = view;
             view.AddElement(this);
         }
-        else if(Scene.ActiveScene){
+        else if (Scene.ActiveScene) {
             this.mouseContext = Scene.ActiveScene.Mouse;
             this._scene = Scene.ActiveScene;
             Scene.ActiveScene.AddElement(this);
@@ -152,9 +149,15 @@ export class Item {
 
     private map?: () => MouseState;
 
-    CaptureMouse(map: () => IPath) {
+    CaptureInner(map: () => Path2D) {
         if (this.mouseContext)
-            this.map = this.mouseContext.CaptureMouse(this, map);
+            this.map = this.mouseContext.CaptureMouseInPath(this, map);
+        return this;
+    }
+
+    CaptureStroke(map: () => Path2D) {
+        if (this.mouseContext)
+            this.map = this.mouseContext.CaptureMouseOnStroke(this, map);
         return this;
     }
 
@@ -166,8 +169,8 @@ export class Item {
         if (this.components.length == 0)
             return;
 
-        if (this.Position == 'relative')
-            this.PrepareCanvas(this._scene.Canvas)
+        if (this.ApplyTransform)
+            this.TransformCanvas(this._scene.Canvas)
 
         Style.Apply(this._scene.Canvas, this);
 
@@ -232,7 +235,7 @@ export class Item {
         return point;
     }
 
-    private PrepareCanvas(context: CanvasRenderingContext2D) {
+    TransformCanvas(context: CanvasRenderingContext2D) {
         function transformContext(state: Item) {
             if (state.Parent == null) {
                 context.translate(state.Transition.x, state.Transition.y);

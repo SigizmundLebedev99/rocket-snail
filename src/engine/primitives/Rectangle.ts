@@ -1,8 +1,8 @@
-import { IPointIn } from "../interfaces/IPointIn";
+import { IPath } from "../interfaces/IPath";
 import { Fns } from "../../helpers/math";
 import { Vector } from "./Vector";
 
-export class Rectangle implements IPointIn{
+export class Rectangle implements IPath{
     x:number;
     y:number;
     width:number;
@@ -13,6 +13,12 @@ export class Rectangle implements IPointIn{
         this.y = y;
         this.height = height;
         this.width = width;
+    }
+
+    GetPath(): Path2D {
+        var path = new Path2D();
+        path.rect(this.x, this.y, this.width, this.height);
+        return path;
     }
 
     IsPointIn(point: Vector): boolean {

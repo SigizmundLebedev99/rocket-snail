@@ -3,9 +3,9 @@ import { Item } from "../engine/core/Item";
 import { Rectangle } from "../engine/primitives/Rectangle";
 import { ViewPort } from "../engine/core/ViewPort";
 import { Vector } from "../engine/primitives/Vector";
-import { Ellips } from "../engine/primitives/Ellips";
+import { Circle } from "../engine/primitives/Circle";
 import { Planet } from "./nodes/Planet";
-import { DrawEllipsCom } from "../engine/general-components/DrawEllipsCom";
+import { DrawCircleCom } from "../engine/general-components/DrawCircleCom";
 import { DragDropCom } from "../engine/general-components/DragDropCom";
 import { SatelliteCom } from "./components/SatelliteCom";
 import { TransitionCom } from "./components/TransitionCom";
@@ -21,17 +21,18 @@ export function Main(){
     let front = viewport.AddScene();
     var root = 
         new Item()
-        .CaptureMouse(()=>new Rectangle(0,0, front.Width, front.Height))
+        .CaptureInner(()=>new Rectangle(0,0, front.Width, front.Height).GetPath())
         .AddComponent(new DragDropCom(),2)
         .AddComponent(new WheelScaleCom())
         .AddChild(grid)
         .AddComponent(({mouseState}) => {
-            back.Redraw();
+            if(mouseState.Movement != null || mouseState.LastEvent.key == 'wheel')
+                back.Redraw();
         })
     
     root.Scale = new Vector(50,-50);
     root.Transition = front.Center;
-    root.Position = 'absolute';
+    root.ApplyTransform = false;
     Item.Root = root;
 
     let pos = new Vector(-6,-6);
@@ -49,7 +50,7 @@ export function Main(){
         sun.Style.lineWidth = 0.1;
         sun.Style.fillStyle = 'yellow';
         sun.Style.strokeStyle = 'orange';
-        sun.CaptureMouse(()=>new Ellips(0,0, 1.5));
+        sun.CaptureInner(()=>new Circle(0,0, 1.5).GetPath());
         sun.Scale = new Vector(0.2, 0.2);
         sun.Transition = pos.Copy();
 
@@ -59,17 +60,17 @@ export function Main(){
 
         sun
             .AddComponent(new PositionShowCom())
-            .AddComponent(new DrawEllipsCom(()=>new Ellips(0,0, 1.5)))
+            .AddComponent(new DrawCircleCom(()=>new Circle(0,0, 1.5)))
             .AddComponent(new DragDropCom(), 2)
             .AddComponent(new SatelliteCom())
             .AddChild(earth
                 .AddComponent(new PositionShowCom())
                 .AddComponent(new TransitionCom())
-                .AddComponent(new DrawEllipsCom(()=>new Ellips(0,0, 1)))
+                .AddComponent(new DrawCircleCom(()=>new Circle(0,0, 1)))
                 .AddChild(moon
                     .AddComponent(new PositionShowCom())
                     .AddComponent(new TransitionCom(-0.005))
-                    .AddComponent(new DrawEllipsCom(()=>new Ellips(0,0, 0.8)))));
+                    .AddComponent(new DrawCircleCom(()=>new Circle(0,0, 0.8)))));
     }
     
     back.Redraw();

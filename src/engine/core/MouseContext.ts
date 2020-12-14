@@ -1,8 +1,9 @@
 import { Vector } from "../primitives/Vector";
-import { IPointIn } from "../interfaces/IPointIn";
 import { Item } from "./Item";
 
-export type MouseEvent = 
+type captureMode = "inPath" | "onStroke";
+
+export type MouseEvent =
 | {key:"down",      Which:number,       Position: Vector}
 | {key:"up",                            Position: Vector}
 | {key:"wheel",     Delta:number,       Position: Vector}
@@ -17,17 +18,21 @@ export type KeyState =
 
 class Binding{
     node:Item;
-    handlers:(() => IPointIn)[] = [];
+    getPath:() => Path2D;
+
+    captureMode : captureMode = 'inPath';
 
     isCaptured: boolean = false;
     isIn: boolean = false;
 
-    constructor(node:Item){
+    constructor(node:Item, getPath: () => Path2D){
         this.node = node;
+        this.getPath = getPath;
     }
 }
 
 export class MouseContext{
+    private context : CanvasRenderingContext2D;
     private captureStack : Binding[] = [];
     private isIn : Binding | null = null;
     private isCaptured: Binding | null = null;
@@ -38,6 +43,10 @@ export class MouseContext{
 
     get Captured(){
         return this.isCaptured;
+    }
+
+    constructor(context: CanvasRenderingContext2D){
+        this.context = context;
     }
 
     Position : Vector = new Vector(0,0);
@@ -54,17 +63,29 @@ export class MouseContext{
 
         for(let b in this.captureStack){
             let binding = this.captureStack[b];
-            for(let p in binding.handlers){
-                let primitive = binding.handlers[p]();
-                let point = binding.node.Position == 'absolute' ? state.Position : binding.node.ToLocal(state.Position.Copy());
-                if(primitive.IsPointIn(point)){
-                    binding.isIn = true;
-                    this.isIn = binding;
-                    break;
-                }
+            let point = state.Position;
+            let path = binding.getPath();
+            if(binding.node.ApplyTransform)
+                point = binding.node.ToLocal(point.Copy());
+            
+            let isIn : boolean;
+            
+            if(binding.captureMode == 'inPath')
+                isIn = this.context.isPointInPath(path, point.x, point.y)
+            else{
+                let l_width = this.context.lineWidth;
+                let item_l_width = binding.node.Style.lineWidth || binding.node.Style.GetProperty('lineWidth', binding.node);
+                if(item_l_width)
+                    this.context.lineWidth = item_l_width;
+                isIn = this.context.isPointInStroke(path, point.x, point.y);
+                this.context.lineWidth = l_width;
             }
-            if(binding.isIn)
+            
+            if(isIn){
+                binding.isIn = true;
+                this.isIn = binding;
                 break;
+            }
         }
 
         switch(state.key){
@@ -133,14 +154,29 @@ export class MouseContext{
         this.Movement = null;
     }
 
-    CaptureMouse(node:Item, handle: () => IPointIn) : () => MouseState{
+    CaptureMouseInPath(node:Item, path: Path2D | (() => Path2D)) : () => MouseState{
+        return this.CaptureMouse(node, path, 'inPath');
+    }
+
+    CaptureMouseOnStroke(node: Item, path: Path2D | (() => Path2D)) : () => MouseState{
+        return this.CaptureMouse(node, path, 'onStroke');
+    }
+
+    private CaptureMouse(node: Item, path: Path2D | (() => Path2D), captureMode : captureMode) : () => MouseState{
+        let handle : () => Path2D
+        if(path instanceof Path2D)
+            handle = () => path;
+        else
+            handle = path;
+
         let binding = this.captureStack.find(e=>e.node == node);
         if(binding){
-            binding.handlers.push(handle);
+            binding.getPath = handle;
+            binding.captureMode = captureMode;
         }
         else{
-            binding = new Binding(node);
-            binding.handlers.push(handle);
+            binding = new Binding(node, handle);
+            binding.captureMode = captureMode;
             this.captureStack.push(binding);
             this.Resort();
         }

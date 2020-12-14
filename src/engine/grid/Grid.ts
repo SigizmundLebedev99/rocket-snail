@@ -19,7 +19,7 @@ export class Grid extends Item{
         this.Priority = -1000;
         this.Style.lineWidth = 0.2;
         this.Style.strokeStyle = "black";
-        this.Position = 'absolute';
+        this.ApplyTransform = false;
         this.Transition = this.Scene.Center;
 
         let {Width, Height} = this.Scene;
@@ -48,13 +48,13 @@ export class Grid extends Item{
         let position = this.Parent?this.Parent.Transition : new Vector(0,0);
         let gap = this.Parent ? Math.abs(this.Parent.Scale.x) : this.gap;
         
-        if(gap * this.xk > this.gap){
-            this.xk /=2;
-        }
-        else if(gap * this.xk < this.gap)
-            this.xk *= 2;
+        // if(gap * this.xk > this.gap){
+        //     this.xk /=2;
+        // }
+        // else if(gap * this.xk < this.gap)
+        //     this.xk *= 2;
 
-        gap *= this.xk;
+        // gap *= this.xk;
 
         let x = position.x % gap;
         
@@ -76,14 +76,6 @@ export class Grid extends Item{
         let arr : Line[] = [];
         let position = this.Parent?this.Parent.Transition : new Vector(0,0);
         let gap = this.Parent ? Math.abs(this.Parent.Scale.y) : this.gap;
-
-        if(gap * this.yk > this.gap){
-            this.yk /=2;
-        }
-        else if(gap * this.yk < this.gap)
-            this.yk *= 2;
-
-        gap *= this.yk;
 
         let y = position.y % gap;
         

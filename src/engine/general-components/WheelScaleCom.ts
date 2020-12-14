@@ -1,17 +1,16 @@
-import { Component } from "../core/Component";
-import { MouseState } from "../core/MouseContext";
-import { Item } from "../core/Item";
+import { Component, IState } from "../core/Component";
 
 export class WheelScaleCom extends Component{    
     constructor(){
         super();
     }
     
-    OnUpdate({node, mouseState}): void {
-        if(!mouseState.IsIn || mouseState.KeyState.key != 'wheel')
+    OnUpdate(state: IState): void {
+        let {mouseState, node} = state;
+        if(!mouseState.IsIn || mouseState.LastEvent.key != 'wheel')
             return;
             
-        var delta = 1 + mouseState.KeyState.Delta / 2000;
+        var delta = 1 + mouseState.LastEvent.Delta / 2000;
         node.Scale.Multiply(delta);
     }
 }

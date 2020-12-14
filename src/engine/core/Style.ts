@@ -16,6 +16,14 @@ export class Style{
         });
     }
 
+    GetProperty(prop:string, node: Item){
+        if(node.Style[prop])
+            return node.Style[prop];
+        if(node.Parent == null)
+            return null;
+        return this.GetProperty(prop, node.Parent)
+    }
+
     Copy(style : Style){
         Object.getOwnPropertyNames(this).forEach(p => {
             if(!this[p])

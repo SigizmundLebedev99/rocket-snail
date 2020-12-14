@@ -18,7 +18,7 @@ export class DragDropCom extends Component{
         if(d == null)
             return;
 
-        if(node.Position == 'relative' && node.Parent != null){
+        if(node.ApplyTransform && node.Parent != null){
             let scale = node.Parent.TotalScale;
             var v = new Vector(d.x / scale.x, d.y / scale.y);
             v.Rotate(-node.TotalRotation);

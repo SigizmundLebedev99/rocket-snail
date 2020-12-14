@@ -1,12 +1,10 @@
 import { Item } from "../../engine/core/Item";
 import { Vector } from "../../engine/primitives/Vector";
-import { Ellips } from "../../engine/primitives/Ellips";
+import { Circle } from "../../engine/primitives/Circle";
 import { SatelliteCom } from "../components/SatelliteCom";
 import { PerspectiveCom } from "../components/PerspectiveCom";
-import { Scene } from "../../engine/core/Scene";
 
 export class Planet extends Item{
-
     orbitYCoefficient : number = 1;
     orbitEllips : Vector;
     Name : string;
@@ -15,9 +13,9 @@ export class Planet extends Item{
         super();
         this.orbitEllips = orbitEllips
         this.Name = name;
-        this.Style.fillStyle = color??"red";
+        this.Style.fillStyle = color ?? "red";
         this.AddComponent(new SatelliteCom())
         .AddComponent(new PerspectiveCom(6))
-        .CaptureMouse(() => new Ellips(0,0,1))
-    }  
+        .CaptureInner(() => new Circle(0,0,1).GetPath())
+    }
 }
