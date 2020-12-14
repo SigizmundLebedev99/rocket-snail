@@ -1,8 +1,10 @@
 {
-  "name": "@dmlebedev/rocketsnail",
+  "name": "rocket-snail",
   "version": "1.0.0",
   "description": "light html canvas engine",
-  "files": ["lib/src/**/*"],
+  "files": [
+    "lib/src/**/*"
+  ],
   "scripts": {
     "dev": "webpack-dev-server --config webpack.sample.js",
     "build": "tsc"
