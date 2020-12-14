@@ -1,5 +1,6 @@
 import { Vector } from "../primitives/Vector";
 import { Item } from "./Item";
+import { Style } from "./Style";
 
 type captureMode = "inPath" | "onStroke";
 
@@ -74,7 +75,7 @@ export class MouseContext {
         isIn = this.context.isPointInPath(path, point.x, point.y)
       else {
         let l_width = this.context.lineWidth;
-        let item_l_width = binding.node.Style.lineWidth || binding.node.Style.GetProperty('lineWidth', binding.node);
+        let item_l_width = binding.node.Style.lineWidth || Style.GetProperty('lineWidth', binding.node);
         if (item_l_width)
           this.context.lineWidth = item_l_width;
         isIn = this.context.isPointInStroke(path, point.x, point.y);
