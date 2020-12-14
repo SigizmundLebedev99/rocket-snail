@@ -2,13 +2,14 @@
   "name": "rocket-snail",
   "version": "1.0.0",
   "description": "light html canvas engine",
-  "main": "index.js",
+  "files": ["lib/**/*"],
   "scripts": {
-    "dev": "webpack-dev-server",
-    "build": "webpack"
+    "dev": "webpack-dev-server --config webpack.sample.js",
+    "build": "tsc"
   },
+  "homepage": "https://github.com/SigizmundLebedev99/rocket-snail",
   "author": "Lebedev Dmitriy",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^3.6.1",
     "@typescript-eslint/parser": "^3.6.1",
