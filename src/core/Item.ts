@@ -149,13 +149,13 @@ export class Item {
 
   private map?: () => MouseState;
 
-  CaptureInner(map: () => Path2D) {
+  CaptureInner(map: Path2D | (() => Path2D)) {
     if (this.mouseContext)
       this.map = this.mouseContext.CaptureMouseInPath(this, map);
     return this;
   }
 
-  CaptureStroke(map: () => Path2D) {
+  CaptureStroke(map: Path2D | (() => Path2D)) {
     if (this.mouseContext)
       this.map = this.mouseContext.CaptureMouseOnStroke(this, map);
     return this;

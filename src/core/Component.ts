@@ -4,7 +4,7 @@ import { MouseState } from "./MouseContext";
 export interface IState { node: Item, context: CanvasRenderingContext2D, mouseState: MouseState };
 
 export abstract class Component {
-  protected priority: number = 1;
+  protected priority: number = 0;
   PriorityChanged?: () => void;
 
   get Priority() {

@@ -1,6 +1,7 @@
 import { Component, IState } from "../../src/core/Component";
 import { Item } from "../../src/core/Item";
-import { DrawLabel } from "../../src/general-components/DrawLabelCom";
+import { Style } from "../../src/core/Style";
+import { DrawLabel } from "../../src/general-components/DrawLabel";
 import { Label } from "../../src/primitives/Label";
 import { Vector } from "../../src/primitives/Vector";
 
@@ -18,7 +19,7 @@ export class PositionShowCom extends Component {
     lable.InheritTransform = false;
     lable.Priority = Number.MAX_VALUE;
     lable.AddComponent(() => lable.Transition = node.ToGlobal(new Vector(0,0)));
-    lable.AddComponent(new DrawLabel(() => new Label(node.Transition.x.toFixed(2) + ", " + node.Transition.y.toFixed(2))));
+    lable.AddComponent(new DrawLabel(() => node.Transition.x.toFixed(2) + ", " + node.Transition.y.toFixed(2), new Style({fillStyle:"teal"})));
     this.lable = lable;
     node.AddChild(lable)
   }

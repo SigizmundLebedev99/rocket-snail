@@ -14,12 +14,12 @@ export class DrawLabel extends Component {
       this.map = map;
     else
       this.map = () => map;
-    style = style;
+    this.style = style;
   }
 
   OnUpdate({ context } : IState): void {
     let label = this.map();
-    
+
     if(this.style){
       context.save();
       Style.Apply(context, this.style);

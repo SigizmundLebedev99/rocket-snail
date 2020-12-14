@@ -1,6 +1,6 @@
 import { Item } from "../core/Item";
 import { Line } from "../primitives/Line";
-import { DrawLine } from "../general-components/DrawLineCom";
+import { DrawLine } from "../general-components/DrawLine";
 import { Vector } from "../primitives/Vector";
 import { Style } from "../core/Style";
 import { Scene } from "../core/Scene";
@@ -43,15 +43,7 @@ export class Grid extends Item {
     let arr: Line[] = [];
     let position = this.Parent ? this.Parent.Transition : new Vector(0, 0);
     let gap = this.Parent ? Math.abs(this.Parent.Scale.x) : this.gap;
-
-    // if(gap * this.xk > this.gap){
-    //     this.xk /=2;
-    // }
-    // else if(gap * this.xk < this.gap)
-    //     this.xk *= 2;
-
-    // gap *= this.xk;
-
+    
     let x = position.x % gap;
 
     while (x < Width) {

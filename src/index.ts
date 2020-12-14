@@ -8,16 +8,17 @@ import { MouseContext, MouseState } from './core/MouseContext';
 import { Circle } from './primitives/Circle';
 import { Line } from './primitives/Line';
 import { Vector } from './primitives/Vector';
+import { Label } from './primitives/Label';
 import { Rectangle } from './primitives/Rectangle';
 import { Polygon } from './primitives/Polygon';
 
 import { StateMachine } from './state-machine/StateMachine';
 
-import { DrawLine } from './general-components/DrawLineCom';
-import { DrawPath } from './general-components/DrawPathCom';
-import { DrawLabel } from './general-components/DrawLabelCom';
-import { WheelScale } from './general-components/WheelScaleCom';
-import { DragDrop } from './general-components/DragDropCom';
+import { DrawLine } from './general-components/DrawLine';
+import { DrawPath } from './general-components/DrawPath';
+import { DrawLabel } from './general-components/DrawLabel';
+import { WheelScale } from './general-components/WheelScale';
+import { DragDrop } from './general-components/DragDrop';
 
 import { Grid } from './grid/Grid';
 
@@ -40,5 +41,6 @@ export default {
     DragDrop,
     MouseContext,
     MouseState,
-    Grid
+    Grid,
+    Label
 }
