@@ -37,7 +37,7 @@ export function Main() {
     .AddComponent(new DragDrop(root), 2)
     .AddComponent(new WheelScale(root))
     .AddComponent(({ mouseState }) => {
-      if (mouseState.Movement != null || mouseState.LastEvent.key == 'wheel'){
+      if (mouseState.IsCaptured || mouseState.WheelEvent){
         back.Redraw();
       }
     });
@@ -54,7 +54,7 @@ export function Main() {
 
   let pos = new Vector(-6, -6);
   let start = new Vector(-6, -6);
-  for (let i = 0; i < 255; i++) {
+  for (let i = 0; i < 2; i++) {
     if (i % 15 == 0) {
       start.Add(0, 5);
       pos = new Vector(start.x, start.y);
@@ -62,6 +62,9 @@ export function Main() {
 
     pos.Add(5, 0);
     let sun = new Item();
+    sun.AddEventListener('mouseenter', (e) => console.log("enter"));
+    sun.AddEventListener('mouseleave', (e) => console.log("leave"));
+    sun.AddEventListener('click', (e) => console.log("click"));
     sun.CaptureInner(new Circle(0, 0, 1.5).GetPath());
     sun.Scale = new Vector(0.5, 0.5);
     sun.Transition = pos.Copy();

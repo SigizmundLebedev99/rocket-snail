@@ -1,6 +1,6 @@
 {
   "name": "rocket-snail",
-  "version": "1.0.13",
+  "version": "1.0.22",
   "description": "light html canvas engine",
   "files": [
     "lib/src/**/*"

@@ -4,19 +4,6 @@ import { Style } from "./Style";
 
 type captureMode = "inPath" | "onStroke";
 
-export type MouseEvent =
-  | { key: "down", Which: number, Position: Vector }
-  | { key: "up", Position: Vector }
-  | { key: "wheel", Delta: number, Position: Vector }
-  | { key: "move", Movement: Vector, Position: Vector }
-  | { key: "none", Position: Vector }
-
-export type KeyState =
-  | { key: "down", Which: number }
-  | { key: "up" }
-  | { key: "wheel", Delta: number }
-  | { key: "none" }
-
 class Binding {
   node: Item;
   getPath: () => Path2D;
@@ -51,31 +38,25 @@ export class MouseContext {
   }
 
   Position: Vector = new Vector(0, 0);
-  LastEvent: KeyState = { key: 'none' };
+  LastEvent: MouseEvent | { type: "none" } = { type: "none" };
+  LastWheelEvent: WheelEvent | null = null;
   Movement: Vector | null = null;
 
-  HandleState(state: MouseEvent) {
-    this.Position = state.Position;
-
-    if (this.isIn != null) {
-      this.isIn.isIn = false;
-      this.isIn = null;
-    }
-
+  HandleState(e: MouseEvent) {
+    this.Position = new Vector(e.x, e.y)
+    let isIn = false;
     for (let b in this.captureStack) {
       let binding = this.captureStack[b];
-      let point = state.Position;
+      let point = this.Position;
       let path = binding.getPath();
 
       point = binding.node.ToLocal(point.Copy());
-
-      let isIn: boolean;
 
       if (binding.captureMode == 'inPath')
         isIn = this.context.isPointInPath(path, point.x, point.y)
       else {
         let l_width = this.context.lineWidth;
-        let item_l_width = binding.node.Style.lineWidth || Style.GetProperty('lineWidth', binding.node);
+        let item_l_width = Style.GetProperty('lineWidth', binding.node);
         if (item_l_width)
           this.context.lineWidth = item_l_width;
         isIn = this.context.isPointInStroke(path, point.x, point.y);
@@ -83,26 +64,47 @@ export class MouseContext {
       }
 
       if (isIn) {
+        if(this.isIn && binding == this.isIn)
+          break;
+        else if(this.isIn != null){
+          this.isIn.node.HandleEvent(new MouseEvent("mouseleave", e));
+          this.isIn.isIn = false;
+          binding.node.HandleEvent(new MouseEvent("mouseenter", e));
+        }
+        else{
+          binding.node.HandleEvent(new MouseEvent("mouseenter", e));
+        }
+        
         binding.isIn = true;
         this.isIn = binding;
         break;
       }
     }
 
-    switch (state.key) {
-      case 'move': {
-        this.Movement = state.Movement;
+    if(!isIn && this.isIn){
+      this.isIn.node.HandleEvent(new MouseEvent("mouseleave", e))
+      this.isIn.isIn = false;
+      this.isIn = null;
+    }
+
+    this.LastEvent = e;
+
+    if(this.isIn){
+      this.isIn.node.HandleEvent(e);
+    }
+
+    switch (e.type) {
+      case 'mousemove': {
+        this.Movement = new Vector(e.movementX, e.movementY);
         break;
       }
-      case 'down': {
-        this.LastEvent = state;
+      case 'mousedown': {
         this.isCaptured = this.isIn;
         if (this.isIn != null)
           this.isIn.isCaptured = true;
         break;
       }
-      case 'up': {
-        this.LastEvent = state;
+      case 'mouseup': {
         if (this.isCaptured) {
           this.isCaptured.isCaptured = false;
           this.isCaptured = null;
@@ -110,40 +112,22 @@ export class MouseContext {
         break;
       }
       case 'wheel': {
-        this.LastEvent = state;
+        this.LastWheelEvent = <WheelEvent>e;
       }
     }
   }
 
   ListenEvents(htmlElement: HTMLElement) {
-    htmlElement.addEventListener("mousedown", (e) => {
-      this.HandleState({
-        key: "down",
-        Position: new Vector(e.x, e.y),
-        Which: e.which
-      })
-    });
-    htmlElement.addEventListener("mouseup", (e) => {
-      this.HandleState(
-        {
-          key: "up",
-          Position: new Vector(e.x, e.y)
-        });
-    });
-    htmlElement.addEventListener("wheel", (e) => {
-      this.HandleState({
-        key: "wheel",
-        Delta: e.deltaY,
-        Position: new Vector(e.x, e.y)
-      })
-    });
-    htmlElement.addEventListener("mousemove", (e) => {
-      this.HandleState({
-        key: "move",
-        Movement: new Vector(e.movementX, e.movementY),
-        Position: new Vector(e.x, e.y)
-      })
-    });
+    htmlElement.addEventListener("mousedown", (e) =>
+      this.HandleState(e));
+    htmlElement.addEventListener("mouseup", (e) =>
+      this.HandleState(e));
+    htmlElement.addEventListener("wheel", (e) =>
+      this.HandleState(e));
+    htmlElement.addEventListener("mousemove", (e) =>
+      this.HandleState(e));
+    htmlElement.addEventListener("click", (e) =>
+      this.HandleState(e));
   }
 
   Resort() {
@@ -151,7 +135,8 @@ export class MouseContext {
   }
 
   Reset() {
-    this.LastEvent = { key: "none" };
+    this.LastEvent = { type: "none" };
+    this.LastWheelEvent = null;
     this.Movement = null;
   }
 
@@ -193,14 +178,16 @@ export class MouseContext {
 export class MouseState {
   IsCaptured: boolean = false;
   IsIn: boolean = false;
-  LastEvent: KeyState;
+  MouseEvent: MouseEvent | { type: "none" };
+  WheelEvent: WheelEvent | null;
   Position: Vector;
   Movement: Vector | null;
   In: Binding | null = null;
   Captured: Binding | null = null;
 
   constructor(context: MouseContext, bind: { isIn: boolean, isCaptured: boolean }) {
-    this.LastEvent = context.LastEvent;
+    this.MouseEvent = context.LastEvent;
+    this.WheelEvent = context.LastWheelEvent;
     this.Position = context.Position.Copy();
     this.Movement = context.Movement == null ? null : context.Movement.Copy();
     this.IsCaptured = bind.isCaptured;

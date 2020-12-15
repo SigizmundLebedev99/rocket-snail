@@ -19,6 +19,8 @@ import { DrawPath } from './general-components/DrawPath';
 import { DrawLabel } from './general-components/DrawLabel';
 import { WheelScale } from './general-components/WheelScale';
 import { DragDrop } from './general-components/DragDrop';
+import { DrawImage } from './general-components/DrawImage';
+import { Clip } from './general-components/Clip';
 
 import { Grid } from './grid/Grid';
 
@@ -42,5 +44,7 @@ export default {
     MouseContext,
     MouseState,
     Grid,
-    Label
+    Label,
+    DrawImage,
+    Clip
 }

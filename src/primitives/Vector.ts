@@ -49,9 +49,9 @@ export class Vector {
     return this;
   }
 
-  SubstractV(vector: Vector) {
-    this.x += vector.x;
-    this.y += vector.y;
+  SubtractV(vector: Vector) {
+    this.x -= vector.x;
+    this.y -= vector.y;
     return this;
   }
 

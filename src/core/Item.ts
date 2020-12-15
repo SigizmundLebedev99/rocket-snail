@@ -4,12 +4,13 @@ import { MouseState, MouseContext } from "./MouseContext";
 import { Vector } from "../primitives/Vector";
 import { GeneralComponent } from "../general-components/GeneralComponent";
 import { Scene } from "./Scene";
+import { EventType, EventHandler } from "./EventsHandler";
 
 export class Item {
-
   public static Root: Item | null;
 
   private _scene: Scene;
+  private _eventHandler: EventHandler = new EventHandler();
 
   get Scene() {
     return this._scene;
@@ -250,5 +251,17 @@ export class Item {
       context.rotate(state.Rotation);
     }
     transformContext(this);
+  }
+
+  AddEventListener(type: EventType, listener: (e: MouseEvent) => void){
+    this._eventHandler.addEventListener(type, listener);
+  }
+
+  RemoveEventListener(type: EventType, listener: (e: MouseEvent) => void){
+    this._eventHandler.removeEventListener(type, listener);
+  }
+
+  HandleEvent(event: MouseEvent) {
+    this._eventHandler.Emit(event);
   }
 }

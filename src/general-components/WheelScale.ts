@@ -11,11 +11,12 @@ export class WheelScale extends Component {
 
   OnUpdate(state: IState): void {
     let { mouseState, node } = state;
-    if (!mouseState.IsIn || mouseState.LastEvent.key != 'wheel')
+    
+    if (!mouseState.IsIn || !mouseState.WheelEvent)
       return;
     if(this.itemToScale)
       node = this.itemToScale;
-    var delta = 1 + mouseState.LastEvent.Delta / 2000;
+    var delta = 1 + mouseState.WheelEvent.deltaY / 2000;
     node.Scale.Multiply(delta);
   }
 }
