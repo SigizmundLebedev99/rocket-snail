@@ -18,7 +18,6 @@ import { StateMachine } from './state-machine/StateMachine';
 import { DrawLine } from './general-components/DrawLine';
 import { DrawPath } from './general-components/DrawPath';
 import { DrawLabel } from './general-components/DrawLabel';
-import { WheelScale } from './general-components/WheelScale';
 import { DragDrop } from './general-components/DragDrop';
 import { DrawImage } from './general-components/DrawImage';
 import { Clip } from './general-components/Clip';
@@ -40,7 +39,6 @@ export default {
     DrawLine,
     DrawLabel,
     DrawPath,
-    WheelScale,
     DragDrop,
     MouseContext,
     MouseState,

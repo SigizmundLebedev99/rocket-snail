@@ -7,7 +7,6 @@ import { Circle } from "../src/primitives/Circle";
 import { Planet } from "./nodes/Planet";
 import { DragDrop } from "../src/general-components/DragDrop";
 import { SatelliteCom } from "./components/SatelliteCom";
-import { WheelScale } from "../src/general-components/WheelScale";
 import { PositionShowCom } from "./components/PositionShowCom";
 
 import sunImg from './sun.jpg';
@@ -37,7 +36,7 @@ export function Main() {
   new Item()
     .CaptureInner(() => new Rectangle(0, 0, front.Width, front.Height).GetPath())
     .AddComponent(new DragDrop(root), 2)
-    .AddComponent(new WheelScale(root));
+    .AddEventListener("wheel", e => root.Scale.Multiply(1 + e.deltaY / 2000))
   
   Item.Root = root;
 

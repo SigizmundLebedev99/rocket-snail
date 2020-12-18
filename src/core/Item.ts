@@ -257,12 +257,14 @@ export class Item {
     transformContext(this);
   }
 
-  AddEventListener(type: EventType, listener: (e: MouseEvent) => void){
+  AddEventListener<K extends keyof EventType>(type: K, listener: (ev: EventType[K]) => void){
     this._eventHandler.addEventListener(type, listener);
+    return this;
   }
 
-  RemoveEventListener(type: EventType, listener: (e: MouseEvent) => void){
+  RemoveEventListener<K extends keyof EventType>(type: K, listener: (ev: EventType[K]) => void){
     this._eventHandler.removeEventListener(type, listener);
+    return this;
   }
 
   HandleEvent(event: MouseEvent) {

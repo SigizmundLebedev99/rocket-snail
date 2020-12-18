@@ -1,7 +1,15 @@
-export type EventType = "click" | "mouseenter" | "mouseleave" | "mousedown" | "mouseup" | "mousemove" | "wheel"
+export type EventType = {
+  "click" : MouseEvent;
+  "mouseenter" : MouseEvent;
+  "mouseleave" : MouseEvent;
+  "mousedown" : MouseEvent; 
+  "mouseup" : MouseEvent; 
+  "mousemove" : MouseEvent; 
+  "wheel" : WheelEvent;
+}
 
 export class EventHandler{
-  private listeners : {[id:string] : ((e:MouseEvent) => void)[]} = {
+  private listeners : {[id:string] : any[]} = {
     'click' : [],
     'mouseenter' : [],
     "mouseleave" : [],
@@ -11,11 +19,11 @@ export class EventHandler{
     "wheel" : []
   };
 
-  addEventListener(type: EventType, listener: (e:MouseEvent) => void){
+  addEventListener<K extends keyof EventType>(type: K, listener: (ev: EventType[K]) => void){
     this.listeners[type].push(listener);
   }
 
-  removeEventListener(type: EventType, listener: (e:MouseEvent) => void){
+  removeEventListener<K extends keyof EventType>(type: K, listener: (ev: EventType[K]) => void){
     this.listeners[type] = this.listeners[type].filter(e => e != listener);
   }
 

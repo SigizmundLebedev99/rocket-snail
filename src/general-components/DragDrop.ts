@@ -11,8 +11,7 @@ export class DragDrop extends Component {
     this.itemToDrag = drag;
   }
 
-  OnUpdate(state: IState): void {
-    let { mouseState, node } = state;
+  OnUpdate({ mouseState, node }: IState): void {
     if (mouseState.IsCaptured && !this.mouseDown)
       this.mouseDown = true;
     if (!mouseState.IsCaptured && this.mouseDown)
