@@ -16,16 +16,18 @@ import moonImg from './moon.jpg';
 
 import { DrawImage } from "../src/general-components/DrawImage";
 import { Clip } from "../src/general-components/Clip";
+import { Style } from "../src/core/Style";
 
 export function Main() {
   let viewport = new ViewPort("viewport");
-  
-  let back = viewport.AddScene();
-
-  let grid = new Grid(50);
-
+ 
   let front = viewport.AddScene();
 
+  onresize = (e) => {
+    front.Resize(document.body.clientWidth, document.body.clientHeight);
+  }
+  
+  let grid = new Grid(50, new Style({strokeStyle:'red', lineWidth:5}), new Style({strokeStyle:'blue', lineWidth:5}));
   let root = new Item();
   root.Scale = new Vector(50, -50);
   root.Transition = front.Center;
@@ -35,12 +37,7 @@ export function Main() {
   new Item()
     .CaptureInner(() => new Rectangle(0, 0, front.Width, front.Height).GetPath())
     .AddComponent(new DragDrop(root), 2)
-    .AddComponent(new WheelScale(root))
-    .AddComponent(({ mouseState }) => {
-      if (mouseState.IsCaptured || mouseState.WheelEvent){
-        back.Redraw();
-      }
-    });
+    .AddComponent(new WheelScale(root));
   
   Item.Root = root;
 
@@ -83,6 +80,5 @@ export function Main() {
       .AddChild(earth.AddChild(moon));
   }
 
-  back.Redraw();
   front.Run();
 }

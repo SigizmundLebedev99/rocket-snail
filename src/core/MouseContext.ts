@@ -45,8 +45,8 @@ export class MouseContext {
   HandleState(e: MouseEvent) {
     this.Position = new Vector(e.x, e.y)
     let isIn = false;
-    for (let b in this.captureStack) {
-      let binding = this.captureStack[b];
+    for(let i = this.captureStack.length - 1; i >= 0 ; i --) {
+      let binding = this.captureStack[i];
       let point = this.Position;
       let path = binding.getPath();
 
@@ -131,7 +131,7 @@ export class MouseContext {
   }
 
   Resort() {
-    this.captureStack = [...this.captureStack].sort((a, b) => b.node.Priority - a.node.Priority);
+    this.captureStack = [...this.captureStack].sort((a, b) => a.node.Priority - b.node.Priority);
   }
 
   Reset() {
@@ -172,6 +172,10 @@ export class MouseContext {
 
   GetState(): MouseState {
     return new MouseState(this, { isIn: false, isCaptured: false });
+  }
+
+  RemoveBinding(node: Item){
+    this.captureStack = this.captureStack.filter(e=>e.node != node);
   }
 }
 

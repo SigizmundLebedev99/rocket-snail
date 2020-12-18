@@ -3,39 +3,31 @@ import { Line } from "../primitives/Line";
 import { DrawLine } from "../general-components/DrawLine";
 import { Vector } from "../primitives/Vector";
 import { Style } from "../core/Style";
-import { Scene } from "../core/Scene";
 
 export class Grid extends Item {
 
   private gap: number;
-  // private xk : number;
-  // private yk : number;
-  constructor(gap: number, scene?: Scene) {
-    super(scene);
+
+  constructor(gap: number, xAxisStyle?: Style, yAxisStyle?: Style) {
+    super();
     this.gap = gap;
     this.Priority = -1000;
     this.Style.lineWidth = 0.2;
     this.Style.strokeStyle = "black";
     this.InheritTransform = false;
 
-    let { Width, Height } = this.Scene;
-
     this.AddComponent(new DrawLine(() => this.GetLongitudes()));
     this.AddComponent(new DrawLine(() => this.GetLatitudes()));
 
     this.AddComponent(new DrawLine(() => new Line(
-      new Vector(- Width, this.Parent ? this.Parent.Transition.y : 0),
-      new Vector(Width, this.Parent ? this.Parent.Transition.y : 0)
-    ), new Style({
-      lineWidth: 1
-    })))
+      new Vector(- this.Scene.Width, this.Parent ? this.Parent.Transition.y : 0),
+      new Vector(this.Scene.Width, this.Parent ? this.Parent.Transition.y : 0)
+    ), xAxisStyle))
 
     this.AddComponent(new DrawLine(() => new Line(
-      new Vector(this.Parent ? this.Parent.Transition.x : 0, - Height),
-      new Vector(this.Parent ? this.Parent.Transition.x : 0, Height)
-    ), new Style({
-      lineWidth: 1
-    })))
+      new Vector(this.Parent ? this.Parent.Transition.x : 0, - this.Scene.Height),
+      new Vector(this.Parent ? this.Parent.Transition.x : 0, this.Scene.Height)
+    ), yAxisStyle))
   }
 
   private GetLatitudes() {

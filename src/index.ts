@@ -4,6 +4,7 @@ import { Scene } from './core/Scene';
 import { Item } from './core/Item';
 import { Style } from './core/Style';
 import { MouseContext, MouseState } from './core/MouseContext';
+import { EventHandler } from './core/EventsHandler';
 
 import { Circle } from './primitives/Circle';
 import { Line } from './primitives/Line';
@@ -46,5 +47,6 @@ export default {
     Grid,
     Label,
     DrawImage,
-    Clip
+    Clip,
+    EventHandler
 }

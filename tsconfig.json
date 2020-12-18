@@ -12,5 +12,6 @@
     "noImplicitAny": false,
     "declaration": true
   },
+  "include": ["src", "sample", "index.d.ts"],
   "exclude": ["node_modules", "**/__tests__/*"]
 }

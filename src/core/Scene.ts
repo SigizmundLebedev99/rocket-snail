@@ -8,7 +8,7 @@ export class Scene {
 
   elementsOnScene: Item[] = [];
 
-  readonly Canvas: CanvasRenderingContext2D;
+  readonly Context: CanvasRenderingContext2D;
 
   private _mouseContext: MouseContext;
 
@@ -21,11 +21,11 @@ export class Scene {
   }
 
   get Width() {
-    return this.Canvas.canvas.width;
+    return this.Context.canvas.width;
   }
 
   get Height() {
-    return this.Canvas.canvas.height;
+    return this.Context.canvas.height;
   }
 
   get LeftTop() {
@@ -48,6 +48,11 @@ export class Scene {
     return new Vector(this.Width / 2, this.Height / 2);
   }
 
+  Resize(width:number, height:number){
+    this.Context.canvas.width = width;
+    this.Context.canvas.height = height;
+  }  
+  
   private shouldResort: boolean = false;
 
   PriorityChanged() {
@@ -67,7 +72,7 @@ export class Scene {
   }
 
   constructor(context: CanvasRenderingContext2D, container?: HTMLDivElement) {
-    this.Canvas = context;
+    this.Context = context;
 
     this._mouseContext = new MouseContext(context);
 
@@ -80,7 +85,7 @@ export class Scene {
   }
 
   Clear() {
-    this.Canvas.clearRect(0, 0, this.Canvas.canvas.width, this.Canvas.canvas.height);
+    this.Context.clearRect(0, 0, this.Context.canvas.width, this.Context.canvas.height);
   }
 
   Redraw() {
@@ -94,9 +99,9 @@ export class Scene {
     this.ElementsOnScene.forEach(node => {
       if (!node.IsActive)
         return;
-      this.Canvas.save();
+      this.Context.save();
       node.OnUpdate();
-      this.Canvas.restore();
+      this.Context.restore();
     });
 
     this._mouseContext.Reset();

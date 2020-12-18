@@ -162,6 +162,10 @@ export class Item {
     return this;
   }
 
+  DropCapture(){
+    this.mouseContext.RemoveBinding(this);
+  }
+
   private ResortComponents() {
     this.components = [...this.components].sort((a, b) => b.Priority - a.Priority);
   }
@@ -170,9 +174,9 @@ export class Item {
     if (this.components.length == 0)
       return;
 
-    this.TransformCanvas(this._scene.Canvas)
+    this.TransformCanvas(this._scene.Context)
 
-    Style.Apply(this._scene.Canvas, this);
+    Style.Apply(this._scene.Context, this);
 
     let mouseState: MouseState;
     if (this.map)
@@ -181,7 +185,7 @@ export class Item {
       mouseState = this.mouseContext.GetState();
 
     this.components.forEach(c => {
-      let state = { node: this, context: this._scene.Canvas, mouseState: mouseState };
+      let state = { node: this, context: this._scene.Context, mouseState: mouseState };
       this.CheckIfStarted(c, state);
       c.OnUpdate(state);
     });
