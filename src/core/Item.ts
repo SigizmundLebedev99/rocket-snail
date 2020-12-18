@@ -24,7 +24,14 @@ export class Item {
     this._scene.AddElement(this);
   }
 
-  IsActive: boolean = true;
+  private isActive : boolean = true;
+  get IsActive(){
+    return this.isActive;
+  }
+  set IsActive(val:boolean){
+    this.isActive = val;
+    this.children.forEach(e => e.IsActive = val);
+  }
 
   InheritTransform: boolean = true;
 

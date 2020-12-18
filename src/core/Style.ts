@@ -8,6 +8,14 @@ export class Style {
   textAlign?: CanvasTextAlign;
   globalAlpha?: number;
   globalCompositeOperation?: string;
+  shadowBlur?: number;
+  shadowColor?: string;
+  shadowOffsetX?: number;
+  shadowOffsetY?: number;
+  lineCap?: CanvasLineCap;
+  lineDashOffset?: number;
+  lineJoin?: CanvasLineJoin;
+  miterLimit?: number;
 
   constructor(state: any = null) {
     if (state)
@@ -32,7 +40,6 @@ export class Style {
   }
 
   static Apply(context: CanvasRenderingContext2D, node: Item | Style) {
-    context.font
     if (!(node instanceof Item)) {
       Object.getOwnPropertyNames(node).forEach(p => {
         if (node[p] && context[p])
