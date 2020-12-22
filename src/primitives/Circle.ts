@@ -1,5 +1,4 @@
 import { IPath } from "../interfaces/IPath";
-import { Vector } from "./Vector";
 
 export class Circle implements IPath {
   x: number;

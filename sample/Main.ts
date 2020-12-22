@@ -16,6 +16,8 @@ import moonImg from './moon.jpg';
 import { DrawImage } from "../src/general-components/DrawImage";
 import { Clip } from "../src/general-components/Clip";
 import { Style } from "../src/core/Style";
+import { DrawLine } from "../src/general-components/DrawLine";
+import { Line } from "../src/primitives/Line";
 
 export function Main() {
   let viewport = new ViewPort("viewport");
@@ -40,7 +42,6 @@ export function Main() {
   
   Item.Root = root;
 
-  
   let _sunimg = new Image();
   _sunimg.src = sunImg;
   let _earthImg = new Image();

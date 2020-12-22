@@ -147,11 +147,16 @@ export class Item {
     return this;
   }
 
+  RemoveComponent(component: Component){
+    this.components = [...this.components].filter(e => e != component);
+  }
+
   Remove(fromParent = true) {
     this._scene.RemoveElement(this);
     if (fromParent && this.parent != null) {
       this.parent.children = this.parent.children.filter(e => e != this);
     }
+    this.DropCapture();
     this.children.forEach(e => e.Remove(false));
   }
 

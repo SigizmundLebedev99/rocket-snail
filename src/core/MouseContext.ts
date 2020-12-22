@@ -47,10 +47,12 @@ export class MouseContext {
     let isIn = false;
     for(let i = this.captureStack.length - 1; i >= 0 ; i --) {
       let binding = this.captureStack[i];
-      let point = this.Position;
-      let path = binding.getPath();
 
-      point = binding.node.ToLocal(point.Copy());
+      if(!binding.node.IsActive)
+        continue;
+        
+      let path = binding.getPath();
+      let point = binding.node.ToLocal(this.Position.Copy());
 
       if (binding.captureMode == 'inPath')
         isIn = this.context.isPointInPath(path, point.x, point.y)
@@ -127,6 +129,8 @@ export class MouseContext {
     htmlElement.addEventListener("mousemove", (e) =>
       this.HandleState(e));
     htmlElement.addEventListener("click", (e) =>
+      this.HandleState(e));
+    htmlElement.addEventListener("dblclick", (e) =>
       this.HandleState(e));
   }
 

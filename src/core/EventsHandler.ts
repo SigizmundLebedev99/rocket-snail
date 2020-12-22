@@ -6,6 +6,7 @@ export type EventType = {
   "mouseup" : MouseEvent; 
   "mousemove" : MouseEvent; 
   "wheel" : WheelEvent;
+  "dblclick" : MouseEvent;
 }
 
 export class EventHandler{
@@ -16,7 +17,8 @@ export class EventHandler{
     "mousedown" : [],
     "mouseup" : [],
     "mousemove" : [],
-    "wheel" : []
+    "wheel" : [],
+    "dblclick" : []
   };
 
   addEventListener<K extends keyof EventType>(type: K, listener: (ev: EventType[K]) => void){
